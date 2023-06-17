@@ -21,5 +21,15 @@ For a better picture of the bugginess of this project, check out the GitHub issu
     - Include a module search feature, where a specific module/instance name is highlighted in a special colour or something.
 
 ### TODO/Features
+- Convert the notes in this README into GitHub issues 
 - Read in LEF/DEF and show the shape of the design in the main window, include the IO pins in the correct locations. Pins should be clickable, and a little popup shows the pin-name and associated constraints (input/output delay etc, pin type [clock, data etc])
 - Should (eventually) support VHDL syntax, since that's just a matter of allowing for different regex search patterns. Include this functionality as a command line argument to switch between Verilog/VHDL.
+- include all the usual arguments like 
+    - -h/--help: (display all arguments). Look into creating a man page that is slightly more verbose than just the --help arg.
+    - --version: when debugging, makes it easier to verify that I've checked out the correct version of the code and built the right version.
+    - -L: specify how many levels of hierarchy to print out
+
+### Stretch Features 
+- Extend this project to be a slightly more general command line Verilog parser:
+    - Display top level IO ports in a given module/list of modules.
+    - How many hardware registers are inferred? This is super useful to know.
