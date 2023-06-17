@@ -28,6 +28,7 @@ For a better picture of the bugginess of this project, check out the GitHub issu
     - -h/--help: (display all arguments). Look into creating a man page that is slightly more verbose than just the --help arg.
     - --version: when debugging, makes it easier to verify that I've checked out the correct version of the code and built the right version.
     - -L: specify how many levels of hierarchy to print out
+- include a changelog once official versioning is started (v0.1.0 for example), it'd be useful to track which features get added in in which versions.
 
 ### Stretch Features 
 - Extend this project to be a slightly more general command line Verilog parser:
