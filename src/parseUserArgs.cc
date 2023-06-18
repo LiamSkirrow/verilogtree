@@ -38,7 +38,7 @@ int getNextArgs(int argc, char **argv, int i, std::string argName, std::string e
 // TODO: include error handling for case where user includes the same argument more than once.
 //       have a bool for each arg and check that it's not already true when handling the arg
 
-struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,11> argList){
+struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,12> argList){
 
     int isEqual;
     bool includedVerilog = false;
@@ -95,7 +95,7 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,11>
             includedVerilog = true;
             // check the next string of argv for the filelist name, open it and read the contents
 
-        } 
+        }
         else if(argv[i] == (std::string)"-L" || argv[i] == (std::string)"--level"){
             // check the next string of argv to get the level, increment i accordingly
             i = getNextArgs(argc, argv, i, argv[i], (std::string)"a numeric value", argumentVecPtr);
@@ -132,7 +132,10 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,11>
             // ******* TEMPORARY *******
             args.lang = argumentVecPtr->at(0);
 
-        } /* TODO: add another argument that determines whether both the module name and inst name is printed or just module name */ 
+        } else if(argv[i] == (std::string)"--debug"){
+            args.debug = true;
+        } 
+        /* TODO: add another argument that determines whether both the module name and inst name is printed or just module name */ 
         else {   // this should never be reached...
             std::cout << "Bug found! Need to add " << argv[i] << " to argument parser!" << std::endl;
             // TODO: include the url of the verilogtree github repo
