@@ -19,6 +19,7 @@ For a better picture of the bugginess of this project, check out the GitHub issu
 - Include command line arguments similar to that of Unix 'tree' -> for example "-L" to specify the level to recurse down and print. 
     - Include another argument to avoid printing out a specific module/instance name (remove from the printing stage) in case it clutters up the terminal.
     - Include a module search feature, where a specific module/instance name is highlighted in a special colour or something.
+- the ultimate test is to run like so: ' ./verilogtree -f $(find . -name \*.v)', this will feed ALL verilog files into the tool
 
 ### TODO/Features
 - Convert the notes in this README into GitHub issues 

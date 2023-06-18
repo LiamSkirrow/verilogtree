@@ -1,4 +1,4 @@
-// main file for verilogtree
+// main source file for verilogtree
 
 #include "include/parseUserArgs.h"
 #include "include/deriveHierarchyTree.h"
@@ -25,7 +25,8 @@ void dumpArgsStruct(struct Arguments args){
     }
     std::cout << std::endl;
 
-    std::cout << "Supplied no include files for vector size: " << args.noIncFiles.size() << std::endl;
+    // TODO: need to replace all mentions of no-include files with no-include modules!
+    std::cout << "Supplied no-include files for vector size: " << args.noIncFiles.size() << std::endl;
     for(int i = 0; i < args.noIncFiles.size(); i++){
         std::cout << "    " << args.noIncFiles.at(i) << std::endl;
     }
@@ -62,7 +63,8 @@ void checkFilesExist(struct Arguments args){
 int main(int argc, char **argv){
 
     struct Arguments args;
-    class  Tree hierarchyTree;
+    Tree hierarchyTree;
+    Tree *hierarchyTreePtr;
     std::string parentNodeRegexStr;
     std::string childNodeRegexStr;
 
@@ -85,6 +87,10 @@ int main(int argc, char **argv){
     // call user input parser function here
     args = parseUserArgs(argc, argv, argListFlags);
     
+    
+    //   -> filelist arg is still TODO !!!
+
+
     // TODO: 
     // this is enabled by supplying the --debug argument
     if(args.debug){
@@ -103,16 +109,11 @@ int main(int argc, char **argv){
 
     // now parse the Verilog/VHDL, searching for the key phrases and generate the logical hierarchy
     // this is the main algorithm to configure the tree
-    hierarchyTree = deriveHierarchyTree(args.rtlFiles, parentNodeRegexStr, childNodeRegexStr);
-    
-    // *** need to create own data structure to represent a tree with arbitrarily many children.
-    //     create using OOP techniques, have a pushChild method etc...
+    hierarchyTreePtr = deriveHierarchyTree(args.rtlFiles, parentNodeRegexStr, childNodeRegexStr);
 
     // display the tree structure of the RTL
+    // printTree(hierarchyTree, args);
 
-    // - create a vector to store the filename paths (read from cmd line or from filelist txt file)
-    // - loop through and make sure that all the files exist *first* before you start parsing the text.
-    // - once all files are verified to exist, then begin opening the files (one at a time) and start the regex search sequence...
 
     return 0;
 }
