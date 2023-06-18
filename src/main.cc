@@ -8,6 +8,8 @@
 
 int main(int argc, char **argv){
 
+    struct Arguments args;
+
     // accepted list of arguments, must remember to update number in parentheses!!!
     std::array<std::string,11> argListFlags = 
                               {"-h",            // display usage and flags information
@@ -30,13 +32,23 @@ int main(int argc, char **argv){
     std::vector<std::string> *noIncSrcNameVecPtr = &noIncSrcNameVec;
 
     // call user input parser function here
-    parseUserArgs(argc, argv, argListFlags, srcNameVecPtr, noIncSrcNameVecPtr);
+    args = parseUserArgs(argc, argv, argListFlags);
     
     // uncomment for debugging: print out user supplied filenames and arguments
-        std::cout << "Supplied Verilog files: ";
-        for(int i = 0; i < srcNameVecPtr->size(); i++){
-            std::cout << srcNameVecPtr->at(i) << ' ';
+        std::cout << "Supplied Verilog files for vector size: " << args.rtlFiles.size() << std::endl;
+        for(int i = 0; i < args.rtlFiles.size(); i++){
+            std::cout << args.rtlFiles.at(i) << ' ';
         }
+        std::cout << std::endl;
+
+        std::cout << "Supplied no include files for vector size: " << args.noIncFiles.size() << std::endl;
+        for(int i = 0; i < args.noIncFiles.size(); i++){
+            std::cout << args.noIncFiles.at(i) << ' ';
+        }
+        std::cout << std::endl;
+
+        std::cout << "Supplied level arg: ";
+        std::cout << args.level;
         std::cout << std::endl;
 
     // - create a vector to store the filename paths (read from cmd line or from filelist txt file)

@@ -3,13 +3,13 @@
 #include "include/parseUserArgs.h"
 
 // bad practice to have this global scope?
-struct Arguments{
-    std::vector<std::string> rtlFiles;
-    std::vector<std::string> noIncFiles;
-    std::string codeVersion = "v0.0.0";
-    std::string lang        = "verilog";
-    std::string level       = "-1";
-} args;
+// struct Arguments{
+//     std::vector<std::string> rtlFiles;
+//     std::vector<std::string> noIncFiles;
+//     std::string codeVersion = "v0.0.0";
+//     std::string lang        = "verilog";
+//     std::string level       = "-1";
+// } args;
 
 void errorAndExit(std::string errorMsg){
     // TODO: need to do some error handling rather than cout
@@ -47,12 +47,13 @@ int getNextArgs(int argc, char **argv, int i, std::string argName, std::string e
 // TODO: include error handling for case where user includes the same argument more than once.
 //       have a bool for each arg and check that it's not already true when handling the arg
 
-void parseUserArgs(int argc, char **argv, std::array<std::string,11> argList, std::vector<std::string> *srcNameVec, std::vector<std::string> *noIncSrcNameVec){
+struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,11> argList){
 
     int isEqual;
     bool includedVerilog = false;
-    // std::vector<std::string> argumentVec;
-    // std::vector<std::string> *argumentVecPtr = &argumentVec;
+    std::vector<std::string> argumentVec;
+    std::vector<std::string> *argumentVecPtr = &argumentVec;
+    Arguments args;
 
     // check args and arg number
     if(argc <= 1){
@@ -80,6 +81,8 @@ void parseUserArgs(int argc, char **argv, std::array<std::string,11> argList, st
         // at this point, the argument read matches one of the accepted args, proceed with getting input
         // -_- switch statements don't work with strings... thank you C++ :)
 
+        argumentVecPtr->clear();
+
         if(argv[i] == (std::string)"-v" || argv[i] == (std::string)"--version"){
             std::cout << "verilogtree " << args.codeVersion << std::endl;
             exit(0);
@@ -93,7 +96,9 @@ void parseUserArgs(int argc, char **argv, std::array<std::string,11> argList, st
             // TODO: make this into a function since it's replicated across -f and --filelist
             includedVerilog = true;
             // check the next N strings of argv to get the Verilog filepaths, increment i accordingly
-            i += getNextArgs(argc, argv, i, (std::string)"-f", (std::string)"path(s) to RTL files", srcNameVec);
+            i += getNextArgs(argc, argv, i, (std::string)"-f", (std::string)"path(s) to RTL files", argumentVecPtr);
+            // now give the args structure the relevant filenames
+            args.rtlFiles = *argumentVecPtr;
         } 
         else if(argv[i] == (std::string)"--filelist"){
             includedVerilog = true;
@@ -101,7 +106,11 @@ void parseUserArgs(int argc, char **argv, std::array<std::string,11> argList, st
 
         } 
         else if(argv[i] == (std::string)"-L" || argv[i] == (std::string)"--level"){
-            i += getNextArgs(argc, argv, i, (std::string)"-L", (std::string)"a numeric value", srcNameVec);
+            i += getNextArgs(argc, argv, i, (std::string)"-L", (std::string)"a numeric value", argumentVecPtr);
+            if(argumentVecPtr->size() != 0){
+                errorAndExit((std::string)"Argument -L must have only one proceeding value");
+            }
+            args.level = argumentVecPtr->at(0);
 
         } 
         else if(argv[i] == (std::string)"-n" || argv[i] == (std::string)"--no-include"){
@@ -122,4 +131,6 @@ void parseUserArgs(int argc, char **argv, std::array<std::string,11> argList, st
     if(!includedVerilog){
         errorAndExit((std::string)"Usage: verilogtree [--filelist <files.txt> | -f file1.v file2.v ...]");
     }
+
+    return args;
 }
