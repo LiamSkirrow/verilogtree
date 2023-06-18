@@ -1,4 +1,4 @@
 # Makefile for verilogtree project
 
-make-verilogtree: ./src/main.cc
-	g++ ./src/main.cc -o verilogtree
+make-verilogtree: src/main.cc src/parseUserArgs.cc
+	g++ src/main.cc src/parseUserArgs.cc -o verilogtree
