@@ -2,19 +2,10 @@
 
 #include "include/parseUserArgs.h"
 
-// bad practice to have this global scope?
-// struct Arguments{
-//     std::vector<std::string> rtlFiles;
-//     std::vector<std::string> noIncFiles;
-//     std::string codeVersion = "v0.0.0";
-//     std::string lang        = "verilog";
-//     std::string level       = "-1";
-// } args;
-
 void errorAndExit(std::string errorMsg){
     // TODO: need to do some error handling rather than cout
     std::cout << std::endl << errorMsg << std::endl << std::endl;
-    std::cout << "Type: 'man verilogtree' or 'verilogtree --help' for help" << std::endl;
+    std::cout << "Type 'verilogtree --help' or 'man verilogtree' for help" << std::endl;
     exit(-1);
 }
 
@@ -96,7 +87,7 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,11>
             // TODO: make this into a function since it's replicated across -f and --filelist
             includedVerilog = true;
             // check the next N strings of argv to get the Verilog filepaths, increment i accordingly
-            i += getNextArgs(argc, argv, i, (std::string)"-f", (std::string)"path(s) to RTL files", argumentVecPtr);
+            i = getNextArgs(argc, argv, i, argv[i], (std::string)"path(s) to RTL files", argumentVecPtr);
             // now give the args structure the relevant filenames
             args.rtlFiles = *argumentVecPtr;
         } 
@@ -106,17 +97,40 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,11>
 
         } 
         else if(argv[i] == (std::string)"-L" || argv[i] == (std::string)"--level"){
-            i += getNextArgs(argc, argv, i, (std::string)"-L", (std::string)"a numeric value", argumentVecPtr);
-            if(argumentVecPtr->size() != 0){
+            // check the next string of argv to get the level, increment i accordingly
+            i = getNextArgs(argc, argv, i, argv[i], (std::string)"a numeric value", argumentVecPtr);
+            if(argumentVecPtr->size() != 1){
                 errorAndExit((std::string)"Argument -L must have only one proceeding value");
             }
+            // TODO: assert -L is numeric value
+            // assert(argumentVecPtr->at(0))
             args.level = argumentVecPtr->at(0);
-
         } 
         else if(argv[i] == (std::string)"-n" || argv[i] == (std::string)"--no-include"){
-
+            // check the next N strings of argv to get the don't include filepaths, increment i accordingly
+            i = getNextArgs(argc, argv, i, argv[i], (std::string)"path(s) to RTL files", argumentVecPtr);
+            // now give the args structure the relevant filenames
+            args.noIncFiles = *argumentVecPtr;
         } 
         else if(argv[i] == (std::string)"--lang"){
+            // check the next string of argv to get the language, increment i accordingly
+            i = getNextArgs(argc, argv, i, argv[i], (std::string)"one of [verilog | vhdl]", argumentVecPtr);
+            if(argumentVecPtr->size() != 1){
+                errorAndExit((std::string)"Argument --lang must be one of [verilog | vhdl]");
+            }
+            // assert(argumentVecPtr->at(0) == "verilog" || argumentVecPtr->at(0) == "vhdl");
+            
+            // ******* TEMPORARY *******
+            // TODO: add GitHub issue for adding VHDL support
+            if(argumentVecPtr->at(0) == "vhdl"){
+                std::cout << "******* ERROR *******" << std::endl << std::endl;
+                std::cout << "VHDL not yet supported! Please see this GitHub issue for progress on VHDL support:" << std::endl;
+                std::cout << "<insert URL here>" << std::endl;
+                std::cout << std::endl << "******* ERROR *******" << std::endl;
+                exit(-1);
+            }
+            // ******* TEMPORARY *******
+            args.lang = argumentVecPtr->at(0);
 
         } /* TODO: add another argument that determines whether both the module name and inst name is printed or just module name */ 
         else {   // this should never be reached...

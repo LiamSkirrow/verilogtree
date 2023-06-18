@@ -4,6 +4,7 @@
 #include <vector>
 #include <array>
 #include <string.h>
+#include <assert.h>
 
 struct Arguments{
     std::vector<std::string> rtlFiles;

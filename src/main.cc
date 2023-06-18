@@ -6,6 +6,29 @@
 #include <array>
 #include <string.h>
 
+// just for debugging ;)
+void dumpArgsStruct(struct Arguments args){
+    std::cout << "Supplied Verilog files for vector size: " << args.rtlFiles.size() << std::endl;
+    for(int i = 0; i < args.rtlFiles.size(); i++){
+        std::cout << args.rtlFiles.at(i) << ' ';
+    }
+    std::cout << std::endl;
+
+    std::cout << "Supplied no include files for vector size: " << args.noIncFiles.size() << std::endl;
+    for(int i = 0; i < args.noIncFiles.size(); i++){
+        std::cout << args.noIncFiles.at(i) << ' ';
+    }
+    std::cout << std::endl;
+
+    std::cout << "Supplied level arg: ";
+    std::cout << args.level;
+    std::cout << std::endl;
+
+    std::cout << "Supplied lang arg: ";
+    std::cout << args.lang;
+    std::cout << std::endl;
+}
+
 int main(int argc, char **argv){
 
     struct Arguments args;
@@ -25,31 +48,11 @@ int main(int argc, char **argv){
                                "--lang"         // one of either [verilog ^ vhdl]
                               };
 
-    // store filename args, passed by reference
-    std::vector<std::string> srcNameVec;
-    std::vector<std::string> noIncSrcNameVec;
-    std::vector<std::string> *srcNameVecPtr      = &srcNameVec;
-    std::vector<std::string> *noIncSrcNameVecPtr = &noIncSrcNameVec;
-
     // call user input parser function here
     args = parseUserArgs(argc, argv, argListFlags);
     
     // uncomment for debugging: print out user supplied filenames and arguments
-        std::cout << "Supplied Verilog files for vector size: " << args.rtlFiles.size() << std::endl;
-        for(int i = 0; i < args.rtlFiles.size(); i++){
-            std::cout << args.rtlFiles.at(i) << ' ';
-        }
-        std::cout << std::endl;
-
-        std::cout << "Supplied no include files for vector size: " << args.noIncFiles.size() << std::endl;
-        for(int i = 0; i < args.noIncFiles.size(); i++){
-            std::cout << args.noIncFiles.at(i) << ' ';
-        }
-        std::cout << std::endl;
-
-        std::cout << "Supplied level arg: ";
-        std::cout << args.level;
-        std::cout << std::endl;
+    dumpArgsStruct(args);
 
     // - create a vector to store the filename paths (read from cmd line or from filelist txt file)
     // - loop through and make sure that all the files exist *first* before you start parsing the text.
