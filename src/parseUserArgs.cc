@@ -2,12 +2,13 @@
 
 #include "include/parseUserArgs.h"
 
+// bad practice to have this global scope?
 struct Arguments{
     std::vector<std::string> rtlFiles;
     std::vector<std::string> noIncFiles;
     std::string codeVersion = "v0.0.0";
     std::string lang        = "verilog";
-    int level          = -1;
+    std::string level       = "-1";
 } args;
 
 void errorAndExit(std::string errorMsg){
@@ -17,11 +18,41 @@ void errorAndExit(std::string errorMsg){
     exit(-1);
 }
 
-void parseUserArgs(int argc, char **argv, std::array<std::string,11> argList, std::vector<std::string> *srcNameVec){
+int getNextArgs(int argc, char **argv, int i, std::string argName, std::string errMsg, std::vector<std::string> *argumentVecPtr){
+    // int index = 0;
+    for(int fileNum = 0; ; fileNum++){
+        // -f is the final argument
+        if(i == argc-1){
+            // no following file names, invalid so throw error
+            if(fileNum == 0){
+                errorAndExit((std::string)"Argument " + argName + " must be followed by " + errMsg);  //paths to RTL files
+            }
+            break;
+        }
+        // next argv entry begins with '-' and is therefore another argument, no filenames supplied
+        if(argv[i+1][0] == '-'){
+            // no following file names, invalid so throw error
+            if(fileNum == 0){
+                errorAndExit((std::string)"Argument " + argName + " must be followed by " + errMsg);  //paths to RTL files
+            }
+            break;
+        }
+        argumentVecPtr->push_back(argv[i+1]);
+        // advance i along to next arg index, fileNum counter also advances
+        i++;
+    }
+    return i;
+}
+
+// TODO: include error handling for case where user includes the same argument more than once.
+//       have a bool for each arg and check that it's not already true when handling the arg
+
+void parseUserArgs(int argc, char **argv, std::array<std::string,11> argList, std::vector<std::string> *srcNameVec, std::vector<std::string> *noIncSrcNameVec){
 
     int isEqual;
-    int fileNum;
     bool includedVerilog = false;
+    // std::vector<std::string> argumentVec;
+    // std::vector<std::string> *argumentVecPtr = &argumentVec;
 
     // check args and arg number
     if(argc <= 1){
@@ -57,43 +88,29 @@ void parseUserArgs(int argc, char **argv, std::array<std::string,11> argList, st
         if(argv[i] == (std::string)"-h" || argv[i] == (std::string)"--help"){
             // printHelp();
             exit(0);
-        } else if(argv[i] == (std::string)"-f"){
+        } 
+        else if(argv[i] == (std::string)"-f"){
             // TODO: make this into a function since it's replicated across -f and --filelist
             includedVerilog = true;
-            // check the next N strings of argv to get the Verilog filepaths
-            for(int fileNum = 0; ; fileNum++){
-                // -f is the final argument
-                if(i == argc-1){
-                    // no following file names, invalid so throw error
-                    if(fileNum == 0){
-                        errorAndExit((std::string)"Argument -f must be followed by paths to RTL files");
-                    }
-                    break;
-                }
-                // next argv entry begins with '-' and is therefore another argument, no filenames supplied
-                if(argv[i+1][0] == '-'){
-                    // no following file names, invalid so throw error
-                    if(fileNum == 0){
-                        errorAndExit((std::string)"Argument -f must be followed by paths to RTL files");
-                    }
-                    break;
-                }
-                srcNameVec->push_back(argv[i+1]);
-                // advance i along to next arg index, fileNum counter also advances
-                i++;
-            }
-            
-        } else if(argv[i] == (std::string)"--filelist"){
+            // check the next N strings of argv to get the Verilog filepaths, increment i accordingly
+            i += getNextArgs(argc, argv, i, (std::string)"-f", (std::string)"path(s) to RTL files", srcNameVec);
+        } 
+        else if(argv[i] == (std::string)"--filelist"){
             includedVerilog = true;
             // check the next string of argv for the filelist name, open it and read the contents
 
-        } else if(argv[i] == (std::string)"-L" || argv[i] == (std::string)"--level"){
+        } 
+        else if(argv[i] == (std::string)"-L" || argv[i] == (std::string)"--level"){
+            i += getNextArgs(argc, argv, i, (std::string)"-L", (std::string)"a numeric value", srcNameVec);
 
-        } else if(argv[i] == (std::string)"-n" || argv[i] == (std::string)"--no-include"){
+        } 
+        else if(argv[i] == (std::string)"-n" || argv[i] == (std::string)"--no-include"){
 
-        } else if(argv[i] == (std::string)"--lang"){
+        } 
+        else if(argv[i] == (std::string)"--lang"){
 
-        } /* TODO: add another argument that determines whether both the module name and inst name is printed or just module name */ else {   // this should never be reached...
+        } /* TODO: add another argument that determines whether both the module name and inst name is printed or just module name */ 
+        else {   // this should never be reached...
             std::cout << "Bug found! Need to add " << argv[i] << " to argument parser!" << std::endl;
             // TODO: include the url of the verilogtree github repo
             std::cout << "Please report this on GitHub!" << std::endl;

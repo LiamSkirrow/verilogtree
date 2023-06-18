@@ -23,19 +23,21 @@ int main(int argc, char **argv){
                                "--lang"         // one of either [verilog ^ vhdl]
                               };
 
-    // pass by reference
+    // store filename args, passed by reference
     std::vector<std::string> srcNameVec;
-    std::vector<std::string> *srcNameVecPtr = &srcNameVec;
+    std::vector<std::string> noIncSrcNameVec;
+    std::vector<std::string> *srcNameVecPtr      = &srcNameVec;
+    std::vector<std::string> *noIncSrcNameVecPtr = &noIncSrcNameVec;
 
     // call user input parser function here
-    parseUserArgs(argc, argv, argListFlags, srcNameVecPtr);
+    parseUserArgs(argc, argv, argListFlags, srcNameVecPtr, noIncSrcNameVecPtr);
     
-    // uncomment for debugging: print out user supplied filenames
-        // std::cout << "Supplied Verilog files: ";
-        // for(int i = 0; i < srcNameVecPtr->size(); i++){
-        //     std::cout << srcNameVecPtr->at(i) << ' ';
-        // }
-        // std::cout << std::endl;
+    // uncomment for debugging: print out user supplied filenames and arguments
+        std::cout << "Supplied Verilog files: ";
+        for(int i = 0; i < srcNameVecPtr->size(); i++){
+            std::cout << srcNameVecPtr->at(i) << ' ';
+        }
+        std::cout << std::endl;
 
     // - create a vector to store the filename paths (read from cmd line or from filelist txt file)
     // - loop through and make sure that all the files exist *first* before you start parsing the text.
