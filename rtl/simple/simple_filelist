@@ -1,0 +1,5 @@
+./rtl/simple/mod0.v
+./rtl/simple/mod1.v
+./rtl/simple/mod2.v
+./rtl/simple/mod3.v
+./rtl/simple/top.v
