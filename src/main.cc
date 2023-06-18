@@ -83,6 +83,7 @@ int main(int argc, char **argv){
 
         if(argv[i] == (string)"-h" || argv[i] == (string)"--help"){
             // printHelp();
+            exit(0);
         } else if(argv[i] == (string)"-f"){
             // TODO: make this into a function since it's replicated across -f and --filelist
             includedVerilog = true;
