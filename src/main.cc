@@ -1,6 +1,7 @@
 // main file for verilogtree
 
 #include "include/parseUserArgs.h"
+#include "include/deriveHierarchyTree.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -61,6 +62,7 @@ void checkFilesExist(struct Arguments args){
 int main(int argc, char **argv){
 
     struct Arguments args;
+    class  Tree hierarchyTree;
     std::string parentNodeRegexStr;
     std::string childNodeRegexStr;
 
@@ -100,7 +102,8 @@ int main(int argc, char **argv){
     // *** NOTE: regex or just 'split()' based on space chars??? ***
 
     // now parse the Verilog/VHDL, searching for the key phrases and generate the logical hierarchy
-    // deriveHierarchyTree(args.rtlFiles, parentNodeRegexStr, childNodeRegexStr, hierarchyTree);
+    // this is the main algorithm to configure the tree
+    hierarchyTree = deriveHierarchyTree(args.rtlFiles, parentNodeRegexStr, childNodeRegexStr);
     
     // *** need to create own data structure to represent a tree with arbitrarily many children.
     //     create using OOP techniques, have a pushChild method etc...
