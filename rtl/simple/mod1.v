@@ -1,4 +1,4 @@
-module mod1();
+   module    mod1 ();
 
 mod3 mod3_inst1();
 

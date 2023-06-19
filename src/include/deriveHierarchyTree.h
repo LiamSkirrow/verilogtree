@@ -1,8 +1,10 @@
 // header file for parseUserArgs.cc
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <array>
+#include <regex>
 
 // child nodes
 class ChildNode{
@@ -28,7 +30,7 @@ class Tree{
     void pushParentNode(ParentNode pNode);
 };
 
-Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::string parentNodeRegexStr, std::string childNodeRegexStr);
-void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parentNodeVecPtr);
+Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug);
+void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug);
 void constructHierarchyTree(Tree *hTreePtr, std::vector<ParentNode> *parentNodeVecPtr);
 

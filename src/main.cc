@@ -66,8 +66,8 @@ int main(int argc, char **argv){
     struct Arguments args;
     Tree hierarchyTree;
     Tree *hierarchyTreePtr;
-    std::string parentNodeRegexStr;
-    std::string childNodeRegexStr;
+    std::regex parentNodeRegexStr;
+    std::regex childNodeRegexStr;
 
     // accepted list of arguments, must remember to update number in parentheses!!!
     std::array<std::string,12> argListFlags = 
@@ -97,10 +97,13 @@ int main(int argc, char **argv){
     checkFilesExist(args);
 
     // select the correct regex patterns depending on the language selected
-    // https://regex101.com/ is my best friend for this kind of stuff -> https://regex101.com/r/HrzsFQ/2
-    parentNodeRegexStr = (args.lang == "verilog") ? "^\ *module*\s*\w*\s*\(" : "          ";
-    childNodeRegexStr  = (args.lang == "verilog") ? "^\ *\w*\s*\w*\s*\("     : "          ";
+    // https://regex101.com/ is my best friend for this kind of stuff -> https://regex101.com/r/CzzlTF/1
+    // parentNodeRegexStr = (args.lang == "verilog") ? "^\ *module*\s*\w*\s*\(" : "          ";
+    // childNodeRegexStr  = (args.lang == "verilog") ? "^\ *\w*\s*\w*\s*\("     : "          ";
     //                                               \_______Verilog______/     \__VHDL__/
+
+    parentNodeRegexStr = "^\\ *module\\s*\\w*\\s*#*\\(";
+    childNodeRegexStr  = "^\\ *\\w*\\s*\\w*\\s*\\(";
 
     // NOTE: should I also be storing the hpaths to each module? This may be more efficient to do *while*
     //       the tree is being constructed rather than having to traverse the tree DFS-style to figure
@@ -108,7 +111,7 @@ int main(int argc, char **argv){
 
     // now parse the Verilog/VHDL, searching for the key phrases and generate the logical hierarchy
     // this is the main algorithm to configure the tree
-    hierarchyTreePtr = deriveHierarchyTree(args.rtlFiles, parentNodeRegexStr, childNodeRegexStr);
+    hierarchyTreePtr = deriveHierarchyTree(args.rtlFiles, parentNodeRegexStr, childNodeRegexStr, args.debug);
 
     // display the tree structure of the RTL
     // printTree(hierarchyTree, args);
