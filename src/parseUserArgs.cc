@@ -145,7 +145,7 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,12>
             if(argumentVecPtr->at(0) == "vhdl"){
                 std::cout << "******* ERROR *******" << std::endl << std::endl;
                 std::cout << "VHDL not yet supported! Please see this GitHub issue for progress on VHDL support:" << std::endl;
-                std::cout << "<insert URL here>" << std::endl;
+                std::cout << "https://github.com/LiamSkirrow/verilogtree/issues/2" << std::endl;
                 std::cout << std::endl << "******* ERROR *******" << std::endl;
                 exit(-1);
             }

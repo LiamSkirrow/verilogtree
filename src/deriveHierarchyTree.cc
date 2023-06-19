@@ -37,7 +37,7 @@ Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::string parentN
     //       and print out the internal database of parent nodes and child nodes, should be 
     //       easy to find any errors or verify correct working functionality this way
 
-    // what about modules defined on the same line separated by a ;?
+    // what about modules defined on the same line separated by a ; ?
     // -> mod0 mod0_inst(); mod1 mod1_inst(); ????
 
     // just remember to document the supported syntax for module declarations

@@ -21,9 +21,10 @@ Refer to the GitHub issues... I've tried to keep them up to date. If you find a 
     - Include a module search feature, where a specific module/instance name is highlighted in a special colour or something.
 - the ultimate test is to run like so: ' ./verilogtree -f $(find . -name \*.v)', this will feed ALL verilog files into the tool
 
+- NOTE: it would be useful to track the addition of specific features. To this end, when adding a specific feature, it would be useful to do this in its own branch, which would then eventually get merged into main. This way, the group of commits that implement this feature can be isolated out and maybe even reverted.
+
 ### TODO/Features
 - Convert the notes in this README into GitHub issues 
-- Read in LEF/DEF and show the shape of the design in the main window, include the IO pins in the correct locations. Pins should be clickable, and a little popup shows the pin-name and associated constraints (input/output delay etc, pin type [clock, data etc])
 - Should (eventually) support VHDL syntax, since that's just a matter of allowing for different regex search patterns. Include this functionality as a command line argument to switch between Verilog/VHDL.
 - include all the usual arguments like 
     - -h/--help: (display all arguments). Look into creating a man page that is slightly more verbose than just the --help arg.

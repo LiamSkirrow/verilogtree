@@ -6,7 +6,8 @@
 #include <fstream>
 #include <vector>
 #include <array>
-#include <string.h>
+#include <regex>
+#include <string.h>   // need this?
 
 // struct Arguments{
 //     std::vector<std::string> rtlFiles;
