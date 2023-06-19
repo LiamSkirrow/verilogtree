@@ -87,11 +87,6 @@ int main(int argc, char **argv){
     // call user input parser function here
     args = parseUserArgs(argc, argv, argListFlags);
     
-    
-    //   -> filelist arg is still TODO !!!
-
-
-    // TODO: 
     // this is enabled by supplying the --debug argument
     if(args.debug){
         dumpArgsStruct(args);
@@ -113,7 +108,6 @@ int main(int argc, char **argv){
 
     // display the tree structure of the RTL
     // printTree(hierarchyTree, args);
-
-
+    
     return 0;
 }

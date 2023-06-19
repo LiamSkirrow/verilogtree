@@ -1,15 +1,15 @@
 # verilogtree
 
-Print out the hierarchy of your Verilog in an easy to read visual format. Like the command line utility 'tree' but for Verilog instead of files!
+Print out the hierarchy of your Verilog source files in an easy to read, visual format. Like the Unix utility 'tree' but for Verilog!
 
 ### Usage
-
+*TODO*
 
 ### Installation Notes
-TODO
+*TODO*
 
 ### Bugs
-For a better picture of the bugginess of this project, check out the GitHub issues... I've tried to keep them up to date. If you find a bug, filing an issue and/or PR is appreciated!
+Refer to the GitHub issues... I've tried to keep them up to date. If you find a bug in this project, filing an issue and/or PR is encouraged.
 
 ### Implementation Plan
 - Parse through a list of Verilog/SystemVerilog files (passed in on the command line, or provided in a text file), searching for the first module declaration (use a regex string search), once found now look for any module instantiations. These are the children of the first module.
