@@ -10,17 +10,34 @@ module mod0(...);
 endmodule
 */
 
+// *** NOTE:
+// I do not like the current tokenising code, maybe refactor it from here.
+
+// *** TODO: do I need to handle tab characters? Not handling newlines for now!
+// given the raw regex match from the RTL files, strip whitespace and store the two text words
+void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPtr){
+    // loop through str and push the sub-words to tokenisedStringPtr
+    int indexStart = 0;
+    bool indexStartAssigned = false;
+    for(int i = 0; i < str.size(); i++){
+        if(str[i] != ' ' && !indexStartAssigned){
+            indexStart = i;
+            indexStartAssigned = true;
+        }
+        else if((str[i] == '(' || str[i] == '#' || str[i] == ' ') && indexStartAssigned){
+            tokenisedStringPtr->push_back(str.substr(indexStart, i-2));
+            indexStart = 0;
+            indexStartAssigned = false;
+        }
+    }
+}
+
 void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug){
-    // - loop through the RTL files and whenever we get a regex hit for a parent node...
-    // parentNodeVecPtr->push_back(new ParentNode); // is this correct use of 'new'?
-    // - then keep scanning for child nodes, when we get a regex hit...
-    // ChildNode curr; curr.moduleName...; curr.instanceName...;
-    // parentNodeVecPtr->back().childNodes.push_back(curr);
-    // - continue doing this for the rest of the files and parentNodeVecPtr should become a vector
-    //   of all the parent nodes in the RTL codebase, each with a record of their corresponding child nodes
 
     std::fstream rtlFileObj;
     std::string line;
+    std::vector<std::string> tokenisedString;
+    std::vector<std::string> *tokenisedStringPtr = &tokenisedString;
     std::smatch matchObj;
 
     for(int i = 0; i < rtlFiles.size(); i++){
@@ -33,11 +50,14 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parent
 
             std::regex_search(line, matchObj, parentNodeRegexStr);
             if(matchObj.size() == 1){
+                // tokenise the parent node string, splitting on arbitrary number of space chars
+                tokenisedStringPtr->clear();
+                tokeniseString(matchObj.str(), tokenisedStringPtr);
+
                 if(debug){
-                    std::cout << "Parent node found in file " << rtlFiles.at(i) << ": " << matchObj.str() << std::endl;
+                    std::cout << "Parent node found in file " << rtlFiles.at(i) << ": " << matchObj.str() << " -> ";
+                    std::cout << tokenisedStringPtr->size() << ' ' << tokenisedStringPtr->at(1) << std::endl;
                 }
-                // split based on spaces
-                
                 ParentNode curr;
                 parentNodeVecPtr->push_back(curr);
 
