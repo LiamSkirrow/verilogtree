@@ -94,7 +94,27 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,12>
         else if(argv[i] == (std::string)"--filelist"){
             includedVerilog = true;
             // check the next string of argv for the filelist name, open it and read the contents
+            i = getNextArgs(argc, argv, i, argv[i], (std::string)"path to filelist", argumentVecPtr);
+            if(argumentVecPtr->size() != 1){
+                errorAndExit((std::string)"Argument --filelist must have only one proceeding value");
+            }
+            // make sure filelist exists
+            std::fstream filelistObj;
+            filelistObj.open(argumentVecPtr->at(0));
+            if(!filelistObj){
+                errorAndExit((std::string)"File " + argumentVecPtr->at(0) + " does not exist");
+            }
+            // read the contents of filelist into argumentVecPtr
+            std::string filelistName = argumentVecPtr->at(0);
+            argumentVecPtr->clear();
 
+            for(std::string filelistEntry; getline(filelistObj, filelistEntry); ){
+                // getline(filelistObj, filelistEntry);
+                argumentVecPtr->push_back(filelistEntry);
+            }
+
+            args.rtlFiles = *argumentVecPtr;
+            filelistObj.close();
         }
         else if(argv[i] == (std::string)"-L" || argv[i] == (std::string)"--level"){
             // check the next string of argv to get the level, increment i accordingly

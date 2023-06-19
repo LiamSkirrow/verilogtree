@@ -1,6 +1,8 @@
 // header file for parseUserArgs.cc
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <vector>
 #include <array>
 #include <string.h>
