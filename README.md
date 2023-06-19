@@ -30,6 +30,8 @@ Refer to the GitHub issues... I've tried to keep them up to date. If you find a 
     - --version: when debugging, makes it easier to verify that I've checked out the correct version of the code and built the right version.
     - -L: specify how many levels of hierarchy to print out
     - --debug: print out lots of internal information that would be useful for debugging code
+    - --find: print out the hpath(s) to one/many specific modules as they're instantiated in the hierarchy
+              just print out the hpath to each module, this mode shouldn't require fancy formatted output.
 - include a changelog once official versioning is started (v0.1.0 for example), it'd be useful to track which features get added in in which versions.
 
 ### Stretch Features 
