@@ -17,7 +17,7 @@
 //     bool debug              = false;
 // };
 
-// just for debugging ;)
+// move into own file to declutter main.cc, since I will add debug output for the next stages etc
 void dumpArgsStruct(struct Arguments args){
     std::cout << "Supplied Verilog files for vector size: " << args.rtlFiles.size() << std::endl;
     for(int i = 0; i < args.rtlFiles.size(); i++){
@@ -96,11 +96,14 @@ int main(int argc, char **argv){
     checkFilesExist(args);
 
     // select the correct regex patterns depending on the language selected
-    parentNodeRegexStr = (args.lang == "verilog") ? "             " : "          ";
-    childNodeRegexStr  = (args.lang == "verilog") ? "             " : "          ";
-    //                                               \__Verilog__/     \__VHDL__/
+    // https://regex101.com/ is my best friend for this kind of stuff -> https://regex101.com/r/HrzsFQ/2
+    parentNodeRegexStr = (args.lang == "verilog") ? "^\ *module*\s*\w*\s*\(" : "          ";
+    childNodeRegexStr  = (args.lang == "verilog") ? "^\ *\w*\s*\w*\s*\("     : "          ";
+    //                                               \_______Verilog______/     \__VHDL__/
 
-    // *** NOTE: regex or just 'split()' based on space chars??? ***
+    // NOTE: should I also be storing the hpaths to each module? This may be more efficient to do *while*
+    //       the tree is being constructed rather than having to traverse the tree DFS-style to figure
+    //       out the hpaths
 
     // now parse the Verilog/VHDL, searching for the key phrases and generate the logical hierarchy
     // this is the main algorithm to configure the tree
@@ -108,6 +111,6 @@ int main(int argc, char **argv){
 
     // display the tree structure of the RTL
     // printTree(hierarchyTree, args);
-    
+
     return 0;
 }

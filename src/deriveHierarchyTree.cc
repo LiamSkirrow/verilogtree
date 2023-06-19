@@ -33,6 +33,16 @@ Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::string parentN
     std::vector<ParentNode> parentNodeVec;
     std::vector<ParentNode> *parentNodeVecPtr;
 
+    // TODO: to check the regex parsing strings, pass in a TON of real-world open source RTL files
+    //       and print out the internal database of parent nodes and child nodes, should be 
+    //       easy to find any errors or verify correct working functionality this way
+
+    // what about modules defined on the same line separated by a ;?
+    // -> mod0 mod0_inst(); mod1 mod1_inst(); ????
+
+    // just remember to document the supported syntax for module declarations
+    // include examples in README...
+
     // parse the RTL according to the regex strings. Create distinct parent-child node groups
     parseRtl(rtlFiles, parentNodeVecPtr);
 
