@@ -34,11 +34,12 @@ class ParentNode{
 
 // main tree abstract data type
 class Tree{
-    //public: // apparently public variables aren't good practice??? Any way around this???
-    // each of these parent nodes is the *root* node of a separate/physically isolated tree
     std::vector<ParentNode> parentNodes;
 
-    void pushParentNode(ParentNode pNode);
+    public:
+        void setParentNodes(std::vector<ParentNode> pNodes);
+        ParentNode getParentNodeAtIndex(int index);
+        int getParentNodesSize();
 };
 
 Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug);

@@ -10,6 +10,18 @@ module mod0(...);
 endmodule
 */
 
+ParentNode Tree::getParentNodeAtIndex(int index){
+    return parentNodes.at(index);
+}
+
+int Tree::getParentNodesSize(){
+    return this->parentNodes.size();
+}
+
+void Tree::setParentNodes(std::vector<ParentNode> pNodes){
+    this->parentNodes = pNodes;
+}
+
 void ChildNode::setModuleName(std::string str){
     this->moduleName = str;
 }
@@ -156,10 +168,12 @@ Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNo
     std::vector<ParentNode> *parentNodeVecPtr;
 
     parentNodeVecPtr = &parentNodeVec;
+    hTreePtr = &hTree;
 
     // TODO: to check the regex parsing strings, pass in a TON of real-world open source RTL files
     //       and print out the internal database of parent nodes and child nodes, should be 
     //       easy to find any errors or verify correct working functionality this way
+    // TODO: add ^^^ to an issue with the label 'Testing'
 
     // what about modules defined on the same line separated by a ; ?
     // -> mod0 mod0_inst(); mod1 mod1_inst(); ????
@@ -180,7 +194,16 @@ Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNo
         }
     }
 
-    // consider whether the tree construction algorithm should be performed using a function or class methods for the Tree class
+    hTreePtr->setParentNodes(*parentNodeVecPtr);
+
+    // std::cout << "Tree stuff..." << std::endl;
+    // for(int i = 0; i < hTreePtr->getParentNodesSize(); i++){
+    //     std::cout << "Parent Node Name: " << hTreePtr->getParentNodeAtIndex(i).getModuleName() << std::endl;
+    //     for(int j = 0; j < hTreePtr->getParentNodeAtIndex(i).getChildNodesSize(); j++){
+    //         std::cout << "    Child Node Module  : " << hTreePtr->getParentNodeAtIndex(i).getChildNodeAtIndex(j).getModuleName() << std::endl;
+    //         std::cout << "    Child Node Instance: " << hTreePtr->getParentNodeAtIndex(i).getChildNodeAtIndex(j).getInstName() << std::endl;
+    //     }
+    // }
 
     // now (recursively?) replace all child nodes with parent nodes to construct the tree
     constructHierarchyTree(hTreePtr, parentNodeVecPtr);
