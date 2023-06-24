@@ -12,7 +12,11 @@ class ChildNode{
     std::string moduleName;
     std::string instanceName;
 
-    void addModule(std::string mName, std::string iName);
+    public:
+        void setModuleName(std::string str);
+        void setInstName(std::string str);
+        std::string getModuleName();
+        std::string getInstName();
 };
 
 // parent nodes
@@ -24,6 +28,8 @@ class ParentNode{
         void pushChildNode(ChildNode cNode);
         void setModuleName(std::string name);
         std::string getModuleName();
+        ChildNode getChildNodeAtIndex(int index);
+        int getChildNodesSize();
 };
 
 // main tree abstract data type
