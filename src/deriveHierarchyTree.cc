@@ -156,10 +156,24 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parent
     }
 }
 
+// main algorithm for elaborating the tree of parent nodes
 void constructHierarchyTree(Tree *hTreePtr, std::vector<ParentNode> *parentNodeVecPtr){
+    // algorithm
+    // - loop through the parent node vector and replace the child nodes with pointers to parent nodes
 
+    int parentNodeSize = hTreePtr->getParentNodesSize();
+    int childNodeSize;
+    
+    for(int i = 0; i < parentNodeSize; i++){
+        pNode = hTreePtr->getParentNodeAtIndex(i);
+        pNodeNumChilds = pNode->getChildNodesSize();
+        for(int j = 0; j < pNodeNumChilds; j++){
+            
+        }
+    }
 }
 
+// top level function, dispatch the rtl parsing and tree construction functions, return the Tree to main
 Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug){
 
     Tree hTree;
@@ -196,14 +210,10 @@ Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNo
 
     hTreePtr->setParentNodes(*parentNodeVecPtr);
 
-    // std::cout << "Tree stuff..." << std::endl;
-    // for(int i = 0; i < hTreePtr->getParentNodesSize(); i++){
-    //     std::cout << "Parent Node Name: " << hTreePtr->getParentNodeAtIndex(i).getModuleName() << std::endl;
-    //     for(int j = 0; j < hTreePtr->getParentNodeAtIndex(i).getChildNodesSize(); j++){
-    //         std::cout << "    Child Node Module  : " << hTreePtr->getParentNodeAtIndex(i).getChildNodeAtIndex(j).getModuleName() << std::endl;
-    //         std::cout << "    Child Node Instance: " << hTreePtr->getParentNodeAtIndex(i).getChildNodeAtIndex(j).getInstName() << std::endl;
-    //     }
-    // }
+    
+    // constructHierarchyTree() is not strictly necessary... the hierarchy of the rtl is now figured out,
+    // could simply just read through parentNodeVecPtr and print from there. Depends what would be best for 
+    // gtkconstraint
 
     // now (recursively?) replace all child nodes with parent nodes to construct the tree
     constructHierarchyTree(hTreePtr, parentNodeVecPtr);
