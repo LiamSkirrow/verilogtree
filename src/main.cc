@@ -116,5 +116,9 @@ int main(int argc, char **argv){
     // display the tree structure of the RTL
     // printTree(hierarchyTree, args);
 
+    if(args.debug){
+        std::cout << std::endl << "Reached end of program!" << std::endl << std::endl;
+    }
+
     return 0;
 }

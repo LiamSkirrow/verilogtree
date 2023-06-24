@@ -10,22 +10,45 @@ module mod0(...);
 endmodule
 */
 
+void ParentNode::setModuleName(std::string str){
+    this->moduleName = str;
+}
+
+std::string ParentNode::getModuleName(){
+    return this->moduleName;
+}
+
 // *** NOTE:
 // I do not like the current tokenising code, maybe refactor it from here.
 
 // *** TODO: do I need to handle tab characters? Not handling newlines for now!
 // given the raw regex match from the RTL files, strip whitespace and store the two text words
-void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPtr){
+void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPtr, bool debug){
     // loop through str and push the sub-words to tokenisedStringPtr
     int indexStart = 0;
     bool indexStartAssigned = false;
+    std::string substr;
+    std::size_t found;
     for(int i = 0; i < str.size(); i++){
         if(str[i] != ' ' && !indexStartAssigned){
             indexStart = i;
             indexStartAssigned = true;
         }
         else if((str[i] == '(' || str[i] == '#' || str[i] == ' ') && indexStartAssigned){
-            tokenisedStringPtr->push_back(str.substr(indexStart, i-2));
+            substr = str.substr(indexStart, i);
+            if(debug) { std::cout << "substr before trim: " << '<' << substr << '>' << std::endl; }
+            for( ; ; ){
+                found = substr.find_first_of(" #(");
+                // found an unwanted char, delete it
+                if(found != std::string::npos){
+                    substr.erase(found);
+                }
+                else{
+                    break;
+                }
+            }
+            if(debug) { std::cout << "substr after trim: " << '<' << substr << '>' << std::endl; }
+            tokenisedStringPtr->push_back(substr);
             indexStart = 0;
             indexStartAssigned = false;
         }
@@ -36,6 +59,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parent
 
     std::fstream rtlFileObj;
     std::string line;
+    std::string moduleName;
     std::vector<std::string> tokenisedString;
     std::vector<std::string> *tokenisedStringPtr = &tokenisedString;
     std::smatch matchObj;
@@ -52,25 +76,20 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parent
             if(matchObj.size() == 1){
                 // tokenise the parent node string, splitting on arbitrary number of space chars
                 tokenisedStringPtr->clear();
-                tokeniseString(matchObj.str(), tokenisedStringPtr);
+                tokeniseString(matchObj.str(), tokenisedStringPtr, debug);
+                moduleName = tokenisedStringPtr->at(1);
 
                 if(debug){
-                    std::cout << "Parent node found in file " << rtlFiles.at(i) << ": " << matchObj.str() << " -> ";
-                    std::cout << tokenisedStringPtr->size() << ' ' << tokenisedStringPtr->at(1) << std::endl;
+                    std::cout << "Parent node found in file " << rtlFiles.at(i) << ": \"" << matchObj.str() << "\" with module name: \"";
+                    std::cout << moduleName << "\" " << std::endl;
                 }
                 ParentNode curr;
+                curr.setModuleName(moduleName);
                 parentNodeVecPtr->push_back(curr);
-
-
             }
-
-
-
         }
         rtlFileObj.close();
     }
-
-
 }
 
 void constructHierarchyTree(Tree *hTreePtr, std::vector<ParentNode> *parentNodeVecPtr){
@@ -98,6 +117,12 @@ Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNo
 
     // parse the RTL according to the regex strings. Create distinct parent-child node groups
     parseRtl(rtlFiles, parentNodeVecPtr, parentNodeRegexStr, childNodeRegexStr, debug);
+    // was the plan to assign parenNodeVecPtr directly to the vector within the ParentNode object?
+
+    for(int i = 0; i < parentNodeVecPtr->size(); i++){
+        std::cout << "Parent Node Name: " << parentNodeVecPtr->at(i).getModuleName() << std::endl;
+    }
+
 
     // consider whether the tree construction algorithm should be performed using a function or class methods for the Tree class
 

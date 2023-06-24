@@ -5,6 +5,7 @@
 #include <vector>
 #include <array>
 #include <regex>
+#include <cstddef>
 
 // child nodes
 class ChildNode{
@@ -17,8 +18,12 @@ class ChildNode{
 // parent nodes
 class ParentNode{
     std::vector<ChildNode> childNodes;
+    std::string moduleName;
 
-    void pushChildNode(ChildNode cNode);
+    public:
+        void pushChildNode(ChildNode cNode);
+        void setModuleName(std::string name);
+        std::string getModuleName();
 };
 
 // main tree abstract data type
