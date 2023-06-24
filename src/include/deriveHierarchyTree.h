@@ -36,6 +36,9 @@ class ParentNode{
 class Tree{
     std::vector<ParentNode> parentNodes;
 
+    // the ParentNode representing the top level module
+    std::vector<ParentNode> treeRoots;
+
     public:
         void setParentNodes(std::vector<ParentNode> pNodes);
         ParentNode getParentNodeAtIndex(int index);
@@ -44,5 +47,5 @@ class Tree{
 
 Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug);
 void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug);
-void constructHierarchyTree(Tree *hTreePtr, std::vector<ParentNode> *parentNodeVecPtr);
+void constructHierarchyTree(Tree *hTreePtr);
 void tokenizeString(std::string str, std::string *tokenisedStringPtr);

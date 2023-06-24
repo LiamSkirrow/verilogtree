@@ -22,6 +22,12 @@ void Tree::setParentNodes(std::vector<ParentNode> pNodes){
     this->parentNodes = pNodes;
 }
 
+// this means that the instance is instantiated by a higher level module
+// used to determine the top level module(s) in the input rtl files
+// void ChildNode::setIsInstantiated(){
+//     this->isInstantiated = true;
+// }
+
 void ChildNode::setModuleName(std::string str){
     this->moduleName = str;
 }
@@ -57,6 +63,8 @@ ChildNode ParentNode::getChildNodeAtIndex(int index){
 int ParentNode::getChildNodesSize(){
     return this->childNodes.size();
 }
+
+// TODO: replace hardcoded iterations with C++ STL iterators ??? 
 
 // *** NOTE:
 // I do not like the current tokenising code, maybe refactor it from here.
@@ -134,7 +142,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parent
                 }
                 // create the ParentNode object
                 ParentNode curr;
-                curr.setModuleName(moduleName);                
+                curr.setModuleName(moduleName);
                 parentNodeVecPtr->push_back(curr);
             }
             // found a child node
@@ -157,18 +165,25 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parent
 }
 
 // main algorithm for elaborating the tree of parent nodes
-void constructHierarchyTree(Tree *hTreePtr, std::vector<ParentNode> *parentNodeVecPtr){
+void constructHierarchyTree(Tree *hTreePtr){
     // algorithm
-    // - loop through the parent node vector and replace the child nodes with pointers to parent nodes
+    // - iterate over hTreePtr->parentNodes and add them to a map/hash table -> Key: module name, Value: ParentNode object
+    // - 
 
+    ParentNode pNode;
+    ChildNode cNode;
+    int pNodeNumChilds;
     int parentNodeSize = hTreePtr->getParentNodesSize();
     int childNodeSize;
     
     for(int i = 0; i < parentNodeSize; i++){
         pNode = hTreePtr->getParentNodeAtIndex(i);
-        pNodeNumChilds = pNode->getChildNodesSize();
+        pNodeNumChilds = pNode.getChildNodesSize();
         for(int j = 0; j < pNodeNumChilds; j++){
-            
+            cNode = pNode.getChildNodeAtIndex(j);
+            // find the top level modules
+
+                        
         }
     }
 }
@@ -208,15 +223,23 @@ Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNo
         }
     }
 
+    // assign the parent nodes vector to the main tree
     hTreePtr->setParentNodes(*parentNodeVecPtr);
 
     
     // constructHierarchyTree() is not strictly necessary... the hierarchy of the rtl is now figured out,
     // could simply just read through parentNodeVecPtr and print from there. Depends what would be best for 
     // gtkconstraint
+    // --> TODO: create an argument that can bypass the tree creation, and instead cause the print stage
+    //           to have to elaborate on the fly... this may be more useful for larger designs ??? Need
+    //           to think about this a little more
+
+    // parentNodeVecPtr may contain a few independent trees, need to figure out how to support arbitrarily
+    // many root ParentNodes
+    // could have a member in a ChildNode that points to the parent, therefore it's easier to find root nodes
 
     // now (recursively?) replace all child nodes with parent nodes to construct the tree
-    constructHierarchyTree(hTreePtr, parentNodeVecPtr);
+    constructHierarchyTree(hTreePtr);
 
     return hTreePtr;
 
