@@ -23,6 +23,7 @@ class ChildNode{
 class ParentNode{
     std::vector<ChildNode> childNodes;
     std::string moduleName;
+    bool isInstantiated = false;
 
     public:
         void pushChildNode(ChildNode cNode);
@@ -30,11 +31,14 @@ class ParentNode{
         std::string getModuleName();
         ChildNode getChildNodeAtIndex(int index);
         int getChildNodesSize();
+        void setIsInstantiated();
+        bool getIsInstantiated();
 };
 
 // main tree abstract data type
 class Tree{
     std::vector<ParentNode> parentNodes;
+    std::map<std::string, ParentNode> parentNodeMap;
 
     // the ParentNode representing the top level module
     std::vector<ParentNode> treeRoots;
@@ -43,9 +47,11 @@ class Tree{
         void setParentNodes(std::vector<ParentNode> pNodes);
         ParentNode getParentNodeAtIndex(int index);
         int getParentNodesSize();
+        void setMap(std::map<std::string, ParentNode> pNodeMap);
+        ParentNode getMapElem(std::string key);
 };
 
 Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug);
-void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug);
+void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, std::map<std::string, ParentNode> *pNodeMapPtr, bool debug);
 void constructHierarchyTree(Tree *hTreePtr);
 void tokenizeString(std::string str, std::string *tokenisedStringPtr);
