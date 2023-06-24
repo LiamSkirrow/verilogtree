@@ -49,9 +49,12 @@ int ParentNode::getChildNodesSize(){
 // *** NOTE:
 // I do not like the current tokenising code, maybe refactor it from here.
 
+// TODO: include a --superdebug flag as well for a ton of debugging information
+//       enabling --superdebug should also enable --debug automatically in the args parsing stage
+
 // *** TODO: do I need to handle tab characters? Not handling newlines for now!
 // given the raw regex match from the RTL files, strip whitespace and store the two text words
-void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPtr, bool debug){
+void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPtr, bool superDebug){
     // loop through str and push the sub-words to tokenisedStringPtr
     int indexStart = 0;
     bool indexStartAssigned = false;
@@ -68,7 +71,7 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
             // TODO: too much debug output, simply print out the names of the parent node module names
             //       and child node module/inst names, in deriveHierarchyTree
 
-            if(debug) { std::cout << "substr before trim: " << '<' << substr << '>' << std::endl; }
+            if(superDebug) { std::cout << "substr before trim: " << '<' << substr << '>' << std::endl; }
             for( ; ; ){
                 found = substr.find_first_of(" #(");
                 // found an unwanted char, delete it
@@ -79,7 +82,7 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
                     break;
                 }
             }
-            if(debug) { std::cout << "substr after trim: " << '<' << substr << '>' << std::endl; }
+            if(superDebug) { std::cout << "substr after trim: " << '<' << substr << '>' << std::endl; }
             tokenisedStringPtr->push_back(substr);
             indexStart = 0;
             indexStartAssigned = false;
@@ -113,7 +116,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parent
             if(matchObjParent.size() == 1){
                 // tokenise the parent node string, splitting on arbitrary number of space chars
                 tokenisedStringPtr->clear();
-                tokeniseString(matchObjParent.str(), tokenisedStringPtr, debug);
+                tokeniseString(matchObjParent.str(), tokenisedStringPtr, false);
                 moduleName = tokenisedStringPtr->at(1);
 
                 if(debug){
@@ -129,7 +132,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parent
             else if(matchObjChild.size() == 1){
                 // tokenise the child node string, splitting on arbitrary number of space chars
                 tokenisedStringPtr->clear();
-                tokeniseString(matchObjChild.str(), tokenisedStringPtr, debug);
+                tokeniseString(matchObjChild.str(), tokenisedStringPtr, false);
 
                 ChildNode curr;
                 curr.setModuleName(tokenisedStringPtr->at(0));
@@ -173,8 +176,8 @@ Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNo
     for(int i = 0; i < parentNodeVecPtr->size(); i++){
         std::cout << "Parent Node Name: " << parentNodeVecPtr->at(i).getModuleName() << std::endl;
         for(int j = 0; j < parentNodeVecPtr->at(i).getChildNodesSize(); j++){
-            std::cout << "   Child Node Module: " << parentNodeVecPtr->at(i).getChildNodeAtIndex(j).getModuleName() << std::endl;
-            std::cout << "   Child Node Instance: " << parentNodeVecPtr->at(i).getChildNodeAtIndex(j).getInstName() << std::endl;
+            std::cout << "    Child Node Module: " << parentNodeVecPtr->at(i).getChildNodeAtIndex(j).getModuleName() << std::endl;
+            std::cout << "    Child Node Instance: " << parentNodeVecPtr->at(i).getChildNodeAtIndex(j).getInstName() << std::endl;
         }
     }
 
