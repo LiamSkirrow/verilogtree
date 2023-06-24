@@ -35,6 +35,10 @@ Refer to the GitHub issues... I've tried to keep them up to date. If you find a 
               just print out the hpath to each module, this mode shouldn't require fancy formatted output.
 - include a changelog once official versioning is started (v0.1.0 for example), it'd be useful to track which features get added in in which versions.
 
+### Testing
+- Include some Python test infrastructure, reading from the --debug output. Run on Jenkins server for nightly regressions.
+    - Also include in Makefile to be able to run test(s) manually
+
 ### Stretch Features 
 - Extend this project to be a slightly more general command line Verilog parser:
     - Display top level IO ports in a given module/list of modules.
