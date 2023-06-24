@@ -67,9 +67,6 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
         }
         else if((str[i] == '(' || str[i] == '#' || str[i] == ' ') && indexStartAssigned){
             substr = str.substr(indexStart, i);
-            
-            // TODO: too much debug output, simply print out the names of the parent node module names
-            //       and child node module/inst names, in deriveHierarchyTree
 
             if(superDebug) { std::cout << "substr before trim: " << '<' << substr << '>' << std::endl; }
             for( ; ; ){
@@ -173,11 +170,13 @@ Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNo
     // parse the RTL according to the regex strings. Create distinct parent-child node groups
     parseRtl(rtlFiles, parentNodeVecPtr, parentNodeRegexStr, childNodeRegexStr, debug);
 
-    for(int i = 0; i < parentNodeVecPtr->size(); i++){
-        std::cout << "Parent Node Name: " << parentNodeVecPtr->at(i).getModuleName() << std::endl;
-        for(int j = 0; j < parentNodeVecPtr->at(i).getChildNodesSize(); j++){
-            std::cout << "    Child Node Module: " << parentNodeVecPtr->at(i).getChildNodeAtIndex(j).getModuleName() << std::endl;
-            std::cout << "    Child Node Instance: " << parentNodeVecPtr->at(i).getChildNodeAtIndex(j).getInstName() << std::endl;
+    if(debug){
+        for(int i = 0; i < parentNodeVecPtr->size(); i++){
+            std::cout << "Parent Node Name: " << parentNodeVecPtr->at(i).getModuleName() << std::endl;
+            for(int j = 0; j < parentNodeVecPtr->at(i).getChildNodesSize(); j++){
+                std::cout << "    Child Node Module  : " << parentNodeVecPtr->at(i).getChildNodeAtIndex(j).getModuleName() << std::endl;
+                std::cout << "    Child Node Instance: " << parentNodeVecPtr->at(i).getChildNodeAtIndex(j).getInstName() << std::endl;
+            }
         }
     }
 
