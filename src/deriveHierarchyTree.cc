@@ -180,7 +180,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parent
 }
 
 // main algorithm for elaborating the tree of parent nodes
-void constructHierarchyTree(Tree *hTreePtr){
+void elaborateHierarchyTree(Tree *hTreePtr){
     // algorithm
     // - the hash table allows for a lookup of a module, given the module name. Returns the ParentNode object
     // - iterate over the hTree parent nodes and assign child nodes as instantiated using the isInstantiated bool
@@ -264,7 +264,7 @@ Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNo
     hTreePtr->setParentNodes(*parentNodeVecPtr);
     hTreePtr->setMap(*pNodeMapPtr);
     
-    // constructHierarchyTree() is not strictly necessary... the hierarchy of the rtl is now figured out,
+    // elaborateHierarchyTree() is not strictly necessary... the hierarchy of the rtl is now figured out,
     // could simply just read through parentNodeVecPtr and print from there. Depends what would be best for 
     // gtkconstraint
     // --> TODO: create an argument that can bypass the tree creation, and instead cause the print stage
@@ -276,7 +276,7 @@ Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNo
     // could have a member in a ChildNode that points to the parent, therefore it's easier to find root nodes
 
     // now (recursively?) replace all child nodes with parent nodes to construct the tree
-    constructHierarchyTree(hTreePtr);
+    elaborateHierarchyTree(hTreePtr);
 
     return hTreePtr;
 

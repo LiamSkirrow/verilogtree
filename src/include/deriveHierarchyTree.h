@@ -53,5 +53,5 @@ class Tree{
 
 Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug);
 void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, std::map<std::string, ParentNode> *pNodeMapPtr, bool debug);
-void constructHierarchyTree(Tree *hTreePtr);
+void elaborateHierarchyTree(Tree *hTreePtr);
 void tokenizeString(std::string str, std::string *tokenisedStringPtr);
