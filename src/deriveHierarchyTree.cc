@@ -179,6 +179,9 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parent
     }
 }
 
+// *** NOTE: ***
+// https://stackoverflow.com/questions/102009/when-is-it-best-to-use-the-stack-instead-of-the-heap-and-vice-versa
+
 // main algorithm for elaborating the tree of parent nodes
 void elaborateHierarchyTree(Tree *hTreePtr){
     // algorithm
