@@ -252,13 +252,13 @@ void elaborateHierarchyTree(Tree *hTreePtr){
         }
     }
 
-    for(int i = 0; i < hTreePtr->getTreeRootSize(); i++){
-        std::cout << "Tree's root node(s): " << hTreePtr->getTreeRootNodeAtIndex(i).getModuleName() << std::endl;
-    }
+    // for(int i = 0; i < hTreePtr->getTreeRootSize(); i++){
+    //     std::cout << "Tree's root node(s): " << hTreePtr->getTreeRootNodeAtIndex(i).getModuleName() << std::endl;
+    // }
 }
 
 // top level function, dispatch the rtl parsing and tree construction functions, return the Tree to main
-Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug){
+void deriveHierarchyTree(Tree *hierarchyTreePtr, std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug){
 
     Tree hTree;
     Tree *hTreePtr;
@@ -314,6 +314,14 @@ Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNo
     // now (recursively?) replace all child nodes with parent nodes to construct the tree
     elaborateHierarchyTree(hTreePtr);
 
-    return hTreePtr;
+    std::cout << "treeRootSize: " << hTreePtr->getTreeRootSize() << std::endl;
+    for(int i = 0; i < hTreePtr->getTreeRootSize(); i++){
+        std::cout << "Tree's root node(s): " << hTreePtr->getTreeRootNodeAtIndex(i).getModuleName() << std::endl;
+    }
+
+    // TODO: this line is unnecessary, don't need to create hTree in the first place, just use hierarchyTreePtr
+    hierarchyTreePtr = hTreePtr;
+
+    // return hTreePtr;
 
 }
