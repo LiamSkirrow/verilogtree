@@ -65,7 +65,7 @@ void checkFilesExist(struct Arguments args){
 // TODO: add an iterative (non-recursive) print out input arg to have a low-memory consumption mode
 // TODO: always print module name, optionally print out instance name as well
 
-void printTreeRecursively(ParentNode pNode, int depth, int count){
+void printTreeRecursively(Node pNode, int depth, int count){
 
     if(count < depth){
         std::cout << pNode.getModuleName() << std::endl;
@@ -77,8 +77,8 @@ void printTreeRecursively(ParentNode pNode, int depth, int count){
 void printTree(Tree hierarchyTree, struct Arguments args){
 
     int treeRootSize = hierarchyTree.getTreeRootSize();
-    ParentNode pNode;
-    ChildNode *cNodePtr;
+    Node pNode;
+    Node *cNodePtr;
 
     // how to do this non-recursively?
 

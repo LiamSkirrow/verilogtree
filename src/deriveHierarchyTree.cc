@@ -10,23 +10,23 @@ module mod0(...);
 endmodule
 */
 
-bool ParentNode::getIsInstantiated(){
+bool Node::getIsInstantiated(){
     return this->isInstantiated;
 }
 
 // this means that the instance is instantiated by a higher level module
 // used to determine the top level module(s) in the input rtl files
-void ParentNode::setIsInstantiated(){
+void Node::setIsInstantiated(){
     this->isInstantiated = true;
 }
 
-ParentNode * Tree::getMapElem(std::string key){
-    ParentNode *pNodePtr;
+Node * Tree::getMapElem(std::string key){
+    Node *pNodePtr;
     pNodePtr = &this->parentNodeMap.at(key);
     return pNodePtr;
 }
 
-ParentNode Tree::getTreeRootNodeAtIndex(int index){
+Node Tree::getTreeRootNodeAtIndex(int index){
     return this->treeRoots.at(index);
 }
 
@@ -34,16 +34,16 @@ int Tree::getTreeRootSize(){
     return this->treeRoots.size();
 }
 
-void Tree::pushTreeRoot(ParentNode pNode){
+void Tree::pushTreeRoot(Node pNode){
     this->treeRoots.push_back(pNode);
 }
 
-void Tree::setMap(std::map<std::string, ParentNode> pNodeMap){
+void Tree::setMap(std::map<std::string, Node> pNodeMap){
     this->parentNodeMap = pNodeMap;
 }
 
-ParentNode * Tree::getParentNodeAtIndex(int index){
-    ParentNode *pNodePtr;
+Node * Tree::getParentNodeAtIndex(int index){
+    Node *pNodePtr;
     pNodePtr = &this->parentNodes.at(index);
     return pNodePtr;
 }
@@ -52,46 +52,37 @@ int Tree::getParentNodesSize(){
     return this->parentNodes.size();
 }
 
-void Tree::setParentNodes(std::vector<ParentNode> pNodes){
+void Tree::setParentNodes(std::vector<Node> pNodes){
     this->parentNodes = pNodes;
 }
 
-
-void ChildNode::setModuleName(std::string str){
+void Node::setModuleName(std::string str){
     this->moduleName = str;
 }
 
-void ChildNode::setInstName(std::string str){
-    this->instanceName = str;
+void Node::setInstName(std::string str){
+    this->instName = str;
 }
 
-std::string ChildNode::getModuleName(){
+std::string Node::getInstName(){
+    return this->instName;
+}
+
+std::string Node::getModuleName(){
     return this->moduleName;
 }
 
-std::string ChildNode::getInstName(){
-    return this->instanceName;
-}
-
-void ParentNode::setModuleName(std::string str){
-    this->moduleName = str;
-}
-
-std::string ParentNode::getModuleName(){
-    return this->moduleName;
-}
-
-void ParentNode::pushChildNode(ChildNode cNode){
+void Node::pushChildNode(Node cNode){
     this->childNodes.push_back(cNode);
 }
 
-ChildNode * ParentNode::getChildNodeAtIndex(int index){
-    ChildNode *cNodePtr;
+Node * Node::getChildNodeAtIndex(int index){
+    Node *cNodePtr;
     cNodePtr = &this->childNodes.at(index);
     return cNodePtr;
 }
 
-int ParentNode::getChildNodesSize(){
+int Node::getChildNodesSize(){
     return this->childNodes.size();
 }
 
@@ -138,7 +129,7 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
     }
 }
 
-void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, std::map<std::string, ParentNode> *pNodeMapPtr, bool debug){
+void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, std::map<std::string, Node> *pNodeMapPtr, bool debug){
 
     std::fstream rtlFileObj;
     std::string line;
@@ -171,22 +162,26 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parent
                     std::cout << "Parent node found in file " << rtlFiles.at(i) << ": \"" << matchObjParent.str() << "\" with module name: \"";
                     std::cout << moduleName << "\" " << std::endl;
                 }
-                // create the ParentNode object
-                ParentNode curr;
+                // create the parent Node object
+                Node curr;
                 curr.setModuleName(moduleName);
                 parentNodeVecPtr->push_back(curr);
                 // add an entry to the hash table of parent nodes
-                pNodeMapPtr->insert(std::pair<std::string, ParentNode>(moduleName, curr));
+                pNodeMapPtr->insert(std::pair<std::string, Node>(moduleName, curr));
             }
             // found a child node
             else if(matchObjChild.size() == 1){
                 // tokenise the child node string, splitting on arbitrary number of space chars
                 tokenisedStringPtr->clear();
                 tokeniseString(matchObjChild.str(), tokenisedStringPtr, false);
-
-                ChildNode curr;
+                // create the child Node object
+                Node curr;
                 curr.setModuleName(tokenisedStringPtr->at(0));
                 curr.setInstName(tokenisedStringPtr->at(1));
+                // all child nodes are instantiated, only parent nodes are not
+
+                // I was hoping this would eliminate the need for the first for loop in elaborateHierarchyTree ?
+                // curr.setIsInstantiated();
                 
                 // the last parent node is the current one, push the associated child nodes
                 parentNodeVecPtr->back().pushChildNode(curr);
@@ -205,13 +200,14 @@ void elaborateHierarchyTree(Tree *hTreePtr){
     // - can then figure out the top level modules by looping through and finding ones with isInstantiated = false
     // - can then enter into main algorithm loop where you iteratively go down the hierarchy, assembling the tree
 
-    ParentNode pNode;
-    ParentNode *pNodePtr;
-    ChildNode cNode;
-    ChildNode *cNodePtr;
+    Node pNode;
+    Node *pNodePtr;
+    Node cNode;
+    Node *cNodePtr;
     int pNodeNumChilds;
     int parentNodeSize = hTreePtr->getParentNodesSize();
     int childNodeSize;
+    int treeRootSize;
     bool testInstantiated;
 
     pNodePtr = &pNode;
@@ -233,18 +229,33 @@ void elaborateHierarchyTree(Tree *hTreePtr){
         }
     }
 
-    // find the top level modules
+    // find the top level modules and push to Tree's tree root vector
     for(int i = 0; i < parentNodeSize; i++){
         pNodePtr = hTreePtr->getParentNodeAtIndex(i);
         testInstantiated = hTreePtr->getMapElem(pNodePtr->getModuleName())->getIsInstantiated();
-        if(!testInstantiated /*pNodePtr->getIsInstantiated()*/){
-            // std::cout << "Detected top level module: " << pNodePtr->getModuleName() << std::endl;
+        if(!testInstantiated){
+            std::cout << "Detected top level module: " << pNodePtr->getModuleName() << std::endl;
             // now add the top level modules to the Tree's root nodes vector
             hTreePtr->pushTreeRoot(*pNodePtr);
         }
+        // else{
+        //     std::cout << "Detected child module: " << pNodePtr->getModuleName() << std::endl;
+        // }
     }
 
-    // assemble the final tree
+    // assemble the final tree, starting at the tree roots
+    treeRootSize = hTreePtr->getTreeRootSize();
+    // std::cout << "tree root size: " << treeRootSize << std::endl;
+    for(int i = 0; i < treeRootSize; i++){
+        pNode = hTreePtr->getTreeRootNodeAtIndex(i);
+        pNodeNumChilds = pNode.getChildNodesSize();
+        for(int j = 0; j < pNodeNumChilds; j++){
+            // TODO:
+            // TODO: UP TO HERE !!!
+            // TODO:
+        }
+    }
+
 }
 
 // top level function, dispatch the rtl parsing and tree construction functions, return the Tree to main
@@ -252,11 +263,11 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
 
     Tree hTree;
     // Tree *hTreePtr;
-    std::vector<ParentNode> parentNodeVec;
-    std::vector<ParentNode> *parentNodeVecPtr;
-    // a hash table of ParentNodes, looked up using their module name
-    std::map<std::string, ParentNode> pNodeMap;
-    std::map<std::string, ParentNode> *pNodeMapPtr;
+    std::vector<Node> parentNodeVec;
+    std::vector<Node> *parentNodeVecPtr;
+    // a hash table of Nodes, looked up using their module name
+    std::map<std::string, Node> pNodeMap;
+    std::map<std::string, Node> *pNodeMapPtr;
 
     parentNodeVecPtr = &parentNodeVec;
     hTreePtr         = &hTree;
@@ -269,7 +280,6 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
 
     // what about modules defined on the same line separated by a ; ?
     // -> mod0 mod0_inst(); mod1 mod1_inst(); ????
-
     // just remember to document the supported syntax for module declarations
     // include examples in README...
 
@@ -289,17 +299,6 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
     // assign the parent nodes vector to the main tree
     hTreePtr->setParentNodes(*parentNodeVecPtr);
     hTreePtr->setMap(*pNodeMapPtr);
-    
-    // elaborateHierarchyTree() is not strictly necessary... the hierarchy of the rtl is now figured out,
-    // could simply just read through parentNodeVecPtr and print from there. Depends what would be best for 
-    // gtkconstraint
-    // --> TODO: create an argument that can bypass the tree creation, and instead cause the print stage
-    //           to have to elaborate on the fly... this may be more useful for larger designs ??? Need
-    //           to think about this a little more
-
-    // parentNodeVecPtr may contain a few independent trees, need to figure out how to support arbitrarily
-    // many root ParentNodes
-    // could have a member in a ChildNode that points to the parent, therefore it's easier to find root nodes
 
     // now (recursively?) replace all child nodes with parent nodes to construct the tree
     elaborateHierarchyTree(hTreePtr);
