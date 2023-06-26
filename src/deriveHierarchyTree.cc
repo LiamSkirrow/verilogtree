@@ -258,10 +258,10 @@ void elaborateHierarchyTree(Tree *hTreePtr){
 }
 
 // top level function, dispatch the rtl parsing and tree construction functions, return the Tree to main
-void deriveHierarchyTree(Tree *hierarchyTreePtr, std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug){
+Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug){
 
     Tree hTree;
-    Tree *hTreePtr;
+    // Tree *hTreePtr;
     std::vector<ParentNode> parentNodeVec;
     std::vector<ParentNode> *parentNodeVecPtr;
     // a hash table of ParentNodes, looked up using their module name
@@ -314,14 +314,8 @@ void deriveHierarchyTree(Tree *hierarchyTreePtr, std::vector<std::string> rtlFil
     // now (recursively?) replace all child nodes with parent nodes to construct the tree
     elaborateHierarchyTree(hTreePtr);
 
-    std::cout << "treeRootSize: " << hTreePtr->getTreeRootSize() << std::endl;
-    for(int i = 0; i < hTreePtr->getTreeRootSize(); i++){
-        std::cout << "Tree's root node(s): " << hTreePtr->getTreeRootNodeAtIndex(i).getModuleName() << std::endl;
-    }
+    // TODO: add a 'code refactoring' label 
 
-    // TODO: this line is unnecessary, don't need to create hTree in the first place, just use hierarchyTreePtr
-    hierarchyTreePtr = hTreePtr;
-
-    // return hTreePtr;
+    return *hTreePtr;
 
 }

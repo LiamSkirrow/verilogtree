@@ -61,14 +61,26 @@ void checkFilesExist(struct Arguments args){
     }
 }
 
-void printTree(Tree *hierarchyTreePtr, struct Arguments args){
+void printTree(Tree hierarchyTree, struct Arguments args){
 
-    int treeRootSize = hierarchyTreePtr->getTreeRootSize();
-    // std::cout << "treeRootSize: " << hierarchyTreePtr->getTreeRootSize() << std::endl;
+    int treeRootSize = hierarchyTree.getTreeRootSize();
+    ParentNode pNode;
+    ChildNode *cNodePtr;
 
-    // for(int i = 0; i < treeRootSize; i++){
+    // how to do this non-recursively?
 
-    // }
+    std::cout << "----------" << std::endl;
+
+    for(int i = 0; i < treeRootSize; i++){
+        // find a root parent node
+        pNode = hierarchyTree.getTreeRootNodeAtIndex(i);
+        std::cout << pNode.getModuleName() << std::endl;
+        for(int j = 0; j < pNode.getChildNodesSize(); j++){
+            cNodePtr = pNode.getChildNodeAtIndex(j);
+            std::cout << "    " << cNodePtr->getModuleName() << std::endl;
+        }
+        std::cout << "----------" << std::endl;
+    }
 
 }
 
@@ -124,15 +136,13 @@ int main(int argc, char **argv){
 
     // now parse the Verilog/VHDL, searching for the key phrases and generate the logical hierarchy
     // this is the main algorithm to configure the tree
-    deriveHierarchyTree(hierarchyTreePtr, args.rtlFiles, parentNodeRegexStr, childNodeRegexStr, args.debug);
-
-    std::cout << "main size: " << hierarchyTreePtr->getTreeRootSize() << std::endl;
+    hierarchyTree = deriveHierarchyTree(hierarchyTreePtr, args.rtlFiles, parentNodeRegexStr, childNodeRegexStr, args.debug);
 
     // display the tree structure of the RTL
-    printTree(hierarchyTreePtr, args);
+    printTree(hierarchyTree, args);
 
     if(args.debug){
-        std::cout << std::endl << "Reached end of program!" << std::endl << std::endl;
+        std::cout << std::endl << "Successfully reached end of program!" << std::endl << std::endl;
     }
 
     return 0;

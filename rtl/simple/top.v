@@ -18,6 +18,6 @@ top
         |__mod3
 
 altTop
-|___
+|___mod3
 
 */
