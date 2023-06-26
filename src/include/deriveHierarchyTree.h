@@ -29,7 +29,7 @@ class ParentNode{
         void pushChildNode(ChildNode cNode);
         void setModuleName(std::string name);
         std::string getModuleName();
-        ChildNode getChildNodeAtIndex(int index);
+        ChildNode * getChildNodeAtIndex(int index);
         int getChildNodesSize();
         void setIsInstantiated();
         bool getIsInstantiated();
@@ -45,10 +45,10 @@ class Tree{
 
     public:
         void setParentNodes(std::vector<ParentNode> pNodes);
-        ParentNode getParentNodeAtIndex(int index);
+        ParentNode * getParentNodeAtIndex(int index);
         int getParentNodesSize();
         void setMap(std::map<std::string, ParentNode> pNodeMap);
-        ParentNode getMapElem(std::string key);
+        ParentNode * getMapElem(std::string key);
 };
 
 Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug);

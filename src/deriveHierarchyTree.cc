@@ -20,16 +20,20 @@ void ParentNode::setIsInstantiated(){
     this->isInstantiated = true;
 }
 
-ParentNode Tree::getMapElem(std::string key){
-    return this->parentNodeMap.at(key);
+ParentNode * Tree::getMapElem(std::string key){
+    ParentNode *pNodePtr;
+    pNodePtr = &this->parentNodeMap.at(key);
+    return pNodePtr;
 }
 
 void Tree::setMap(std::map<std::string, ParentNode> pNodeMap){
     this->parentNodeMap = pNodeMap;
 }
 
-ParentNode Tree::getParentNodeAtIndex(int index){
-    return parentNodes.at(index);
+ParentNode * Tree::getParentNodeAtIndex(int index){
+    ParentNode *pNodePtr;
+    pNodePtr = &this->parentNodes.at(index);
+    return pNodePtr;
 }
 
 int Tree::getParentNodesSize(){
@@ -69,8 +73,10 @@ void ParentNode::pushChildNode(ChildNode cNode){
     this->childNodes.push_back(cNode);
 }
 
-ChildNode ParentNode::getChildNodeAtIndex(int index){
-    return this->childNodes.at(index);
+ChildNode * ParentNode::getChildNodeAtIndex(int index){
+    ChildNode *cNodePtr;
+    cNodePtr = &this->childNodes.at(index);
+    return cNodePtr;
 }
 
 int ParentNode::getChildNodesSize(){
@@ -191,35 +197,52 @@ void elaborateHierarchyTree(Tree *hTreePtr){
     // - can then enter into main algorithm loop where you iteratively/recursively go down the hierarchy assembling the tree
 
     ParentNode pNode;
+    ParentNode *pNodePtr;
     ChildNode cNode;
+    ChildNode *cNodePtr;
     int pNodeNumChilds;
     int parentNodeSize = hTreePtr->getParentNodesSize();
     int childNodeSize;
+    bool testInstantiated;
+    
+    pNodePtr = &pNode;
+    cNodePtr = &cNode;
+
+    // TODO: the below methods have to return a pointer, rather than a copy
     
     for(int i = 0; i < parentNodeSize; i++){
-        pNode = hTreePtr->getParentNodeAtIndex(i);
-        pNodeNumChilds = pNode.getChildNodesSize();
-        // std::cout << "Parent Module Name: " << pNode.getModuleName() << std::endl;
+        pNodePtr = hTreePtr->getParentNodeAtIndex(i);
+        pNodeNumChilds = pNodePtr->getChildNodesSize();
+        std::cout << "Parent Module Name: " << pNodePtr->getModuleName() << ", num children: " << pNodeNumChilds << std::endl;
         for(int j = 0; j < pNodeNumChilds; j++){
-            cNode = pNode.getChildNodeAtIndex(j);
+            cNodePtr = pNodePtr->getChildNodeAtIndex(j);
             // mark the parent node as instantiated
-            std::cout << "  Child Module Name: " << cNode.getModuleName() << std::endl;
-            hTreePtr->getMapElem(cNode.getModuleName()).setIsInstantiated();
-            // std::cout << "  Map lookup: " << hTreePtr->getMapElem(cNode.getModuleName()).getModuleName() << std::endl;
-            // std::cout << "  Map lookup: " << hTreePtr->getMapElem(cNode.getModuleName()).getIsInstantiated() << std::endl;
+            std::cout << "  Child Module Name: " << cNodePtr->getModuleName() << std::endl;
+            hTreePtr->getMapElem(cNodePtr->getModuleName())->setIsInstantiated();
+            std::cout << "  Map lookup: " << hTreePtr->getMapElem(cNodePtr->getModuleName())->getModuleName();
+            std::cout << ", instantiated: " << hTreePtr->getMapElem(cNodePtr->getModuleName())->getIsInstantiated() << std::endl;
         }
 
         // follows sequence: mod3 3 1 0 1 2, skips the 3x nested mod3 since we don't go far down enough...
     }
 
+    std::cout << "top bool val: "  << hTreePtr->getMapElem((std::string)"top")->getIsInstantiated() << std::endl;
+    std::cout << "mod0 bool val: " << hTreePtr->getMapElem((std::string)"mod0")->getIsInstantiated() << std::endl;
+    std::cout << "mod1 bool val: " << hTreePtr->getMapElem((std::string)"mod1")->getIsInstantiated() << std::endl;
+    std::cout << "mod2 bool val: " << hTreePtr->getMapElem((std::string)"mod2")->getIsInstantiated() << std::endl;
+    std::cout << "mod3 bool val: " << hTreePtr->getMapElem((std::string)"mod3")->getIsInstantiated() << std::endl;
+
+    
+
     // find the top level modules
     for(int i = 0; i < parentNodeSize; i++){
-        pNode = hTreePtr->getParentNodeAtIndex(i);
-        if(pNode.getIsInstantiated()){
-            std::cout << "Detected top level module: " << pNode.getModuleName() << std::endl;
+        pNodePtr = hTreePtr->getParentNodeAtIndex(i);
+        testInstantiated = hTreePtr->getMapElem(pNodePtr->getModuleName())->getIsInstantiated();
+        if(!testInstantiated /*pNodePtr->getIsInstantiated()*/){
+            std::cout << "Detected top level module: " << pNodePtr->getModuleName() << std::endl;
         }
         else{
-            // std::cout << "test" << std::endl;
+            std::cout << "Detected instantiated module: " << pNodePtr->getModuleName() << std::endl;
         }
     }
 }
@@ -257,8 +280,8 @@ Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNo
         for(int i = 0; i < parentNodeVecPtr->size(); i++){
             std::cout << "Parent Node Name: " << parentNodeVecPtr->at(i).getModuleName() << std::endl;
             for(int j = 0; j < parentNodeVecPtr->at(i).getChildNodesSize(); j++){
-                std::cout << "    Child Node Module  : " << parentNodeVecPtr->at(i).getChildNodeAtIndex(j).getModuleName() << std::endl;
-                std::cout << "    Child Node Instance: " << parentNodeVecPtr->at(i).getChildNodeAtIndex(j).getInstName() << std::endl;
+                std::cout << "    Child Node Module  : " << parentNodeVecPtr->at(i).getChildNodeAtIndex(j)->getModuleName() << std::endl;
+                std::cout << "    Child Node Instance: " << parentNodeVecPtr->at(i).getChildNodeAtIndex(j)->getInstName() << std::endl;
             }
         }
     }
