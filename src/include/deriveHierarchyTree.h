@@ -49,6 +49,9 @@ class Tree{
         int getParentNodesSize();
         void setMap(std::map<std::string, ParentNode> pNodeMap);
         ParentNode * getMapElem(std::string key);
+        void pushTreeRoot(ParentNode pNode);            // should this be a pointer to a ParentNode ???
+        ParentNode getTreeRootNodeAtIndex(int index);   // should this be a pointer to a ParentNode ???
+        int getTreeRootSize();
 };
 
 Tree *deriveHierarchyTree(std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug);
