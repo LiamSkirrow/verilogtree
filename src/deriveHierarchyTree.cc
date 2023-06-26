@@ -178,6 +178,10 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 Node curr;
                 curr.setModuleName(tokenisedStringPtr->at(0));
                 curr.setInstName(tokenisedStringPtr->at(1));
+                // all child nodes are instantiated, only parent nodes are not
+
+                // I was hoping this would eliminate the need for the first for loop in elaborateHierarchyTree ?
+                // curr.setIsInstantiated();
                 
                 // the last parent node is the current one, push the associated child nodes
                 parentNodeVecPtr->back().pushChildNode(curr);
@@ -203,6 +207,7 @@ void elaborateHierarchyTree(Tree *hTreePtr){
     int pNodeNumChilds;
     int parentNodeSize = hTreePtr->getParentNodesSize();
     int childNodeSize;
+    int treeRootSize;
     bool testInstantiated;
 
     pNodePtr = &pNode;
@@ -224,18 +229,32 @@ void elaborateHierarchyTree(Tree *hTreePtr){
         }
     }
 
-    // find the top level modules
+    // find the top level modules and push to Tree's tree root vector
     for(int i = 0; i < parentNodeSize; i++){
         pNodePtr = hTreePtr->getParentNodeAtIndex(i);
         testInstantiated = hTreePtr->getMapElem(pNodePtr->getModuleName())->getIsInstantiated();
-        if(!testInstantiated /*pNodePtr->getIsInstantiated()*/){
-            // std::cout << "Detected top level module: " << pNodePtr->getModuleName() << std::endl;
+        if(!testInstantiated){
+            std::cout << "Detected top level module: " << pNodePtr->getModuleName() << std::endl;
             // now add the top level modules to the Tree's root nodes vector
             hTreePtr->pushTreeRoot(*pNodePtr);
         }
+        // else{
+        //     std::cout << "Detected child module: " << pNodePtr->getModuleName() << std::endl;
+        // }
     }
 
-    // assemble the final tree
+    // assemble the final tree, starting at the tree roots
+    treeRootSize = hTreePtr->getTreeRootSize();
+    // std::cout << "tree root size: " << treeRootSize << std::endl;
+    for(int i = 0; i < treeRootSize; i++){
+        pNode = hTreePtr->getTreeRootNodeAtIndex(i);
+        pNodeNumChilds = pNode.getChildNodesSize();
+        for(int j = 0; j < pNodeNumChilds; j++){
+            // TODO:
+            // TODO: UP TO HERE !!!
+            // TODO:
+        }
+    }
 
 }
 
@@ -280,13 +299,6 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
     // assign the parent nodes vector to the main tree
     hTreePtr->setParentNodes(*parentNodeVecPtr);
     hTreePtr->setMap(*pNodeMapPtr);
-
-    
-    
-    // TODO:
-    // set the Tree root nodes here, should be determined in parseRtl() 
-
-
 
     // now (recursively?) replace all child nodes with parent nodes to construct the tree
     elaborateHierarchyTree(hTreePtr);
