@@ -1,7 +1,7 @@
 module altTop();
 
 
-mod3 mod3_instX();
+mod2 mod2_instX();
 
 
 endmodule

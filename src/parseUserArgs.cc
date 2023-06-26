@@ -38,7 +38,7 @@ int getNextArgs(int argc, char **argv, int i, std::string argName, std::string e
 // TODO: include error handling for case where user includes the same argument more than once.
 //       have a bool for each arg and check that it's not already true when handling the arg
 
-struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,12> argList){
+struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,14> argList){
 
     int isEqual;
     bool includedVerilog = false;
@@ -154,6 +154,11 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,12>
 
         } else if(argv[i] == (std::string)"--debug"){
             args.debug = true;
+        } else if(argv[i] == (std::string)"--iterative"){
+            args.algorithm = "iterative";
+        } 
+        else if(argv[i] == (std::string)"--recursive"){
+            args.algorithm = "recursive";   // default
         } 
         /* TODO: add another argument that determines whether both the module name and inst name is printed or just module name */ 
         else {   // this should never be reached...

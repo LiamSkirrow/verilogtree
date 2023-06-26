@@ -61,6 +61,19 @@ void checkFilesExist(struct Arguments args){
     }
 }
 
+// TODO: have the option to highlight specific modules with a certain colour in the output
+// TODO: add an iterative (non-recursive) print out input arg to have a low-memory consumption mode
+// TODO: always print module name, optionally print out instance name as well
+
+void printTreeRecursively(ParentNode pNode, int depth, int count){
+
+    if(count < depth){
+        std::cout << pNode.getModuleName() << std::endl;
+        // printTreeRecursively(, depth, ++count);
+    }
+    return;
+}
+
 void printTree(Tree hierarchyTree, struct Arguments args){
 
     int treeRootSize = hierarchyTree.getTreeRootSize();
@@ -71,15 +84,22 @@ void printTree(Tree hierarchyTree, struct Arguments args){
 
     std::cout << "----------" << std::endl;
 
-    for(int i = 0; i < treeRootSize; i++){
-        // find a root parent node
-        pNode = hierarchyTree.getTreeRootNodeAtIndex(i);
-        std::cout << pNode.getModuleName() << std::endl;
-        for(int j = 0; j < pNode.getChildNodesSize(); j++){
-            cNodePtr = pNode.getChildNodeAtIndex(j);
-            std::cout << "    " << cNodePtr->getModuleName() << std::endl;
+    if(args.algorithm == "recursive"){
+        for(int i = 0; i < treeRootSize; i++){
+            // find a root parent node
+            pNode = hierarchyTree.getTreeRootNodeAtIndex(i);
+            std::cout << pNode.getModuleName() << std::endl;
+            printTreeRecursively(pNode, atoi(args.level.c_str()), 0);
+            std::cout << "----------" << std::endl;
         }
-        std::cout << "----------" << std::endl;
+    }
+    else if(args.algorithm == "iterative"){
+        std::cout << "iterative selected" << std::endl;
+    }
+    else{
+        std::cout << ("Internal error!");
+        std::cout << "Please report this on GitHub!" << std::endl;
+        exit(-1);
     }
 
 }
@@ -95,7 +115,7 @@ int main(int argc, char **argv){
     hierarchyTreePtr = &hierarchyTree;
 
     // accepted list of arguments, must remember to update number in parentheses!!!
-    std::array<std::string,12> argListFlags = 
+    std::array<std::string,14> argListFlags = 
                               {"-h",            // display usage and flags information
                                "--help",
                                "-f",            // file paths
@@ -107,7 +127,9 @@ int main(int argc, char **argv){
                                "-n",            // don't print out this/these module names/instance names
                                "--no-include",
                                "--lang",        // one of either [verilog ^ vhdl]
-                               "--debug"        // more verbose output, print out internal variables
+                               "--debug",       // more verbose output, print out internal variables
+                               "--iterative",    // print out hierarchy iteratively rather than recursively (uses less memory for large hierarchies)
+                               "--recursive"    // print out hierarchy recursively (default)
                               };
 
     // call user input parser function here

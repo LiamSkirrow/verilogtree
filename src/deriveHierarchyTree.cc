@@ -199,11 +199,11 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<ParentNode> *parent
 
 // main algorithm for elaborating the tree of parent nodes
 void elaborateHierarchyTree(Tree *hTreePtr){
-    // algorithm
+    // algorithm:
     // - the hash table allows for a lookup of a module, given the module name. Returns the ParentNode object
     // - iterate over the hTree parent nodes and assign child nodes as instantiated using the isInstantiated bool
     // - can then figure out the top level modules by looping through and finding ones with isInstantiated = false
-    // - can then enter into main algorithm loop where you iteratively/recursively go down the hierarchy assembling the tree
+    // - can then enter into main algorithm loop where you iteratively go down the hierarchy, assembling the tree
 
     ParentNode pNode;
     ParentNode *pNodePtr;
@@ -231,15 +231,7 @@ void elaborateHierarchyTree(Tree *hTreePtr){
             // std::cout << "  Map lookup: " << hTreePtr->getMapElem(cNodePtr->getModuleName())->getModuleName();
             // std::cout << ", instantiated: " << hTreePtr->getMapElem(cNodePtr->getModuleName())->getIsInstantiated() << std::endl;
         }
-
-        // follows sequence: mod3 3 1 0 1 2, skips the 3x nested mod3 since we don't go far down enough...
     }
-
-    // std::cout << "top bool val: "  << hTreePtr->getMapElem((std::string)"top")->getIsInstantiated() << std::endl;
-    // std::cout << "mod0 bool val: " << hTreePtr->getMapElem((std::string)"mod0")->getIsInstantiated() << std::endl;
-    // std::cout << "mod1 bool val: " << hTreePtr->getMapElem((std::string)"mod1")->getIsInstantiated() << std::endl;
-    // std::cout << "mod2 bool val: " << hTreePtr->getMapElem((std::string)"mod2")->getIsInstantiated() << std::endl;
-    // std::cout << "mod3 bool val: " << hTreePtr->getMapElem((std::string)"mod3")->getIsInstantiated() << std::endl;
 
     // find the top level modules
     for(int i = 0; i < parentNodeSize; i++){
@@ -252,9 +244,7 @@ void elaborateHierarchyTree(Tree *hTreePtr){
         }
     }
 
-    // for(int i = 0; i < hTreePtr->getTreeRootSize(); i++){
-    //     std::cout << "Tree's root node(s): " << hTreePtr->getTreeRootNodeAtIndex(i).getModuleName() << std::endl;
-    // }
+    // assemble the final tree
 }
 
 // top level function, dispatch the rtl parsing and tree construction functions, return the Tree to main

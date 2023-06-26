@@ -14,9 +14,10 @@ struct Arguments{
     std::string codeVersion = "v0.0.0";
     std::string lang        = "verilog";
     std::string level       = "-1";
+    std::string algorithm   = "recursive";
     bool debug              = false;
 };
 
-struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,12> argList);
+struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,14> argList);
 void errorAndExit(std::string errorMsg);
 int getNextArgs(int argc, char **argv, int i, std::string argName, std::string errMsg, std::vector<std::string> *argumentVecPtr);
