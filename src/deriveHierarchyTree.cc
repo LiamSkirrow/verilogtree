@@ -10,16 +10,6 @@ module mod0(...);
 endmodule
 */
 
-bool Node::getIsInstantiated(){
-    return this->isInstantiated;
-}
-
-// this means that the instance is instantiated by a higher level module
-// used to determine the top level module(s) in the input rtl files
-void Node::setIsInstantiated(){
-    this->isInstantiated = true;
-}
-
 Node * Tree::getMapElem(std::string key){
     Node *pNodePtr;
     pNodePtr = &this->parentNodeMap.at(key);
@@ -42,6 +32,10 @@ void Tree::setMap(std::map<std::string, Node> pNodeMap){
     this->parentNodeMap = pNodeMap;
 }
 
+void Tree::setParentNodes(std::vector<Node> pNodes){
+    this->parentNodes = pNodes;
+}
+
 Node * Tree::getParentNodeAtIndex(int index){
     Node *pNodePtr;
     pNodePtr = &this->parentNodes.at(index);
@@ -52,9 +46,16 @@ int Tree::getParentNodesSize(){
     return this->parentNodes.size();
 }
 
-void Tree::setParentNodes(std::vector<Node> pNodes){
-    this->parentNodes = pNodes;
+bool Node::getIsInstantiated(){
+    return this->isInstantiated;
 }
+
+// this means that the instance is instantiated by a higher level module
+// used to determine the top level module(s) in the input rtl files
+void Node::setIsInstantiated(){
+    this->isInstantiated = true;
+}
+
 
 void Node::setModuleName(std::string str){
     this->moduleName = str;
@@ -140,6 +141,16 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
     std::vector<std::string> *tokenisedStringPtr = &tokenisedString;
     std::smatch matchObjParent;
     std::smatch matchObjChild;
+    Node tmpNode;
+    Node *tmpNodePtr;
+
+    // std::string pNodeName;
+
+    std::map<std::string, Node> tmpNodeMap;
+
+    int parentNodeSize;
+
+    tmpNodePtr = &tmpNode;
 
     for(int i = 0; i < rtlFiles.size(); i++){
         // open the next file in the list
@@ -167,7 +178,8 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 curr.setModuleName(moduleName);
                 parentNodeVecPtr->push_back(curr);
                 // add an entry to the hash table of parent nodes
-                pNodeMapPtr->insert(std::pair<std::string, Node>(moduleName, curr));
+                // pNodeMapPtr->insert(std::pair<std::string, Node>(moduleName, curr));
+                tmpNodeMap[moduleName] = curr;
             }
             // found a child node
             else if(matchObjChild.size() == 1){
@@ -179,16 +191,26 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 curr.setModuleName(tokenisedStringPtr->at(0));
                 curr.setInstName(tokenisedStringPtr->at(1));
                 // all child nodes are instantiated, only parent nodes are not
-
                 // I was hoping this would eliminate the need for the first for loop in elaborateHierarchyTree ?
                 // curr.setIsInstantiated();
                 
                 // the last parent node is the current one, push the associated child nodes
-                parentNodeVecPtr->back().pushChildNode(curr);
-                
+                tmpNodePtr = &parentNodeVecPtr->back();
+                // pNodeName = tmpNodePtr->getModuleName();
+                tmpNodePtr->pushChildNode(curr);
+
+                // add/update the entry in the hash table of the respective parent node
+                // pNodeMapPtr->insert(std::pair<std::string, Node>(moduleName, *tmpNodePtr));
+                tmpNodeMap[moduleName] = *tmpNodePtr;
+
+                // parentNodeSize = parentNodeVecPtr->size();
+                // // get a reference to the last entry
+                // tmpNodePtr = &parentNodeVecPtr->at(parentNodeSize-1);
+                // tmpNodePtr->pushChildNode(curr);
             }
         }
         rtlFileObj.close();
+        *pNodeMapPtr = tmpNodeMap;
     }
 }
 
@@ -204,6 +226,8 @@ void elaborateHierarchyTree(Tree *hTreePtr){
     Node *pNodePtr;
     Node cNode;
     Node *cNodePtr;
+    Node tmpNode;
+    Node *tmpNodePtr;
     int pNodeNumChilds;
     int parentNodeSize = hTreePtr->getParentNodesSize();
     int childNodeSize;
@@ -212,6 +236,7 @@ void elaborateHierarchyTree(Tree *hTreePtr){
 
     pNodePtr = &pNode;
     cNodePtr = &cNode;
+    tmpNodePtr = &tmpNode;
 
     // TODO: the below methods have to return a pointer, rather than a copy
     
@@ -222,10 +247,7 @@ void elaborateHierarchyTree(Tree *hTreePtr){
         for(int j = 0; j < pNodeNumChilds; j++){
             cNodePtr = pNodePtr->getChildNodeAtIndex(j);
             // mark the parent node as instantiated
-            // std::cout << "  Child Module Name: " << cNodePtr->getModuleName() << std::endl;
             hTreePtr->getMapElem(cNodePtr->getModuleName())->setIsInstantiated();
-            // std::cout << "  Map lookup: " << hTreePtr->getMapElem(cNodePtr->getModuleName())->getModuleName();
-            // std::cout << ", instantiated: " << hTreePtr->getMapElem(cNodePtr->getModuleName())->getIsInstantiated() << std::endl;
         }
     }
 
@@ -234,28 +256,33 @@ void elaborateHierarchyTree(Tree *hTreePtr){
         pNodePtr = hTreePtr->getParentNodeAtIndex(i);
         testInstantiated = hTreePtr->getMapElem(pNodePtr->getModuleName())->getIsInstantiated();
         if(!testInstantiated){
-            std::cout << "Detected top level module: " << pNodePtr->getModuleName() << std::endl;
             // now add the top level modules to the Tree's root nodes vector
             hTreePtr->pushTreeRoot(*pNodePtr);
         }
-        // else{
-        //     std::cout << "Detected child module: " << pNodePtr->getModuleName() << std::endl;
-        // }
     }
 
     // assemble the final tree, starting at the tree roots
     treeRootSize = hTreePtr->getTreeRootSize();
     // std::cout << "tree root size: " << treeRootSize << std::endl;
     for(int i = 0; i < treeRootSize; i++){
-        pNode = hTreePtr->getTreeRootNodeAtIndex(i);
-        pNodeNumChilds = pNode.getChildNodesSize();
+        *pNodePtr = hTreePtr->getTreeRootNodeAtIndex(i);
+        pNodeNumChilds = pNodePtr->getChildNodesSize();
+        std::cout << "Tree Root: " << pNodePtr->getModuleName() << " w/ # children: " << pNodeNumChilds << std::endl;
         for(int j = 0; j < pNodeNumChilds; j++){
+            cNodePtr = pNodePtr->getChildNodeAtIndex(j);
+            tmpNodePtr = hTreePtr->getMapElem(cNodePtr->getModuleName());
+            std::cout << "Num Children: " << hTreePtr->getMapElem(cNodePtr->getModuleName())->getChildNodesSize() << std::endl;
+            // std::cout << "  Child: " << tmpNodePtr->getModuleName() << " w/ # children: " << tmpNodePtr->getChildNodesSize() << std::endl;
+            *cNodePtr = *tmpNodePtr;
+            // std::cout << "  Child: " << cNodePtr->getModuleName() << " w/ # children: " << cNodePtr->getChildNodesSize() << std::endl;
+            if(cNodePtr->getChildNodesSize() > 0){
+                std::cout << "    Child's child: " << cNodePtr->getChildNodeAtIndex(0)->getModuleName() << std::endl;
+            }
             // TODO:
-            // TODO: UP TO HERE !!!
+            // TODO: need to find a way to do this non-recursively!
             // TODO:
         }
     }
-
 }
 
 // top level function, dispatch the rtl parsing and tree construction functions, return the Tree to main
@@ -286,12 +313,19 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
     // parse the RTL according to the regex strings. Create distinct parent-child node groups
     parseRtl(rtlFiles, parentNodeVecPtr, parentNodeRegexStr, childNodeRegexStr, pNodeMapPtr, debug);
 
+    std::string debugModuleName;
+    std::string debugInstName;
+
     if(debug){
         for(int i = 0; i < parentNodeVecPtr->size(); i++){
             std::cout << "Parent Node Name: " << parentNodeVecPtr->at(i).getModuleName() << std::endl;
             for(int j = 0; j < parentNodeVecPtr->at(i).getChildNodesSize(); j++){
-                std::cout << "    Child Node Module  : " << parentNodeVecPtr->at(i).getChildNodeAtIndex(j)->getModuleName() << std::endl;
-                std::cout << "    Child Node Instance: " << parentNodeVecPtr->at(i).getChildNodeAtIndex(j)->getInstName() << std::endl;
+                debugModuleName = parentNodeVecPtr->at(i).getChildNodeAtIndex(j)->getModuleName();
+                debugInstName   = parentNodeVecPtr->at(i).getChildNodeAtIndex(j)->getInstName();
+                std::cout << "    Child Node Module  : " << debugModuleName << std::endl;
+                std::cout << "    Child Node Instance: " << debugInstName << std::endl;
+                // std::cout << "    Num Children:        " << parentNodeVecPtr->at(i).getChildNodeAtIndex(j)->getChildNodesSize() << std::endl;
+                std::cout << "    Num Children:        " << pNodeMap[parentNodeVecPtr->at(i).getChildNodeAtIndex(j)->getModuleName()].getChildNodesSize() << std::endl;
             }
         }
     }
