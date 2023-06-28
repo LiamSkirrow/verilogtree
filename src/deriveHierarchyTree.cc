@@ -270,10 +270,8 @@ void elaborateHierarchyTree(Tree *hTreePtr){
         std::cout << "Tree Root: " << pNodePtr->getModuleName() << " w/ # children: " << pNodeNumChilds << std::endl;
         for(int j = 0; j < pNodeNumChilds; j++){
             cNodePtr = pNodePtr->getChildNodeAtIndex(j);
-            tmpNodePtr = hTreePtr->getMapElem(cNodePtr->getModuleName());
-            *cNodePtr = *tmpNodePtr;
-            // NOTE: ^^^ in this case, you might want to use a COPY rather than a REFERENCE,
-            //           since we're only trying to replicate it, things might get messy with pointers here...
+            tmpNode = *hTreePtr->getMapElem(cNodePtr->getModuleName());
+            *cNodePtr = tmpNode;
             std::cout << "  Child: " << cNodePtr->getModuleName() << " w/ # children: " << cNodePtr->getChildNodesSize() << std::endl;
             if(cNodePtr->getChildNodesSize() > 0){
                 std::cout << "    Child's child: " << cNodePtr->getChildNodeAtIndex(0)->getModuleName() << std::endl;
