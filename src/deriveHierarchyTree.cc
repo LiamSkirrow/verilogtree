@@ -232,6 +232,7 @@ void elaborateHierarchyTree(Tree *hTreePtr){
     int parentNodeSize = hTreePtr->getParentNodesSize();
     int childNodeSize;
     int treeRootSize;
+    int cNodeIndex = 0;
     bool testInstantiated;
 
     pNodePtr = &pNode;
@@ -261,6 +262,8 @@ void elaborateHierarchyTree(Tree *hTreePtr){
         }
     }
 
+    // TODO: not a fan of these infinite loops with breaks... need to refactor into something better
+
     // assemble the final tree, starting at the tree roots
     treeRootSize = hTreePtr->getTreeRootSize();
     // std::cout << "tree root size: " << treeRootSize << std::endl;
@@ -268,18 +271,42 @@ void elaborateHierarchyTree(Tree *hTreePtr){
         *pNodePtr = hTreePtr->getTreeRootNodeAtIndex(i);
         pNodeNumChilds = pNodePtr->getChildNodesSize();
         std::cout << "Tree Root: " << pNodePtr->getModuleName() << " w/ # children: " << pNodeNumChilds << std::endl;
-        for(int j = 0; j < pNodeNumChilds; j++){
-            cNodePtr = pNodePtr->getChildNodeAtIndex(j);
-            tmpNode = *hTreePtr->getMapElem(cNodePtr->getModuleName());
-            *cNodePtr = tmpNode;
-            std::cout << "  Child: " << cNodePtr->getModuleName() << " w/ # children: " << cNodePtr->getChildNodesSize() << std::endl;
-            if(cNodePtr->getChildNodesSize() > 0){
-                std::cout << "    Child's child: " << cNodePtr->getChildNodeAtIndex(0)->getModuleName() << std::endl;
+        // if stub tree node with no children
+        if(pNodeNumChilds > 0){
+            // just use recursion, it's waaaaay easier... can refactor it later if memory usage becomes a concern
+            // check with a monitor program to view ram usage, just out of curiosity.
+            // - replace below with function call
+            // - within the function, have a for loop that iterates over the child nodes, and if a child node exists,
+            //   then recurse down, and keep recursing until a node with no children is found (leaf node) at which point, return
+            // - after returning upwards, the next child node at that level will be entered into ... etc until the tree
+            //   is constructed DFS style
+            //----------------------------------------
+            while(true){
+                cNodePtr = pNodePtr->getChildNodeAtIndex(cNodeIndex);
+                tmpNode = *hTreePtr->getMapElem(cNodePtr->getModuleName());
+                *cNodePtr = tmpNode;
+                std::cout << "  Child: " << cNodePtr->getModuleName() << " w/ # children: " << cNodePtr->getChildNodesSize() << std::endl;
+                // std::cout << "    Child's child: " << cNodePtr->getChildNodeAtIndex(0)->getModuleName() << std::endl;
+                // NOTE: might wanna replace the fors with whiles and just infinitely/arbitrarily loop
+                //       until you run out of child nodes. At end of loop, assign curr = curr->child
+
+                // reached end of child node list
+                if(cNodeIndex == pNodeNumChilds-1){
+                    // cNodeIndex = 0;
+                    std::cout << std::endl << std::endl << "### Reached end, leaving loop" << std::endl << std::endl;
+                    cNodeIndex = 0;
+                    *pNodePtr = *cNodePtr;
+                    // break;
+                }
+                cNodeIndex++;
             }
-            // NOTE: might wanna replace the fors with whiles and just infinitely/arbitrarily loop
-            //       until you run out of child nodes. At end of loop, assign curr = curr->child
+            // if(){
+            //     break;
+            // }
+            //----------------------------------------
         }
     }
+    std::cout << "Made it!" << std::endl;
 }
 
 // top level function, dispatch the rtl parsing and tree construction functions, return the Tree to main
