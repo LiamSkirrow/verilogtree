@@ -270,17 +270,14 @@ void elaborateHierarchyTree(Tree *hTreePtr){
         std::cout << "Tree Root: " << pNodePtr->getModuleName() << " w/ # children: " << pNodeNumChilds << std::endl;
         for(int j = 0; j < pNodeNumChilds; j++){
             cNodePtr = pNodePtr->getChildNodeAtIndex(j);
-            tmpNodePtr = hTreePtr->getMapElem(cNodePtr->getModuleName());
-            std::cout << "Num Children: " << hTreePtr->getMapElem(cNodePtr->getModuleName())->getChildNodesSize() << std::endl;
-            // std::cout << "  Child: " << tmpNodePtr->getModuleName() << " w/ # children: " << tmpNodePtr->getChildNodesSize() << std::endl;
-            *cNodePtr = *tmpNodePtr;
-            // std::cout << "  Child: " << cNodePtr->getModuleName() << " w/ # children: " << cNodePtr->getChildNodesSize() << std::endl;
+            tmpNode = *hTreePtr->getMapElem(cNodePtr->getModuleName());
+            *cNodePtr = tmpNode;
+            std::cout << "  Child: " << cNodePtr->getModuleName() << " w/ # children: " << cNodePtr->getChildNodesSize() << std::endl;
             if(cNodePtr->getChildNodesSize() > 0){
                 std::cout << "    Child's child: " << cNodePtr->getChildNodeAtIndex(0)->getModuleName() << std::endl;
             }
-            // TODO:
-            // TODO: need to find a way to do this non-recursively!
-            // TODO:
+            // NOTE: might wanna replace the fors with whiles and just infinitely/arbitrarily loop
+            //       until you run out of child nodes. At end of loop, assign curr = curr->child
         }
     }
 }
