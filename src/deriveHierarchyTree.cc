@@ -271,16 +271,15 @@ void elaborateHierarchyTree(Tree *hTreePtr){
         for(int j = 0; j < pNodeNumChilds; j++){
             cNodePtr = pNodePtr->getChildNodeAtIndex(j);
             tmpNodePtr = hTreePtr->getMapElem(cNodePtr->getModuleName());
-            std::cout << "Num Children: " << hTreePtr->getMapElem(cNodePtr->getModuleName())->getChildNodesSize() << std::endl;
-            // std::cout << "  Child: " << tmpNodePtr->getModuleName() << " w/ # children: " << tmpNodePtr->getChildNodesSize() << std::endl;
             *cNodePtr = *tmpNodePtr;
-            // std::cout << "  Child: " << cNodePtr->getModuleName() << " w/ # children: " << cNodePtr->getChildNodesSize() << std::endl;
+            // NOTE: ^^^ in this case, you might want to use a COPY rather than a REFERENCE,
+            //           since we're only trying to replicate it, things might get messy with pointers here...
+            std::cout << "  Child: " << cNodePtr->getModuleName() << " w/ # children: " << cNodePtr->getChildNodesSize() << std::endl;
             if(cNodePtr->getChildNodesSize() > 0){
                 std::cout << "    Child's child: " << cNodePtr->getChildNodeAtIndex(0)->getModuleName() << std::endl;
             }
-            // TODO:
-            // TODO: need to find a way to do this non-recursively!
-            // TODO:
+            // NOTE: might wanna replace the fors with whiles and just infinitely/arbitrarily loop
+            //       until you run out of child nodes. At end of loop, assign curr = curr->child
         }
     }
 }
