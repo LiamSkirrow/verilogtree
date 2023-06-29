@@ -189,6 +189,9 @@ int main(int argc, char **argv){
     // display the tree structure of the RTL
     printTree(hierarchyTree, args);
 
+    // TODO: what happens if I give it a module that doesn't exist in the RTL?
+    // FIXME: BUG: this program will segfault if a circular hierarchy is given -> eg mod0 instantiates itself or something...
+
     if(args.debug){
         std::cout << std::endl << "Successfully reached end of program!" << std::endl << std::endl;
     }
