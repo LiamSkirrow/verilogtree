@@ -86,7 +86,7 @@ void printTreeRecursively(Node pNode, int depth, int count){
             std::cout << ' ';
         }        
         std::cout << cNode.getModuleName() << " " << cNode.getInstName() << std::endl;        
-        // std::cout << "Child: " << cNode.getModuleName() << ": " << cNodeLen << std::endl;
+        // std::cout << "Child's child: " << cNode.getChildNodeAtIndex(0)->getModuleName() << ": " << cNodeLen << std::endl;
         if(cNode.getChildNodesSize() > 0){
             printTreeRecursively(cNode, depth, ++count);
         }
@@ -107,10 +107,10 @@ void printTree(Tree hierarchyTree, struct Arguments args){
     if(args.algorithm == "recursive"){
         for(int i = 0; i < treeRootSize; i++){
             
-            // TODO: what if it's emtpy, pNode doesn't exist? Need to account for this edge case
+            // TODO: what if it's empty, pNode doesn't exist? Need to account for this edge case
 
             // find a root parent node
-            pNode = hierarchyTree.getTreeRootNodeAtIndex(i);
+            pNode = *hierarchyTree.getTreeRootNodeAtIndex(i);
             pNodeNumChilds = pNode.getChildNodesSize();
             std::cout << pNode.getModuleName() << std::endl;
             // if(pNodeNumChilds > 0){
@@ -189,9 +189,14 @@ int main(int argc, char **argv){
     // display the tree structure of the RTL
     printTree(hierarchyTree, args);
 
+    // TODO: what happens if I give it a module that doesn't exist in the RTL?
+    // FIXME: BUG: this program will segfault if a circular hierarchy is given -> eg mod0 instantiates itself or something...
+
     if(args.debug){
         std::cout << std::endl << "Successfully reached end of program!" << std::endl << std::endl;
     }
+
+    // TODO: should include a list of which modules were no-included at the end...
 
     return 0;
 }

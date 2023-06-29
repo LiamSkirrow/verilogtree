@@ -53,7 +53,7 @@ class Tree{
         void setMap(std::map<std::string, Node> pNodeMap);
         Node * getMapElem(std::string key);
         void pushTreeRoot(Node pNode);            // should this be a pointer to a ParentNode ???
-        Node getTreeRootNodeAtIndex(int index);   // should this be a pointer to a ParentNode ???
+        Node * getTreeRootNodeAtIndex(int index);   // should this be a pointer to a ParentNode ???
         int getTreeRootSize();
 };
 

@@ -16,8 +16,10 @@ Node * Tree::getMapElem(std::string key){
     return pNodePtr;
 }
 
-Node Tree::getTreeRootNodeAtIndex(int index){
-    return this->treeRoots.at(index);
+Node * Tree::getTreeRootNodeAtIndex(int index){
+    Node *pNodePtr;
+    pNodePtr = &this->treeRoots.at(index);
+    return pNodePtr;
 }
 
 int Tree::getTreeRootSize(){
@@ -130,6 +132,8 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
     }
 }
 
+// TODO: might be cool to include how many lines of verilog/systemverilog were parsed at the very end, add to debug output?
+
 void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, std::map<std::string, Node> *pNodeMapPtr, bool debug){
 
     std::fstream rtlFileObj;
@@ -229,13 +233,16 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug){
     cNodePtr = &cNode;
 
     for(int i = 0; i < pNodePtr->getChildNodesSize(); i++){
-        cNodePtr = pNodePtr->getChildNodeAtIndex(i);
+        *cNodePtr = *pNodePtr->getChildNodeAtIndex(i);
         tmpNode = *hTreePtr->getMapElem(cNodePtr->getModuleName());
         *cNodePtr = tmpNode;
         if(debug){
             std::cout << "  At level: " << pNodePtr->getModuleName() << " w/ # children: " << pNodePtr->getChildNodesSize() << std::endl;
             std::cout << "  Child   : " << cNodePtr->getModuleName() << " w/ # children: " << cNodePtr->getChildNodesSize() << std::endl;
         }
+        
+        // FIXME: might not be adding the leaf nodes to the structure via *cNodePtr = tmpNode;
+        //        this might be the reason why the final level of the hierarchy isn't being reached in the printout
         
         if(cNodePtr->getChildNodesSize() > 0){
             if(debug){
@@ -247,12 +254,8 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug){
     if(debug){
         std::cout << "going up..." << std::endl;
     }
-    
-    // return;
 
     // std::cout << "    Child's child: " << cNodePtr->getChildNodeAtIndex(0)->getModuleName() << std::endl;
-    // NOTE: might wanna replace the fors with whiles and just infinitely/arbitrarily loop
-    //       until you run out of child nodes. At end of loop, assign curr = curr->child
 
 }
 
@@ -303,12 +306,11 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
             hTreePtr->pushTreeRoot(*pNodePtr);
         }
     }
-
     // assemble the final tree, starting at the tree roots
     treeRootSize = hTreePtr->getTreeRootSize();
     // std::cout << "tree root size: " << treeRootSize << std::endl;
     for(int i = 0; i < treeRootSize; i++){
-        *pNodePtr = hTreePtr->getTreeRootNodeAtIndex(i);
+        pNodePtr = hTreePtr->getTreeRootNodeAtIndex(i);
         pNodeNumChilds = pNodePtr->getChildNodesSize();
         if(debug){
             std::cout << "Tree Root: " << pNodePtr->getModuleName() << " w/ # children: " << pNodeNumChilds << std::endl;
@@ -327,6 +329,9 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
             
         }
     }
+
+    std::cout << std::endl << "Check: " << hTreePtr->getTreeRootNodeAtIndex(0)->getChildNodeAtIndex(0)->getChildNodesSize() << std::endl << std::endl;
+
 }
 
 // top level function, dispatch the rtl parsing and tree construction functions, return the Tree to main
