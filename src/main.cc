@@ -66,19 +66,37 @@ void checkFilesExist(struct Arguments args){
 // TODO: always print module name, optionally print out instance name as well
 // TODO: (stretch feature) actually print out a proper visual tree in the middle of the screen branching downwards left and right
 //       see if there's a library that can do this automatically
+// TODO: include a setting to print out a blank line between lines of hierarchy, space it out a bit more?
 
 void printTreeRecursively(Node pNode, int depth, int count){
 
-    if(count < depth){
-        std::cout << pNode.getModuleName() << std::endl;
-        // printTreeRecursively(, depth, ++count);
+    Node cNode;
+    int cNodeLen;
+    
+    // level arg: may need to return count, and update it at end of each function call
+    // calling each function up the recursive chain to end
+
+    // currently not recursing all the way to the end... stops one level too shallow...
+
+    for(int i = 0; i < pNode.getChildNodesSize(); i++){
+        cNode = *pNode.getChildNodeAtIndex(i);
+        // cNodeLen = cNode.getChildNodesSize();
+        // print out the correct level of indentation
+        for(int j = 0; j < 4*count; j++){
+            std::cout << ' ';
+        }        
+        std::cout << cNode.getModuleName() << " " << cNode.getInstName() << std::endl;        
+        // std::cout << "Child: " << cNode.getModuleName() << ": " << cNodeLen << std::endl;
+        if(cNode.getChildNodesSize() > 0){
+            printTreeRecursively(cNode, depth, ++count);
+        }
     }
-    return;
 }
 
 void printTree(Tree hierarchyTree, struct Arguments args){
 
     int treeRootSize = hierarchyTree.getTreeRootSize();
+    int pNodeNumChilds;
     Node pNode;
     Node *cNodePtr;
 
@@ -88,10 +106,16 @@ void printTree(Tree hierarchyTree, struct Arguments args){
 
     if(args.algorithm == "recursive"){
         for(int i = 0; i < treeRootSize; i++){
+            
+            // TODO: what if it's emtpy, pNode doesn't exist? Need to account for this edge case
+
             // find a root parent node
             pNode = hierarchyTree.getTreeRootNodeAtIndex(i);
+            pNodeNumChilds = pNode.getChildNodesSize();
             std::cout << pNode.getModuleName() << std::endl;
-            printTreeRecursively(pNode, atoi(args.level.c_str()), 0);
+            // if(pNodeNumChilds > 0){
+            printTreeRecursively(pNode, atoi(args.level.c_str()), 1);
+            // }
             std::cout << "----------" << std::endl;
         }
     }

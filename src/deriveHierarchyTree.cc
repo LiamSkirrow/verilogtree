@@ -304,8 +304,6 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
         }
     }
 
-    // TODO: not a fan of these infinite loops with breaks... need to refactor into something better
-
     // assemble the final tree, starting at the tree roots
     treeRootSize = hTreePtr->getTreeRootSize();
     // std::cout << "tree root size: " << treeRootSize << std::endl;
