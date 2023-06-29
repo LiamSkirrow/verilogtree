@@ -16,8 +16,8 @@ Node * Tree::getMapElem(std::string key){
     return pNodePtr;
 }
 
-Node Tree::getTreeRootNodeAtIndex(int index){
-    return this->treeRoots.at(index);
+Node * Tree::getTreeRootNodeAtIndex(int index){
+    return &this->treeRoots.at(index);
 }
 
 int Tree::getTreeRootSize(){
@@ -229,7 +229,7 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug){
     cNodePtr = &cNode;
 
     for(int i = 0; i < pNodePtr->getChildNodesSize(); i++){
-        cNodePtr = pNodePtr->getChildNodeAtIndex(i);
+        *cNodePtr = *pNodePtr->getChildNodeAtIndex(i);
         tmpNode = *hTreePtr->getMapElem(cNodePtr->getModuleName());
         *cNodePtr = tmpNode;
         if(debug){
@@ -251,7 +251,8 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug){
         std::cout << "going up..." << std::endl;
     }
     
-    // return;
+    // FIXME: this line shouldn't be generating errors
+    // std::cout << "Check: " << hTreePtr->getTreeRootNodeAtIndex(0)->getChildNodeAtIndex(0)->getChildNodeAtIndex(0)->getModuleName() << std::endl;
 
     // std::cout << "    Child's child: " << cNodePtr->getChildNodeAtIndex(0)->getModuleName() << std::endl;
     // NOTE: might wanna replace the fors with whiles and just infinitely/arbitrarily loop
@@ -311,7 +312,7 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
     treeRootSize = hTreePtr->getTreeRootSize();
     // std::cout << "tree root size: " << treeRootSize << std::endl;
     for(int i = 0; i < treeRootSize; i++){
-        *pNodePtr = hTreePtr->getTreeRootNodeAtIndex(i);
+        *pNodePtr = *hTreePtr->getTreeRootNodeAtIndex(i);
         pNodeNumChilds = pNodePtr->getChildNodesSize();
         if(debug){
             std::cout << "Tree Root: " << pNodePtr->getModuleName() << " w/ # children: " << pNodeNumChilds << std::endl;

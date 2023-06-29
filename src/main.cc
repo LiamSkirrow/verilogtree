@@ -110,7 +110,7 @@ void printTree(Tree hierarchyTree, struct Arguments args){
             // TODO: what if it's empty, pNode doesn't exist? Need to account for this edge case
 
             // find a root parent node
-            pNode = hierarchyTree.getTreeRootNodeAtIndex(i);
+            pNode = *hierarchyTree.getTreeRootNodeAtIndex(i);
             pNodeNumChilds = pNode.getChildNodesSize();
             std::cout << pNode.getModuleName() << std::endl;
             // if(pNodeNumChilds > 0){
