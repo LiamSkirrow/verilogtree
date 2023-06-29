@@ -64,6 +64,8 @@ void checkFilesExist(struct Arguments args){
 // TODO: have the option to highlight specific modules with a certain colour in the output
 // TODO: add an iterative (non-recursive) print out input arg to have a low-memory consumption mode
 // TODO: always print module name, optionally print out instance name as well
+// TODO: (stretch feature) actually print out a proper visual tree in the middle of the screen branching downwards left and right
+//       see if there's a library that can do this automatically
 
 void printTreeRecursively(Node pNode, int depth, int count){
 
