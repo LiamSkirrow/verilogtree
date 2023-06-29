@@ -82,9 +82,15 @@ void printTreeRecursively(Node pNode, int depth, int count){
         cNode = *pNode.getChildNodeAtIndex(i);
         // cNodeLen = cNode.getChildNodesSize();
         // print out the correct level of indentation
-        for(int j = 0; j < 4*count; j++){
+        std::cout << '|';
+        for(int j = 0; j < 4*(count-1)-1; j++){
             std::cout << ' ';
         }
+        for(int j = 0; j < 3; j++){
+            std::cout << '-';
+        }
+        std::cout << ' ';
+        // FIXME: where are the instance names in the console output?
         std::cout << cNode.getModuleName() << " " << cNode.getInstName() << std::endl;
         // std::cout << "Child's child: " << cNode.getChildNodeAtIndex(0)->getModuleName() << ": " << cNodeLen << std::endl;
         if(cNode.getChildNodesSize() > 0){
@@ -102,7 +108,7 @@ void printTree(Tree hierarchyTree, struct Arguments args){
 
     // how to do this non-recursively?
 
-    std::cout << "----------" << std::endl;
+    // std::cout << "----------" << std::endl;
 
     if(args.algorithm == "recursive"){
         for(int i = 0; i < treeRootSize; i++){
@@ -116,7 +122,7 @@ void printTree(Tree hierarchyTree, struct Arguments args){
             // if(pNodeNumChilds > 0){
             printTreeRecursively(pNode, atoi(args.level.c_str()), 1);
             // }
-            std::cout << "----------" << std::endl;
+            // std::cout << "----------" << std::endl;
         }
     }
     else if(args.algorithm == "iterative"){

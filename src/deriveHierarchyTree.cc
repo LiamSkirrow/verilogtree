@@ -244,10 +244,6 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug){
             std::cout << "  At level: " << pNodePtr->getModuleName() << " w/ # children: " << pNodePtr->getChildNodesSize() << std::endl;
             std::cout << "  Child   : " << cNodePtr->getModuleName() << " w/ # children: " << cNodePtr->getChildNodesSize() << std::endl;
         }
-        
-        // FIXME: might not be adding the leaf nodes to the structure via *cNodePtr = tmpNode;
-        //        this might be the reason why the final level of the hierarchy isn't being reached in the printout
-        
         if(cNodePtr->getChildNodesSize() > 0){
             if(debug){
                 std::cout << "recursing..." << std::endl;
@@ -258,9 +254,6 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug){
     if(debug){
         std::cout << "going up..." << std::endl;
     }
-
-    // std::cout << std::endl << "Check in recursion: " << hTreePtr->getTreeRootNodeAtIndex(1)->getChildNodeAtIndex(0)->getChildNodesSize() << std::endl << std::endl;
-
 }
 
 // main algorithm for elaborating the tree of parent nodes
@@ -333,9 +326,6 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
             
         }
     }
-
-    std::cout << std::endl << "Check: " << hTreePtr->getTreeRootNodeAtIndex(0)->getChildNodeAtIndex(0)->getChildNodesSize() << std::endl << std::endl;
-
 }
 
 // top level function, dispatch the rtl parsing and tree construction functions, return the Tree to main
