@@ -232,8 +232,12 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug){
 
     cNodePtr = &cNode;
 
+    if(pNodePtr->getChildNodeAtIndex(0)->getModuleName() == "mod0"){
+        // pNodePtr->getChildNodeAtIndex(0)->setModuleName("mod0Moodified");
+    }
+
     for(int i = 0; i < pNodePtr->getChildNodesSize(); i++){
-        *cNodePtr = *pNodePtr->getChildNodeAtIndex(i);
+        cNodePtr = pNodePtr->getChildNodeAtIndex(i);
         tmpNode = *hTreePtr->getMapElem(cNodePtr->getModuleName());
         *cNodePtr = tmpNode;
         if(debug){
@@ -255,7 +259,7 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug){
         std::cout << "going up..." << std::endl;
     }
 
-    // std::cout << "    Child's child: " << cNodePtr->getChildNodeAtIndex(0)->getModuleName() << std::endl;
+    // std::cout << std::endl << "Check in recursion: " << hTreePtr->getTreeRootNodeAtIndex(1)->getChildNodeAtIndex(0)->getChildNodesSize() << std::endl << std::endl;
 
 }
 

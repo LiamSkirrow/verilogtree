@@ -84,8 +84,8 @@ void printTreeRecursively(Node pNode, int depth, int count){
         // print out the correct level of indentation
         for(int j = 0; j < 4*count; j++){
             std::cout << ' ';
-        }        
-        std::cout << cNode.getModuleName() << " " << cNode.getInstName() << std::endl;        
+        }
+        std::cout << cNode.getModuleName() << " " << cNode.getInstName() << std::endl;
         // std::cout << "Child's child: " << cNode.getChildNodeAtIndex(0)->getModuleName() << ": " << cNodeLen << std::endl;
         if(cNode.getChildNodesSize() > 0){
             printTreeRecursively(cNode, depth, ++count);

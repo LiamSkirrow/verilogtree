@@ -61,4 +61,4 @@ Tree deriveHierarchyTree(Tree *hierarchyTreePtr, std::vector<std::string> rtlFil
 void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, std::map<std::string, Node> *pNodeMapPtr, bool debug);
 void elaborateHierarchyTree(Tree *hTreePtr);
 void tokenizeString(std::string str, std::string *tokenisedStringPtr);
-void constructTreeRecursively(std::vector<Node> *pNodePtr, Tree *hTreePtr);
+void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug);
