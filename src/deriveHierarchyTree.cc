@@ -110,12 +110,12 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
             indexStart = i;
             indexStartAssigned = true;
         }
-        else if((str[i] == '(' || str[i] == '#' || str[i] == ' ') && indexStartAssigned){
+        else if((str[i] == '\(' || str[i] == '#' || str[i] == ' ') && indexStartAssigned){
             substr = str.substr(indexStart, i);
 
             if(superDebug) { std::cout << "substr before trim: " << '<' << substr << '>' << std::endl; }
             for( ; ; ){
-                found = substr.find_first_of(" #(");
+                found = substr.find_first_of(" #\(");
                 // found an unwanted char, delete it
                 if(found != std::string::npos){
                     substr.erase(found);
@@ -139,6 +139,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
     std::fstream rtlFileObj;
     std::string line;
     std::string moduleName;
+    std::string instName;
     std::string childModuleName;
     std::string childInstName;
     std::vector<std::string> tokenisedString;
@@ -190,10 +191,11 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 // tokenise the child node string, splitting on arbitrary number of space chars
                 tokenisedStringPtr->clear();
                 tokeniseString(matchObjChild.str(), tokenisedStringPtr, false);
+                instName = tokenisedStringPtr->at(1);
                 
                 if(debug){
-                    std::cout << "Instantiated module found in file " << rtlFiles.at(i) << ": \"" << matchObjChild.str() << "\" with instance name: \"";
-                    std::cout << moduleName << "\" " << std::endl;
+                    std::cout << "  Instantiated module found in file " << rtlFiles.at(i) << ": \"" << matchObjChild.str() << "\" with instance name: \"";
+                    std::cout << instName << "\" " << std::endl;
                 }
 
                 // create the child Node object
