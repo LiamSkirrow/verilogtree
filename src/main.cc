@@ -78,25 +78,24 @@ void printTreeRecursively(Node pNode, int depth, int count){
 
     Node cNode;
     int cNodeLen;
-    bool indentationDone = false;
+    // bool indentationDone = false;
     
     // level arg: may need to return count, and update it at end of each function call
     // calling each function up the recursive chain to end
 
     // TODO: need to figure out when the last 1st level node is visited, this is when you stop printing out the 
     //       "|" at the beginning of every line
+    
+    // print out the correct level of indentation
+    for(int j = 0; j < 4*(count-1); j++){
+        if(j == 0)
+            std::cout << "│";
+        else
+            std::cout << ' ';
+    }
 
     for(int i = 0; i < pNode.getChildNodesSize(); i++){
         cNode = *pNode.getChildNodeAtIndex(i);
-        // print out the correct level of indentation
-        if(!indentationDone){
-            for(int j = 0; j < 4*(count-1)-1; j++){
-                if(j == 0)
-                    std::cout << "│";
-                else
-                    std::cout << ' ';
-            }
-        }
         for(int j = 0; j < 3; j++){
             if(j == 0){
                 // if we've reached the final module at this level
@@ -110,12 +109,11 @@ void printTreeRecursively(Node pNode, int depth, int count){
                 std::cout << "─";
         }
         std::cout << ' ';
-        indentationDone = true;
         // FIXME: where are the instance names in the console output?
         std::cout << cNode.getModuleName() /*<< " pSize: " << pNode.getChildNodesSize() << " | cSize: " << cNode.getChildNodesSize()*/ << " " << cNode.getInstName() << std::endl;
         // TODO: remove this if statement, it's redundant...
         if(cNode.getChildNodesSize() > 0){
-            printTreeRecursively(cNode, depth, ++count);
+            printTreeRecursively(cNode, depth, count+1);
         }
     }
 }
