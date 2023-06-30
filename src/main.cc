@@ -78,16 +78,27 @@ void printTreeRecursively(Node pNode, int depth, int count){
 
     // currently not recursing all the way to the end... stops one level too shallow...
 
+    // TODO: also need to use the character "└" for the last module at a given level
+
     for(int i = 0; i < pNode.getChildNodesSize(); i++){
         cNode = *pNode.getChildNodeAtIndex(i);
         // cNodeLen = cNode.getChildNodesSize();
         // print out the correct level of indentation
-        std::cout << '|';
         for(int j = 0; j < 4*(count-1)-1; j++){
             std::cout << ' ';
         }
         for(int j = 0; j < 3; j++){
-            std::cout << '-';
+            if(j == 0){
+                if(i == pNode.getChildNodesSize()-1){
+                    std::cout << "└";    
+                }
+                else{
+                    std::cout << "├";
+                }
+            }
+            else{
+                std::cout << "─";
+            }
         }
         std::cout << ' ';
         // FIXME: where are the instance names in the console output?
