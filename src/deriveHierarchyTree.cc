@@ -95,12 +95,12 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
             indexStart = i;
             indexStartAssigned = true;
         }
-        else if((str[i] == "\(" || str[i] == '#' || str[i] == ' ') && indexStartAssigned){
+        else if((str[i] == '(' || str[i] == '#' || str[i] == ' ') && indexStartAssigned){
             substr = str.substr(indexStart, i);
 
             if(superDebug) { std::cout << "substr before trim: " << '<' << substr << '>' << std::endl; }
             for( ; ; ){
-                found = substr.find_first_of(" #\(");
+                found = substr.find_first_of(" #(");
                 // found an unwanted char, delete it
                 if(found != std::string::npos){
                     substr.erase(found);
