@@ -74,11 +74,10 @@ void checkFilesExist(struct Arguments args){
 //       Do this for a variety of rtl codebases to generate a suite of autotests that can run in a nightly regression, whenever
 //       new commits are pushed to master etc...
 
-void printTreeRecursively(Node pNode, int depth, int count){
+void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone){
 
     Node cNode;
     int cNodeLen;
-    // bool indentationDone = false;
     
     // level arg: may need to return count, and update it at end of each function call
     // calling each function up the recursive chain to end
@@ -88,8 +87,14 @@ void printTreeRecursively(Node pNode, int depth, int count){
     
     // print out the correct level of indentation
     for(int j = 0; j < 4*(count-1); j++){
-        if(j == 0)
-            std::cout << "│";
+        if(j == 0){
+            if(indentationDone){
+                std::cout << ' ';
+            }
+            else{
+                std::cout << "│";
+            }
+        }
         else
             std::cout << ' ';
     }
@@ -113,7 +118,10 @@ void printTreeRecursively(Node pNode, int depth, int count){
         std::cout << cNode.getModuleName() /*<< " pSize: " << pNode.getChildNodesSize() << " | cSize: " << cNode.getChildNodesSize()*/ << " " << cNode.getInstName() << std::endl;
         // TODO: remove this if statement, it's redundant...
         if(cNode.getChildNodesSize() > 0){
-            printTreeRecursively(cNode, depth, count+1);
+            if(i == pNode.getChildNodesSize()-1 && count==1){
+                indentationDone = true;
+            }
+            printTreeRecursively(cNode, depth, count+1, indentationDone);
         }
     }
 }
@@ -140,7 +148,7 @@ void printTree(Tree hierarchyTree, struct Arguments args){
             pNodeNumChilds = pNode.getChildNodesSize();
             std::cout << pNode.getModuleName() << std::endl;
             // if(pNodeNumChilds > 0){
-            printTreeRecursively(pNode, atoi(args.level.c_str()), 1);
+            printTreeRecursively(pNode, atoi(args.level.c_str()), 1, false);
             // }
             // std::cout << "----------" << std::endl;
         }
