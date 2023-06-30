@@ -1,15 +1,6 @@
 
 #include "include/deriveHierarchyTree.h"
 
-/* NOTE: does Verilog allow nested modules? Like...
--> if this is standard Verilog, create a GitHub issue for this and just deal with it in a future minor release
-module mod0(...);
-    module mod1(...);
-        mod2 mod2_inst(...);
-    endmodule
-endmodule
-*/
-
 Node * Tree::getMapElem(std::string key){
     Node *pNodePtr;
     pNodePtr = &this->parentNodeMap.at(key);
@@ -89,15 +80,9 @@ int Node::getChildNodesSize(){
     return this->childNodes.size();
 }
 
-// TODO: replace hardcoded iterations with C++ STL iterators ??? 
-
 // *** NOTE:
 // I do not like the current tokenising code, maybe refactor it from here.
 
-// TODO: include a --superdebug flag as well for a ton of debugging information
-//       enabling --superdebug should also enable --debug automatically in the args parsing stage
-
-// *** TODO: do I need to handle tab characters? Not handling newlines for now!
 // given the raw regex match from the RTL files, strip whitespace and store the two text words
 void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPtr, bool superDebug){
     // loop through str and push the sub-words to tokenisedStringPtr
@@ -110,7 +95,7 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
             indexStart = i;
             indexStartAssigned = true;
         }
-        else if((str[i] == '\(' || str[i] == '#' || str[i] == ' ') && indexStartAssigned){
+        else if((str[i] == "\(" || str[i] == '#' || str[i] == ' ') && indexStartAssigned){
             substr = str.substr(indexStart, i);
 
             if(superDebug) { std::cout << "substr before trim: " << '<' << substr << '>' << std::endl; }
@@ -132,8 +117,6 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
     }
 }
 
-// TODO: might be cool to include how many lines of verilog/systemverilog were parsed at the very end, add to debug output?
-
 void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, std::map<std::string, Node> *pNodeMapPtr, bool debug){
 
     std::fstream rtlFileObj;
@@ -148,8 +131,6 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
     std::smatch matchObjChild;
     Node tmpNode;
     Node *tmpNodePtr;
-
-    // std::string pNodeName;
 
     std::map<std::string, Node> tmpNodeMap;
 
@@ -226,11 +207,6 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
     }
 }
 
-// TODO: the -L flag could be used to simply limit how many levels the tree goes, rather than
-//       only printing so far...
-
-// TODO: add "stage 1","stage 2" in debug output text and format it nicely with blank spaces between each section
-
 // recursively go down the hierarchy of Nodes and assign child nodes
 void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug){
 
@@ -284,8 +260,6 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
     pNodePtr = &pNode;
     cNodePtr = &cNode;
     tmpNodePtr = &tmpNode;
-
-    // TODO: the below methods have to return a pointer, rather than a copy
     
     for(int i = 0; i < parentNodeSize; i++){
         pNodePtr = hTreePtr->getParentNodeAtIndex(i);
@@ -346,16 +320,6 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
     hTreePtr         = &hTree;
     pNodeMapPtr      = &pNodeMap;
 
-    // TODO: to check the regex parsing strings, pass in a TON of real-world open source RTL files
-    //       and print out the internal database of parent nodes and child nodes, should be 
-    //       easy to find any errors or verify correct working functionality this way
-    // TODO: add ^^^ to an issue with the label 'Testing'
-
-    // what about modules defined on the same line separated by a ; ?
-    // -> mod0 mod0_inst(); mod1 mod1_inst(); ????
-    // just remember to document the supported syntax for module declarations
-    // include examples in README...
-
     // parse the RTL according to the regex strings. Create distinct parent-child node groups
     parseRtl(rtlFiles, parentNodeVecPtr, parentNodeRegexStr, childNodeRegexStr, pNodeMapPtr, debug);
 
@@ -385,8 +349,6 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
     elaborateHierarchyTree(hTreePtr, debug);
     
     // std::cout << "TEST: " << hTreePtr->getTreeRootNodeAtIndex(0)->getChildNodeAtIndex(0)->getChildNodeAtIndex(1)->getChildNodeAtIndex(0)->getInstName() << std::endl;
-
-    // TODO: add a 'code refactoring' label 
 
     return *hTreePtr;
 

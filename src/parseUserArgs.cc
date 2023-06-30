@@ -3,7 +3,6 @@
 #include "include/parseUserArgs.h"
 
 void errorAndExit(std::string errorMsg){
-    // TODO: need to do some error handling rather than cout
     std::cout << std::endl << errorMsg << std::endl << std::endl;
     std::cout << "Type 'verilogtree --help' or 'man verilogtree' for help" << std::endl;
     exit(-1);
@@ -35,9 +34,6 @@ int getNextArgs(int argc, char **argv, int i, std::string argName, std::string e
     return i;
 }
 
-// TODO: include error handling for case where user includes the same argument more than once.
-//       have a bool for each arg and check that it's not already true when handling the arg
-
 struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,14> argList){
 
     int isEqual;
@@ -65,9 +61,8 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,14>
         if(!isEqual){
             errorAndExit((std::string)"Invalid argument detected: \"" + (std::string)argv[i] + (std::string)"\"");
         }
-        // FIXME:
         // replace the entire above code with simply "if(argv[i] in argList)"... that's literally it!
-        // FIXME:
+        // TODO: make this more efficient...
 
         // at this point, the argument read matches one of the accepted args, proceed with getting input
         // -_- switch statements don't work with strings... thank you C++ :)
@@ -84,7 +79,6 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,14>
             exit(0);
         } 
         else if(argv[i] == (std::string)"-f"){
-            // TODO: make this into a function since it's replicated across -f and --filelist
             includedVerilog = true;
             // check the next N strings of argv to get the Verilog filepaths, increment i accordingly
             i = getNextArgs(argc, argv, i, argv[i], (std::string)"path(s) to RTL files", argumentVecPtr);
@@ -122,7 +116,6 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,14>
             if(argumentVecPtr->size() != 1){
                 errorAndExit((std::string)"Argument -L must have only one proceeding value");
             }
-            // TODO: assert -L is numeric value
             // assert(argumentVecPtr->at(0))
             args.level = argumentVecPtr->at(0);
         } 
@@ -141,7 +134,6 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,14>
             // assert(argumentVecPtr->at(0) == "verilog" || argumentVecPtr->at(0) == "vhdl");
             
             // ******* TEMPORARY *******
-            // TODO: add GitHub issue for adding VHDL support
             if(argumentVecPtr->at(0) == "vhdl"){
                 std::cout << "******* ERROR *******" << std::endl << std::endl;
                 std::cout << "VHDL not yet supported! Please see this GitHub issue for progress on VHDL support:" << std::endl;
@@ -160,11 +152,9 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,14>
         else if(argv[i] == (std::string)"--recursive"){
             args.algorithm = "recursive";   // default
         } 
-        /* TODO: add another argument that determines whether both the module name and inst name is printed or just module name */ 
         else {   // this should never be reached...
             std::cout << "Bug found! Need to add " << argv[i] << " to argument parser!" << std::endl;
-            // TODO: include the url of the verilogtree github repo
-            std::cout << "Please report this on GitHub!" << std::endl;
+            std::cout << "Please report this on GitHub! https://github.com/LiamSkirrow/verilogtree" << std::endl;
             exit(-1);
         }
     }
