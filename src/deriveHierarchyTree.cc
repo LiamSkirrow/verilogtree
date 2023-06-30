@@ -174,7 +174,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 moduleName = tokenisedStringPtr->at(1);
 
                 if(debug){
-                    std::cout << "Parent node found in file " << rtlFiles.at(i) << ": \"" << matchObjParent.str() << "\" with module name: \"";
+                    std::cout << "Module definition found in file " << rtlFiles.at(i) << ": \"" << matchObjParent.str() << "\" with module name: \"";
                     std::cout << moduleName << "\" " << std::endl;
                 }
                 // create the parent Node object
@@ -190,6 +190,12 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 // tokenise the child node string, splitting on arbitrary number of space chars
                 tokenisedStringPtr->clear();
                 tokeniseString(matchObjChild.str(), tokenisedStringPtr, false);
+                
+                if(debug){
+                    std::cout << "Instantiated module found in file " << rtlFiles.at(i) << ": \"" << matchObjChild.str() << "\" with instance name: \"";
+                    std::cout << moduleName << "\" " << std::endl;
+                }
+
                 // create the child Node object
                 Node curr;
                 curr.setModuleName(tokenisedStringPtr->at(0));
@@ -377,8 +383,11 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
     hTreePtr->setParentNodes(*parentNodeVecPtr);
     hTreePtr->setMap(*pNodeMapPtr);
 
+
     // now (recursively?) replace all child nodes with parent nodes to construct the tree
     elaborateHierarchyTree(hTreePtr, debug);
+    
+    std::cout << "TEST: " << hTreePtr->getTreeRootNodeAtIndex(0)->getChildNodeAtIndex(0)->getChildNodeAtIndex(1)->getChildNodeAtIndex(0)->getInstName() << std::endl;
 
     // TODO: add a 'code refactoring' label 
 
