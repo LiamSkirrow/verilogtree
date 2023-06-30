@@ -240,10 +240,6 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug){
 
     cNodePtr = &cNode;
 
-    if(pNodePtr->getChildNodeAtIndex(0)->getModuleName() == "mod0"){
-        // pNodePtr->getChildNodeAtIndex(0)->setModuleName("mod0Moodified");
-    }
-
     for(int i = 0; i < pNodePtr->getChildNodesSize(); i++){
         cNodePtr = pNodePtr->getChildNodeAtIndex(i);
         tmpNode = *hTreePtr->getMapElem(cNodePtr->getModuleName());
@@ -330,8 +326,7 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
             // - after returning upwards, the next child node at that level will be entered into ... etc until the tree
             //   is constructed DFS style
 
-            constructTreeRecursively(pNodePtr, hTreePtr, debug);
-            
+            constructTreeRecursively(pNodePtr, hTreePtr, debug);            
         }
     }
 }
@@ -389,7 +384,7 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
     // now (recursively?) replace all child nodes with parent nodes to construct the tree
     elaborateHierarchyTree(hTreePtr, debug);
     
-    std::cout << "TEST: " << hTreePtr->getTreeRootNodeAtIndex(0)->getChildNodeAtIndex(0)->getChildNodeAtIndex(1)->getChildNodeAtIndex(0)->getInstName() << std::endl;
+    // std::cout << "TEST: " << hTreePtr->getTreeRootNodeAtIndex(0)->getChildNodeAtIndex(0)->getChildNodeAtIndex(1)->getChildNodeAtIndex(0)->getInstName() << std::endl;
 
     // TODO: add a 'code refactoring' label 
 

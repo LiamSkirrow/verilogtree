@@ -74,6 +74,16 @@ void checkFilesExist(struct Arguments args){
 //       Do this for a variety of rtl codebases to generate a suite of autotests that can run in a nightly regression, whenever
 //       new commits are pushed to master etc...
 
+// TODO: handle the error case where a particular file is given that includes an instantiated module, but without the module definition. Program should exit gracefully (since this is not a valid case, and as such should cause a crash)
+//       To reproduce: ./verilogtree -f ../../verilog-projects/riscv-cpu/src/alu/alu.v ../../verilog-projects/riscv-cpu/src/control-unit/Control_Unit.v
+/*  output:
+         Control_Unit
+         ├──
+         └── alu
+*/
+
+// TODO: (stretch feature) should probably include ability to read `ifdefs since currently an instantiated function *will* be included in the hierarchy even though it may be ifdef'd away. Would need to parse `defines and actually determine on the fly whether certain modules would be instantiated... Alternatively give ability to include a `define file, so user can see what the hierarchy would look like with/without particular `defines...
+
 void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone){
 
     Node cNode;
@@ -161,6 +171,8 @@ void printTree(Tree hierarchyTree, struct Arguments args){
         exit(-1);
     }
 
+    std::cout << std::endl;
+
 }
 
 int main(int argc, char **argv){
@@ -226,7 +238,7 @@ int main(int argc, char **argv){
     // FIXME: BUG: this program will segfault if a circular hierarchy is given -> eg mod0 instantiates itself or something...
 
     if(args.debug){
-        std::cout << std::endl << "Successfully reached end of program!" << std::endl << std::endl;
+        std::cout << "Successfully reached end of program!" << std::endl << std::endl;
     }
 
     // TODO: should include a list of which modules were no-included at the end...
