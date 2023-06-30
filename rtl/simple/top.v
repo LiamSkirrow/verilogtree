@@ -10,11 +10,14 @@ endmodule
 
 top 
 |___mod0
-    |__mod3
-       |__mod4
+|   |__mod3
+|   |  |__mod4
+|   |__mod1
+|      |__mod3
+|         |__mod4
 |___mod1
-    |__mod3
-       |__mod4
+|   |__mod3
+|      |__mod4
 |___mod2
     |__mod1
         |__mod3

@@ -81,25 +81,24 @@ void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone
     
     // level arg: may need to return count, and update it at end of each function call
     // calling each function up the recursive chain to end
-
-    // TODO: need to figure out when the last 1st level node is visited, this is when you stop printing out the 
-    //       "|" at the beginning of every line
     
-    // print out the correct level of indentation
-    for(int j = 0; j < 4*(count-1); j++){
-        if(j == 0){
-            if(indentationDone){
-                std::cout << ' ';
-            }
-            else{
-                std::cout << "│";
-            }
-        }
-        else
-            std::cout << ' ';
-    }
 
     for(int i = 0; i < pNode.getChildNodesSize(); i++){
+        // print out the correct level of indentation
+        if(i == 0){
+            for(int j = 0; j < 4*(count-1); j++){
+                if(j == 0){
+                    if(indentationDone){
+                        std::cout << ' ';
+                    }
+                    else{
+                        std::cout << "│";
+                    }
+                }
+                else
+                    std::cout << ' ';
+            }
+        }
         cNode = *pNode.getChildNodeAtIndex(i);
         for(int j = 0; j < 3; j++){
             if(j == 0){
@@ -209,8 +208,8 @@ int main(int argc, char **argv){
     // childNodeRegexStr  = (args.lang == "verilog") ? "^\ *\w*\s*\w*\s*\("     : "          ";
     //                                               \_______Verilog______/     \__VHDL__/
 
-    parentNodeRegexStr = "^\\ *module\\s*\\w*\\s*#*\\(";
-    childNodeRegexStr  = "^\\ *\\w*\\s*\\w*\\s*\\(";
+    parentNodeRegexStr = "^\\ *module\\s+\\w+\\s*#*\\ *\\(";
+    childNodeRegexStr  = "^\\ *\\w+\\s+\\w+\\s*\\(";
 
     // NOTE: should I also be storing the hpaths to each module? This may be more efficient to do *while*
     //       the tree is being constructed rather than having to traverse the tree DFS-style to figure
