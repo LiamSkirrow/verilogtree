@@ -70,19 +70,17 @@ void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone
 
     for(int i = 0; i < pNode.getChildNodesSize(); i++){
         // print out the correct level of indentation
-        if(i == 0){
-            for(int j = 0; j < 4*(count-1); j++){
-                if(j == 0){
-                    if(indentationDone){
-                        std::cout << ' ';
-                    }
-                    else{
-                        std::cout << "│";
-                    }
-                }
-                else
+        for(int j = 0; j < 4*(count-1); j++){
+            if(j == 0){
+                if(indentationDone){
                     std::cout << ' ';
+                }
+                else{
+                    std::cout << "│";
+                }
             }
+            else
+                std::cout << ' ';
         }
         cNode = *pNode.getChildNodeAtIndex(i);
         for(int j = 0; j < 3; j++){
