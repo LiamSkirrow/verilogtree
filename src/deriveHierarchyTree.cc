@@ -49,7 +49,6 @@ void Node::setIsInstantiated(){
     this->isInstantiated = true;
 }
 
-
 void Node::setModuleName(std::string str){
     this->moduleName = str;
 }
@@ -160,12 +159,12 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                     std::cout << moduleName << "\" " << std::endl;
                 }
                 // create the parent Node object
-                Node curr;
-                curr.setModuleName(moduleName);
-                parentNodeVecPtr->push_back(curr);
+                Node curr0;
+                curr0.setModuleName(moduleName);
+                parentNodeVecPtr->push_back(curr0);
                 // add an entry to the hash table of parent nodes
-                // pNodeMapPtr->insert(std::pair<std::string, Node>(moduleName, curr));
-                tmpNodeMap[moduleName] = curr;
+                // pNodeMapPtr->insert(std::pair<std::string, Node>(moduleName, curr0));
+                tmpNodeMap[moduleName] = curr0;
             }
             // found a child node
             else if(matchObjChild.size() == 1){
@@ -180,9 +179,12 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 }
 
                 // create the child Node object
-                Node curr;
-                curr.setModuleName(tokenisedStringPtr->at(0));
-                curr.setInstName(tokenisedStringPtr->at(1));
+                Node curr1;
+                curr1.setModuleName(tokenisedStringPtr->at(0));
+                curr1.setInstName(tokenisedStringPtr->at(1));
+                // curr1.setModuleName(moduleName);
+                // curr1.setInstName(instName);
+
                 // all child nodes are instantiated, only parent nodes are not
                 // I was hoping this would eliminate the need for the first for loop in elaborateHierarchyTree ?
                 // curr.setIsInstantiated();
@@ -190,11 +192,13 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 // the last parent node is the current one, push the associated child nodes
                 tmpNodePtr = &parentNodeVecPtr->back();
                 // pNodeName = tmpNodePtr->getModuleName();
-                tmpNodePtr->pushChildNode(curr);
+                tmpNodePtr->pushChildNode(curr1);
 
                 // add/update the entry in the hash table of the respective parent node
                 // pNodeMapPtr->insert(std::pair<std::string, Node>(moduleName, *tmpNodePtr));
                 tmpNodeMap[moduleName] = *tmpNodePtr;
+
+                // std::cout << "yoyoyo (pass???): " << tmpNodePtr->getChildNodeAtIndex(0)->getInstName() << std::endl;
 
                 // parentNodeSize = parentNodeVecPtr->size();
                 // // get a reference to the last entry
@@ -213,13 +217,18 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug){
     Node cNode;
     Node *cNodePtr;
     Node tmpNode;
+    // will need to manually update instance name when swapping child for parent node
+    std::string tmpInstName;
 
     cNodePtr = &cNode;
 
     for(int i = 0; i < pNodePtr->getChildNodesSize(); i++){
         cNodePtr = pNodePtr->getChildNodeAtIndex(i);
+        tmpInstName = cNodePtr->getInstName();
         tmpNode = *hTreePtr->getMapElem(cNodePtr->getModuleName());
         *cNodePtr = tmpNode;
+        // in overwriting the child node with a parent node, we lose the instance name so update it here
+        cNodePtr->setInstName(tmpInstName);
         if(debug){
             std::cout << "  At level: " << pNodePtr->getModuleName() << " w/ # children: " << pNodePtr->getChildNodesSize() << std::endl;
             std::cout << "  Child   : " << cNodePtr->getModuleName() << " w/ # children: " << cNodePtr->getChildNodesSize() << std::endl;
@@ -264,7 +273,6 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
     for(int i = 0; i < parentNodeSize; i++){
         pNodePtr = hTreePtr->getParentNodeAtIndex(i);
         pNodeNumChilds = pNodePtr->getChildNodesSize();
-        // std::cout << "Parent Module Name: " << pNodePtr->getModuleName() << ", num children: " << pNodeNumChilds << std::endl;
         for(int j = 0; j < pNodeNumChilds; j++){
             cNodePtr = pNodePtr->getChildNodeAtIndex(j);
             // mark the parent node as instantiated
@@ -339,16 +347,13 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
             }
         }
     }
-
+    
     // assign the parent nodes vector to the main tree
     hTreePtr->setParentNodes(*parentNodeVecPtr);
     hTreePtr->setMap(*pNodeMapPtr);
 
-
     // now (recursively?) replace all child nodes with parent nodes to construct the tree
     elaborateHierarchyTree(hTreePtr, debug);
-    
-    // std::cout << "TEST: " << hTreePtr->getTreeRootNodeAtIndex(0)->getChildNodeAtIndex(0)->getChildNodeAtIndex(1)->getChildNodeAtIndex(0)->getInstName() << std::endl;
 
     return *hTreePtr;
 
