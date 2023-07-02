@@ -60,7 +60,7 @@ void checkFilesExist(struct Arguments args){
     }
 }
 
-void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone){
+void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone, bool finalChild){
 
     Node cNode;
     int cNodeLen;
@@ -77,7 +77,12 @@ void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone
                     std::cout << ' ';
                 }
                 else{
-                    std::cout << "│";
+                    if(j == 0 || !finalChild){
+                        std::cout << "│";
+                    }
+                    else{
+                        std::cout << " ";
+                    }
                 }
             }
             else
@@ -102,10 +107,13 @@ void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone
         // FIXME: where are the instance names in the console output?
         std::cout << cNode.getModuleName() /*<< " pSize: " << pNode.getChildNodesSize() << " | cSize: " << cNode.getChildNodesSize()*/ << " " << cNode.getInstName() << std::endl;
         if(cNode.getChildNodesSize() > 0){
-            if(i == pNode.getChildNodesSize()-1 && count==1){
-                indentationDone = true;
+            if(i == pNode.getChildNodesSize()-1){
+                if(count==1){
+                    indentationDone = true;
+                }
+                finalChild = true;
             }
-            printTreeRecursively(cNode, depth, count+1, indentationDone);
+            printTreeRecursively(cNode, depth, count+1, indentationDone, finalChild);
         }
     }
 }
@@ -132,7 +140,7 @@ void printTree(Tree hierarchyTree, struct Arguments args){
             pNodeNumChilds = pNode.getChildNodesSize();
             std::cout << pNode.getModuleName() << std::endl;
             // if(pNodeNumChilds > 0){
-            printTreeRecursively(pNode, atoi(args.level.c_str()), 1, false);
+            printTreeRecursively(pNode, atoi(args.level.c_str()), 1, false, false);
             // }
             // std::cout << "----------" << std::endl;
         }
