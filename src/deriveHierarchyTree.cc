@@ -259,7 +259,7 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
     // - the hash table allows for a lookup of a module, given the module name. Returns the ParentNode object
     // - iterate over the hTree parent nodes and assign child nodes as instantiated using the isInstantiated bool
     // - can then figure out the top level modules by looping through and finding ones with isInstantiated = false
-    // - can then enter into main algorithm loop where you iteratively go down the hierarchy, assembling the tree
+    // - can then enter into main algorithm loop where you recursively go down the hierarchy, assembling the tree
 
     Node pNode;
     Node *pNodePtr;
