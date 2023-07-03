@@ -124,6 +124,8 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
     }
 }
 
+// TODO: print out somewhere in the debug output, the total number of modules found. This is a good sanity check number
+
 void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, std::map<std::string, Node> *pNodeMapPtr, bool debug){
 
     std::fstream rtlFileObj;
@@ -142,6 +144,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
     std::map<std::string, Node> tmpNodeMap;
 
     int parentNodeSize;
+    bool caughtFalseModule = false;
 
     tmpNodePtr = &tmpNode;
 
@@ -150,9 +153,9 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
         rtlFileObj.open(rtlFiles.at(i));
         // read line-by-line and apply the regex search pattern
         for(std::string line; getline(rtlFileObj, line); ){
-            // std::cout << "line: " << line << std::endl;
+            // caughtFalseModule = false;
+            
             // check for a parent-node match
-
             std::regex_search(line, matchObjParent, parentNodeRegexStr);
             std::regex_search(line, matchObjChild,  childNodeRegexStr);
             // found a parent node
@@ -179,39 +182,37 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 // tokenise the child node string, splitting on arbitrary number of space chars
                 tokenisedStringPtr->clear();
                 tokeniseString(matchObjChild.str(), tokenisedStringPtr, false);
+                // moduleName = tokenisedStringPtr->at(0);
                 instName = tokenisedStringPtr->at(1);
                 
-                if(debug){
-                    std::cout << "  Instantiated module found in file " << rtlFiles.at(i) << ": \"" << matchObjChild.str() << "\" with instance name: \"";
-                    std::cout << instName << "\" " << std::endl;
+                caughtFalseModule = (tokenisedStringPtr->at(0) == "unique") && (tokenisedStringPtr->at(1) == "case" || tokenisedStringPtr->at(1) == "casez");
+
+                if(!caughtFalseModule){
+                    if(debug){
+                        std::cout << "  Instantiated module \"" << tokenisedStringPtr->at(0) << "\" found in file " << rtlFiles.at(i) << ": \"" << matchObjChild.str() << "\" with instance name: \"";
+                        std::cout << instName << "\" " << std::endl;
+                    }
+
+                    // create the child Node object
+                    Node curr1;
+                    curr1.setModuleName(tokenisedStringPtr->at(0));
+                    curr1.setInstName(tokenisedStringPtr->at(1));
+                    // curr1.setModuleName(moduleName);
+                    // curr1.setInstName(instName);
+
+                    // all child nodes are instantiated, only parent nodes are not
+                    // I was hoping this would eliminate the need for the first for loop in elaborateHierarchyTree ?
+                    // curr.setIsInstantiated();
+                    
+                    // the last parent node is the current one, push the associated child nodes
+                    tmpNodePtr = &parentNodeVecPtr->back();
+                    // pNodeName = tmpNodePtr->getModuleName();
+                    tmpNodePtr->pushChildNode(curr1);
+
+                    // add/update the entry in the hash table of the respective parent node
+                    // pNodeMapPtr->insert(std::pair<std::string, Node>(moduleName, *tmpNodePtr));
+                    tmpNodeMap[moduleName] = *tmpNodePtr;
                 }
-
-                // create the child Node object
-                Node curr1;
-                curr1.setModuleName(tokenisedStringPtr->at(0));
-                curr1.setInstName(tokenisedStringPtr->at(1));
-                // curr1.setModuleName(moduleName);
-                // curr1.setInstName(instName);
-
-                // all child nodes are instantiated, only parent nodes are not
-                // I was hoping this would eliminate the need for the first for loop in elaborateHierarchyTree ?
-                // curr.setIsInstantiated();
-                
-                // the last parent node is the current one, push the associated child nodes
-                tmpNodePtr = &parentNodeVecPtr->back();
-                // pNodeName = tmpNodePtr->getModuleName();
-                tmpNodePtr->pushChildNode(curr1);
-
-                // add/update the entry in the hash table of the respective parent node
-                // pNodeMapPtr->insert(std::pair<std::string, Node>(moduleName, *tmpNodePtr));
-                tmpNodeMap[moduleName] = *tmpNodePtr;
-
-                // std::cout << "yoyoyo (pass???): " << tmpNodePtr->getChildNodeAtIndex(0)->getInstName() << std::endl;
-
-                // parentNodeSize = parentNodeVecPtr->size();
-                // // get a reference to the last entry
-                // tmpNodePtr = &parentNodeVecPtr->at(parentNodeSize-1);
-                // tmpNodePtr->pushChildNode(curr);
             }
         }
         rtlFileObj.close();
