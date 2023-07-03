@@ -1,6 +1,14 @@
 
 #include "include/deriveHierarchyTree.h"
 
+std::map<std::string, Node>::iterator Tree::getMapEnd(){
+    return this->parentNodeMap.end();
+}
+
+std::map<std::string, Node>::iterator Tree::findNodeInMap(Node pNode){
+    return this->parentNodeMap.find(pNode.getModuleName());
+}
+
 Node * Tree::getMapElem(std::string key){
     Node *pNodePtr;
     pNodePtr = &this->parentNodeMap.at(key);
@@ -259,6 +267,8 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
     Node *cNodePtr;
     Node tmpNode;
     Node *tmpNodePtr;
+    // create an iterator for the map
+    std::map<std::string, Node>::iterator iter;
     int pNodeNumChilds;
     int parentNodeSize = hTreePtr->getParentNodesSize();
     int childNodeSize;
@@ -275,6 +285,13 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
         pNodeNumChilds = pNodePtr->getChildNodesSize();
         for(int j = 0; j < pNodeNumChilds; j++){
             cNodePtr = pNodePtr->getChildNodeAtIndex(j);
+            // check if the module exists in the map, if not generate an error and exit
+            iter = hTreePtr->findNodeInMap(*cNodePtr);
+            if(iter == hTreePtr->getMapEnd()){
+                std::cout << "*** Internal Error: Tried performing a lookup for a module that doesn't exist! Please report on GitHub: " << std::endl;
+                std::cout << std::endl << "https://github.com/LiamSkirrow/verilogtree/" << std::endl;
+                exit(-1);
+            }
             // mark the parent node as instantiated
             hTreePtr->getMapElem(cNodePtr->getModuleName())->setIsInstantiated();
         }
