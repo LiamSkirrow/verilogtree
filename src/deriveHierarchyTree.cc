@@ -291,8 +291,8 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
             // check if the module exists in the map, if not generate an error and exit
             iter = hTreePtr->findNodeInMap(*cNodePtr);
             if(iter == hTreePtr->getMapEnd()){
-                std::cout << "*** Internal Error: Tried performing a lookup for a module that doesn't exist! Please report on GitHub: " << std::endl;
-                std::cout << std::endl << "https://github.com/LiamSkirrow/verilogtree/" << std::endl;
+                std::cout << "*** Internal Error: Tried performing a lookup for a module that doesn't exist! " << std::endl;
+                std::cout << std::endl << "Please report on GitHub: https://github.com/LiamSkirrow/verilogtree/" << std::endl;
                 exit(-1);
             }
             // mark the parent node as instantiated
@@ -348,11 +348,16 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
     hTreePtr         = &hTree;
     pNodeMapPtr      = &pNodeMap;
 
+
     // parse the RTL according to the regex strings. Create distinct parent-child node groups
     parseRtl(rtlFiles, parentNodeVecPtr, parentNodeRegexStr, childNodeRegexStr, pNodeMapPtr, debug);
 
+    // int pNodeMapSize = pNodeMap[parentNodeVecPtr->at(0).getModuleName()].getChildNodesSize();
     std::string debugModuleName;
     std::string debugInstName;
+
+    // FIXME: when the below for loop is not executed (debug == false) the pNodeMap lookup never happens, this is what is causing the 
+    //        discrepency between running on the ibex rtl codebase with --debug either defined or not defined
 
     if(debug){
         for(int i = 0; i < parentNodeVecPtr->size(); i++){
@@ -362,13 +367,12 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
                 debugInstName   = parentNodeVecPtr->at(i).getChildNodeAtIndex(j)->getInstName();
                 std::cout << "    Child Node Module  : " << debugModuleName << std::endl;
                 std::cout << "    Child Node Instance: " << debugInstName << std::endl;
-                // std::cout << "    Num Children:        " << parentNodeVecPtr->at(i).getChildNodeAtIndex(j)->getChildNodesSize() << std::endl;
                 std::cout << "    Num Children:        " << pNodeMap[parentNodeVecPtr->at(i).getChildNodeAtIndex(j)->getModuleName()].getChildNodesSize() << std::endl;
             }
         }
     }
     
-    // assign the parent nodes vector to the main tree
+    // assign the parent node's vector to the main tree
     hTreePtr->setParentNodes(*parentNodeVecPtr);
     hTreePtr->setMap(*pNodeMapPtr);
 
