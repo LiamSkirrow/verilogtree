@@ -125,6 +125,8 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
 }
 
 // TODO: print out somewhere in the debug output, the total number of modules found. This is a good sanity check number
+// TODO: need a systematic way to find false modules (they appear as child nodes but not parent nodes!) and print this out in an error message...
+//       v0.1.0 should be pretty full proof and should not print out any false modules
 
 void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, std::map<std::string, Node> *pNodeMapPtr, bool debug){
 
