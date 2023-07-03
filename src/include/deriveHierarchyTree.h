@@ -52,8 +52,10 @@ class Tree{
         int getParentNodesSize();
         void setMap(std::map<std::string, Node> pNodeMap);
         Node * getMapElem(std::string key);
-        void pushTreeRoot(Node pNode);            // should this be a pointer to a ParentNode ???
-        Node * getTreeRootNodeAtIndex(int index);   // should this be a pointer to a ParentNode ???
+        void pushTreeRoot(Node pNode);
+        Node * getTreeRootNodeAtIndex(int index);
+        std::map<std::string, Node>::iterator findNodeInMap(Node pNode);
+        std::map<std::string, Node>::iterator getMapEnd();
         int getTreeRootSize();
 };
 

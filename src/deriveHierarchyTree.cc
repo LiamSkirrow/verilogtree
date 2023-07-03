@@ -1,6 +1,14 @@
 
 #include "include/deriveHierarchyTree.h"
 
+std::map<std::string, Node>::iterator Tree::getMapEnd(){
+    return this->parentNodeMap.end();
+}
+
+std::map<std::string, Node>::iterator Tree::findNodeInMap(Node pNode){
+    return this->parentNodeMap.find(pNode.getModuleName());
+}
+
 Node * Tree::getMapElem(std::string key){
     Node *pNodePtr;
     pNodePtr = &this->parentNodeMap.at(key);
@@ -116,6 +124,10 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
     }
 }
 
+// TODO: print out somewhere in the debug output, the total number of modules found. This is a good sanity check number
+// TODO: need a systematic way to find false modules (they appear as child nodes but not parent nodes!) and print this out in an error message...
+//       v0.1.0 should be pretty full proof and should not print out any false modules
+
 void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, std::map<std::string, Node> *pNodeMapPtr, bool debug){
 
     std::fstream rtlFileObj;
@@ -134,6 +146,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
     std::map<std::string, Node> tmpNodeMap;
 
     int parentNodeSize;
+    bool caughtFalseModule = false;
 
     tmpNodePtr = &tmpNode;
 
@@ -142,9 +155,9 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
         rtlFileObj.open(rtlFiles.at(i));
         // read line-by-line and apply the regex search pattern
         for(std::string line; getline(rtlFileObj, line); ){
-            // std::cout << "line: " << line << std::endl;
+            // caughtFalseModule = false;
+            
             // check for a parent-node match
-
             std::regex_search(line, matchObjParent, parentNodeRegexStr);
             std::regex_search(line, matchObjChild,  childNodeRegexStr);
             // found a parent node
@@ -171,39 +184,37 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 // tokenise the child node string, splitting on arbitrary number of space chars
                 tokenisedStringPtr->clear();
                 tokeniseString(matchObjChild.str(), tokenisedStringPtr, false);
+                // moduleName = tokenisedStringPtr->at(0);
                 instName = tokenisedStringPtr->at(1);
                 
-                if(debug){
-                    std::cout << "  Instantiated module found in file " << rtlFiles.at(i) << ": \"" << matchObjChild.str() << "\" with instance name: \"";
-                    std::cout << instName << "\" " << std::endl;
+                caughtFalseModule = (tokenisedStringPtr->at(0) == "unique") && (tokenisedStringPtr->at(1) == "case" || tokenisedStringPtr->at(1) == "casez");
+
+                if(!caughtFalseModule){
+                    if(debug){
+                        std::cout << "  Instantiated module \"" << tokenisedStringPtr->at(0) << "\" found in file " << rtlFiles.at(i) << ": \"" << matchObjChild.str() << "\" with instance name: \"";
+                        std::cout << instName << "\" " << std::endl;
+                    }
+
+                    // create the child Node object
+                    Node curr1;
+                    curr1.setModuleName(tokenisedStringPtr->at(0));
+                    curr1.setInstName(tokenisedStringPtr->at(1));
+                    // curr1.setModuleName(moduleName);
+                    // curr1.setInstName(instName);
+
+                    // all child nodes are instantiated, only parent nodes are not
+                    // I was hoping this would eliminate the need for the first for loop in elaborateHierarchyTree ?
+                    // curr.setIsInstantiated();
+                    
+                    // the last parent node is the current one, push the associated child nodes
+                    tmpNodePtr = &parentNodeVecPtr->back();
+                    // pNodeName = tmpNodePtr->getModuleName();
+                    tmpNodePtr->pushChildNode(curr1);
+
+                    // add/update the entry in the hash table of the respective parent node
+                    // pNodeMapPtr->insert(std::pair<std::string, Node>(moduleName, *tmpNodePtr));
+                    tmpNodeMap[moduleName] = *tmpNodePtr;
                 }
-
-                // create the child Node object
-                Node curr1;
-                curr1.setModuleName(tokenisedStringPtr->at(0));
-                curr1.setInstName(tokenisedStringPtr->at(1));
-                // curr1.setModuleName(moduleName);
-                // curr1.setInstName(instName);
-
-                // all child nodes are instantiated, only parent nodes are not
-                // I was hoping this would eliminate the need for the first for loop in elaborateHierarchyTree ?
-                // curr.setIsInstantiated();
-                
-                // the last parent node is the current one, push the associated child nodes
-                tmpNodePtr = &parentNodeVecPtr->back();
-                // pNodeName = tmpNodePtr->getModuleName();
-                tmpNodePtr->pushChildNode(curr1);
-
-                // add/update the entry in the hash table of the respective parent node
-                // pNodeMapPtr->insert(std::pair<std::string, Node>(moduleName, *tmpNodePtr));
-                tmpNodeMap[moduleName] = *tmpNodePtr;
-
-                // std::cout << "yoyoyo (pass???): " << tmpNodePtr->getChildNodeAtIndex(0)->getInstName() << std::endl;
-
-                // parentNodeSize = parentNodeVecPtr->size();
-                // // get a reference to the last entry
-                // tmpNodePtr = &parentNodeVecPtr->at(parentNodeSize-1);
-                // tmpNodePtr->pushChildNode(curr);
             }
         }
         rtlFileObj.close();
@@ -251,7 +262,7 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
     // - the hash table allows for a lookup of a module, given the module name. Returns the ParentNode object
     // - iterate over the hTree parent nodes and assign child nodes as instantiated using the isInstantiated bool
     // - can then figure out the top level modules by looping through and finding ones with isInstantiated = false
-    // - can then enter into main algorithm loop where you iteratively go down the hierarchy, assembling the tree
+    // - can then enter into main algorithm loop where you recursively go down the hierarchy, assembling the tree
 
     Node pNode;
     Node *pNodePtr;
@@ -259,6 +270,8 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
     Node *cNodePtr;
     Node tmpNode;
     Node *tmpNodePtr;
+    // create an iterator for the map
+    std::map<std::string, Node>::iterator iter;
     int pNodeNumChilds;
     int parentNodeSize = hTreePtr->getParentNodesSize();
     int childNodeSize;
@@ -275,6 +288,13 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
         pNodeNumChilds = pNodePtr->getChildNodesSize();
         for(int j = 0; j < pNodeNumChilds; j++){
             cNodePtr = pNodePtr->getChildNodeAtIndex(j);
+            // check if the module exists in the map, if not generate an error and exit
+            iter = hTreePtr->findNodeInMap(*cNodePtr);
+            if(iter == hTreePtr->getMapEnd()){
+                std::cout << "*** Internal Error: Tried performing a lookup for a module that doesn't exist! " << std::endl;
+                std::cout << std::endl << "Please report on GitHub: https://github.com/LiamSkirrow/verilogtree/" << std::endl;
+                exit(-1);
+            }
             // mark the parent node as instantiated
             hTreePtr->getMapElem(cNodePtr->getModuleName())->setIsInstantiated();
         }
@@ -328,11 +348,16 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
     hTreePtr         = &hTree;
     pNodeMapPtr      = &pNodeMap;
 
+
     // parse the RTL according to the regex strings. Create distinct parent-child node groups
     parseRtl(rtlFiles, parentNodeVecPtr, parentNodeRegexStr, childNodeRegexStr, pNodeMapPtr, debug);
 
+    // int pNodeMapSize = pNodeMap[parentNodeVecPtr->at(0).getModuleName()].getChildNodesSize();
     std::string debugModuleName;
     std::string debugInstName;
+
+    // FIXME: when the below for loop is not executed (debug == false) the pNodeMap lookup never happens, this is what is causing the 
+    //        discrepency between running on the ibex rtl codebase with --debug either defined or not defined
 
     if(debug){
         for(int i = 0; i < parentNodeVecPtr->size(); i++){
@@ -342,13 +367,12 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
                 debugInstName   = parentNodeVecPtr->at(i).getChildNodeAtIndex(j)->getInstName();
                 std::cout << "    Child Node Module  : " << debugModuleName << std::endl;
                 std::cout << "    Child Node Instance: " << debugInstName << std::endl;
-                // std::cout << "    Num Children:        " << parentNodeVecPtr->at(i).getChildNodeAtIndex(j)->getChildNodesSize() << std::endl;
                 std::cout << "    Num Children:        " << pNodeMap[parentNodeVecPtr->at(i).getChildNodeAtIndex(j)->getModuleName()].getChildNodesSize() << std::endl;
             }
         }
     }
     
-    // assign the parent nodes vector to the main tree
+    // assign the parent node's vector to the main tree
     hTreePtr->setParentNodes(*parentNodeVecPtr);
     hTreePtr->setMap(*pNodeMapPtr);
 
