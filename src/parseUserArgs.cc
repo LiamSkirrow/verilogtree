@@ -120,11 +120,11 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,15>
             // assert(argumentVecPtr->at(0))
             args.level = argumentVecPtr->at(0);
         } 
-        else if(argv[i] == (std::string)"-n" || argv[i] == (std::string)"--no-include"){
+        else if(argv[i] == (std::string)"-n" || argv[i] == (std::string)"--ignore-modules"){
             // check the next N strings of argv to get the don't include filepaths, increment i accordingly
-            i = getNextArgs(argc, argv, i, argv[i], (std::string)"path(s) to RTL files", argumentVecPtr);
+            i = getNextArgs(argc, argv, i, argv[i], (std::string)"names of modules to ignore", argumentVecPtr);
             // now give the args structure the relevant filenames
-            args.noIncFiles = *argumentVecPtr;
+            args.noIncModules = *argumentVecPtr;
         } 
         else if(argv[i] == (std::string)"--lang"){
             // check the next string of argv to get the language, increment i accordingly

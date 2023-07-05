@@ -10,7 +10,7 @@
 
 struct Arguments{
     std::vector<std::string> rtlFiles;
-    std::vector<std::string> noIncFiles;
+    std::vector<std::string> noIncModules;
     std::string codeVersion = "v0.0.0";
     std::string lang        = "verilog";
     std::string level       = "-1";
