@@ -59,7 +59,11 @@ void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone
     std::string instNamePlaceholder;
     
     // level arg: may need to return count, and update it at end of each function call
-    // calling each function up the recursive chain to end    
+    // calling each function up the recursive chain to end
+
+    if(count == depth){
+        return;
+    }
 
     for(int i = 0; i < pNode.getChildNodesSize(); i++){
         // print out the correct level of indentation
