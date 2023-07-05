@@ -34,7 +34,7 @@ int getNextArgs(int argc, char **argv, int i, std::string argName, std::string e
     return i;
 }
 
-struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,14> argList){
+struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,15> argList){
 
     int isEqual;
     bool includedVerilog = false;
@@ -151,7 +151,10 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,14>
         } 
         else if(argv[i] == (std::string)"--recursive"){
             args.algorithm = "recursive";   // default
-        } 
+        }
+        else if(argv[i] == (std::string)"--no-inst-name"){
+            args.printInstName = false;
+        }
         else {   // this should never be reached...
             std::cout << "Bug found! Need to add " << argv[i] << " to argument parser!" << std::endl;
             std::cout << "Please report this on GitHub! https://github.com/LiamSkirrow/verilogtree" << std::endl;

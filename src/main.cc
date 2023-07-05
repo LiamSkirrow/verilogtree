@@ -9,15 +9,6 @@
 #include <regex>
 #include <string.h>   // need this?
 
-// struct Arguments{
-//     std::vector<std::string> rtlFiles;
-//     std::vector<std::string> noIncFiles;
-//     std::string codeVersion = "v0.0.0";
-//     std::string lang        = "verilog";
-//     std::string level       = "-1";
-//     bool debug              = false;
-// };
-
 // move into own file to declutter main.cc, since I will add debug output for the next stages etc
 void dumpArgsStruct(struct Arguments args){
     std::cout << "Supplied Verilog files for vector size: " << args.rtlFiles.size() << std::endl;
@@ -60,11 +51,12 @@ void checkFilesExist(struct Arguments args){
     }
 }
 
-void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone, bool finalChild){
+void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone, bool finalChild, bool printInstName){
 
     Node cNode;
     int cNodeLen;
     std::string character;
+    std::string instNamePlaceholder;
     
     // level arg: may need to return count, and update it at end of each function call
     // calling each function up the recursive chain to end    
@@ -103,8 +95,9 @@ void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone
             else
                 std::cout << "─";
         }
+        instNamePlaceholder = (printInstName ? cNode.getInstName() : (std::string)" ");
         std::cout << ' ';
-        std::cout << cNode.getModuleName() << " " << cNode.getInstName() << std::endl;
+        std::cout << cNode.getModuleName() << " " << instNamePlaceholder << std::endl;
         if(cNode.getChildNodesSize() > 0){
             if(i == pNode.getChildNodesSize()-1){
                 if(count==1){
@@ -112,7 +105,7 @@ void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone
                 }
                 finalChild = true;
             }
-            printTreeRecursively(cNode, depth, count+1, indentationDone, finalChild);
+            printTreeRecursively(cNode, depth, count+1, indentationDone, finalChild, printInstName);
         }
     }
 }
@@ -136,7 +129,7 @@ void printTree(Tree hierarchyTree, struct Arguments args){
             pNode = *hierarchyTree.getTreeRootNodeAtIndex(i);
             pNodeNumChilds = pNode.getChildNodesSize();
             std::cout << pNode.getModuleName() << std::endl;
-            printTreeRecursively(pNode, atoi(args.level.c_str()), 1, false, false);
+            printTreeRecursively(pNode, atoi(args.level.c_str()), 1, false, false, args.printInstName);
         }
     }
     else if(args.algorithm == "iterative"){
@@ -163,7 +156,7 @@ int main(int argc, char **argv){
     hierarchyTreePtr = &hierarchyTree;
 
     // accepted list of arguments, must remember to update number in parentheses!!!
-    std::array<std::string,14> argListFlags = 
+    std::array<std::string,15> argListFlags = 
                               {"-h",            // display usage and flags information
                                "--help",
                                "-f",            // file paths
@@ -176,8 +169,9 @@ int main(int argc, char **argv){
                                "--no-include",
                                "--lang",        // one of either [verilog ^ vhdl]
                                "--debug",       // more verbose output, print out internal variables
-                               "--iterative",    // print out hierarchy iteratively rather than recursively (uses less memory for large hierarchies)
-                               "--recursive"    // print out hierarchy recursively (default)
+                               "--iterative",   // print out hierarchy iteratively rather than recursively (uses less memory for large hierarchies)
+                               "--recursive",   // print out hierarchy recursively (default)
+                               "--no-inst-name" // do not print out the instance names 
                               };
 
     // call user input parser function here
