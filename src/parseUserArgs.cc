@@ -112,9 +112,10 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,15>
         }
         else if(argv[i] == (std::string)"-L" || argv[i] == (std::string)"--level"){
             // check the next string of argv to get the level, increment i accordingly
-            i = getNextArgs(argc, argv, i, argv[i], (std::string)"a numeric value", argumentVecPtr);
+            i = getNextArgs(argc, argv, i, argv[i], (std::string)"a positive numeric value", argumentVecPtr);
+            // check only one value is given
             if(argumentVecPtr->size() != 1){
-                errorAndExit((std::string)"Argument -L must have only one proceeding value");
+                errorAndExit((std::string)"Argument -L/--level must have only one proceeding value");
             }
             // assert(argumentVecPtr->at(0))
             args.level = argumentVecPtr->at(0);
