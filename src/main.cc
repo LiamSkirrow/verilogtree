@@ -55,7 +55,6 @@ void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone
 
     Node cNode;
     int cNodeLen;
-    bool skip = false;
     std::string character;
     std::string instNamePlaceholder;
     
@@ -66,29 +65,8 @@ void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone
     if(count == depth){
         return;
     }
-    // // TODO: this would be more efficient as a lookup table rather than a linear search
-    // // check if the current module is a module to ignore
-    // for(int i = 0; i < noIncModules.size(); i++){
-    //     if(pNode.getModuleName() == noIncModules.at(i)){
-    //         return;
-    //     }
-    // }
 
     for(int i = 0; i < pNode.getChildNodesSize(); i++){
-        // TODO: do I need to handle module name typos?
-        // TODO: this seems to screw up the formatting a little...
-        // TODO: this would be more efficient as a lookup table rather than a linear search
-        // check if the current module is a module to ignore
-        for(int k = 0; k < noIncModules.size(); k++){
-            if(pNode.getChildNodeAtIndex(i)->getModuleName() == noIncModules.at(k)){
-                skip = true;
-            }
-        }
-        // if signal to skip, then skip this iteration of the loop and don't output current module
-        if(skip){
-            skip = false;
-            continue;
-        }
         // print out the correct level of indentation
         for(int j = 0; j < 4*(count-1); j++){
             if((j % 4) == 0){
@@ -235,7 +213,7 @@ int main(int argc, char **argv){
 
     // now parse the Verilog/VHDL, searching for the key phrases and generate the logical hierarchy
     // this is the main algorithm to configure the tree
-    hierarchyTree = deriveHierarchyTree(hierarchyTreePtr, args.rtlFiles, parentNodeRegexStr, childNodeRegexStr, args.debug);
+    hierarchyTree = deriveHierarchyTree(hierarchyTreePtr, args.rtlFiles, parentNodeRegexStr, childNodeRegexStr, args.debug, args.noIncModules);
 
     // display the tree structure of the RTL
     printTree(hierarchyTree, args);
