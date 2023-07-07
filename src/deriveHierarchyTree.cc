@@ -303,6 +303,9 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, std::vector<std::string>
     pNodePtr = &pNode;
     cNodePtr = &cNode;
     tmpNodePtr = &tmpNode;
+
+    // TODO: could alternatively just loop until we find a module that should not be included, and simply 'delete' it 
+    //       from the parent node vector
     
     for(int i = 0; i < parentNodeSize; i++){
         pNodePtr = hTreePtr->getParentNodeAtIndex(i);
