@@ -146,6 +146,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
     std::map<std::string, Node> tmpNodeMap;
 
     int parentNodeSize;
+    int numlines = 0;
     bool caughtFalseModule = false;
 
     tmpNodePtr = &tmpNode;
@@ -154,7 +155,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
         // open the next file in the list
         rtlFileObj.open(rtlFiles.at(i));
         // read line-by-line and apply the regex search pattern
-        for(std::string line; getline(rtlFileObj, line); ){
+        for(std::string line; getline(rtlFileObj, line); numlines++){
             // caughtFalseModule = false;
             
             // check for a parent-node match
@@ -219,6 +220,9 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
         }
         rtlFileObj.close();
         *pNodeMapPtr = tmpNodeMap;
+    }
+    if(debug){
+        std::cout << numlines << " lines parsed..." << std::endl;
     }
 }
 

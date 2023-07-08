@@ -9,15 +9,6 @@
 #include <regex>
 #include <string.h>   // need this?
 
-// struct Arguments{
-//     std::vector<std::string> rtlFiles;
-//     std::vector<std::string> noIncFiles;
-//     std::string codeVersion = "v0.0.0";
-//     std::string lang        = "verilog";
-//     std::string level       = "-1";
-//     bool debug              = false;
-// };
-
 // move into own file to declutter main.cc, since I will add debug output for the next stages etc
 void dumpArgsStruct(struct Arguments args){
     std::cout << "Supplied Verilog files for vector size: " << args.rtlFiles.size() << std::endl;
@@ -26,9 +17,9 @@ void dumpArgsStruct(struct Arguments args){
     }
     std::cout << std::endl;
 
-    std::cout << "Supplied no-include files for vector size: " << args.noIncFiles.size() << std::endl;
-    for(int i = 0; i < args.noIncFiles.size(); i++){
-        std::cout << "    " << args.noIncFiles.at(i) << std::endl;
+    std::cout << "Supplied no-include files for vector size: " << args.noIncModules.size() << std::endl;
+    for(int i = 0; i < args.noIncModules.size(); i++){
+        std::cout << "    " << args.noIncModules.at(i) << std::endl;
     }
     std::cout << std::endl;
 
@@ -60,16 +51,44 @@ void checkFilesExist(struct Arguments args){
     }
 }
 
-void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone, bool finalChild){
+void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone, bool finalChild, bool printInstName, std::vector<std::string> noIncModules){
 
     Node cNode;
     int cNodeLen;
+    bool skip = false;
     std::string character;
+    std::string instNamePlaceholder;
     
     // level arg: may need to return count, and update it at end of each function call
-    // calling each function up the recursive chain to end    
+    // calling each function up the recursive chain to end
+
+    // check if we've reached the user specified max depth
+    if(count == depth){
+        return;
+    }
+    // // TODO: this would be more efficient as a lookup table rather than a linear search
+    // // check if the current module is a module to ignore
+    // for(int i = 0; i < noIncModules.size(); i++){
+    //     if(pNode.getModuleName() == noIncModules.at(i)){
+    //         return;
+    //     }
+    // }
 
     for(int i = 0; i < pNode.getChildNodesSize(); i++){
+        // TODO: do I need to handle module name typos?
+        // TODO: this seems to screw up the formatting a little...
+        // TODO: this would be more efficient as a lookup table rather than a linear search
+        // check if the current module is a module to ignore
+        for(int k = 0; k < noIncModules.size(); k++){
+            if(pNode.getChildNodeAtIndex(i)->getModuleName() == noIncModules.at(k)){
+                skip = true;
+            }
+        }
+        // if signal to skip, then skip this iteration of the loop and don't output current module
+        if(skip){
+            skip = false;
+            continue;
+        }
         // print out the correct level of indentation
         for(int j = 0; j < 4*(count-1); j++){
             if((j % 4) == 0){
@@ -103,8 +122,9 @@ void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone
             else
                 std::cout << "─";
         }
+        instNamePlaceholder = (printInstName ? cNode.getInstName() : (std::string)" ");
         std::cout << ' ';
-        std::cout << cNode.getModuleName() << " " << cNode.getInstName() << std::endl;
+        std::cout << cNode.getModuleName() << " " << instNamePlaceholder << std::endl;
         if(cNode.getChildNodesSize() > 0){
             if(i == pNode.getChildNodesSize()-1){
                 if(count==1){
@@ -112,7 +132,7 @@ void printTreeRecursively(Node pNode, int depth, int count, bool indentationDone
                 }
                 finalChild = true;
             }
-            printTreeRecursively(cNode, depth, count+1, indentationDone, finalChild);
+            printTreeRecursively(cNode, depth, count+1, indentationDone, finalChild, printInstName, noIncModules);
         }
     }
 }
@@ -136,7 +156,7 @@ void printTree(Tree hierarchyTree, struct Arguments args){
             pNode = *hierarchyTree.getTreeRootNodeAtIndex(i);
             pNodeNumChilds = pNode.getChildNodesSize();
             std::cout << pNode.getModuleName() << std::endl;
-            printTreeRecursively(pNode, atoi(args.level.c_str()), 1, false, false);
+            printTreeRecursively(pNode, atoi(args.level.c_str()), 1, false, false, args.printInstName, args.noIncModules);
         }
     }
     else if(args.algorithm == "iterative"){
@@ -147,9 +167,17 @@ void printTree(Tree hierarchyTree, struct Arguments args){
         std::cout << "Please report this on GitHub!" << std::endl;
         exit(-1);
     }
-
+    
     std::cout << std::endl;
 
+    // print a summary of the ignored modules as a sanity reminder
+    if(args.noIncModules.size() > 0){
+        std::cout << "Ignoring following module(s) from output: ";
+        for(int j = 0; j < args.noIncModules.size(); j++){
+            std::cout << args.noIncModules.at(j) << " ";
+        }
+        std::cout << std::endl;
+    }
 }
 
 int main(int argc, char **argv){
@@ -163,7 +191,7 @@ int main(int argc, char **argv){
     hierarchyTreePtr = &hierarchyTree;
 
     // accepted list of arguments, must remember to update number in parentheses!!!
-    std::array<std::string,14> argListFlags = 
+    std::array<std::string,15> argListFlags = 
                               {"-h",            // display usage and flags information
                                "--help",
                                "-f",            // file paths
@@ -172,12 +200,13 @@ int main(int argc, char **argv){
                                "--version",
                                "-L",            // print up to this many levels of hierarchy
                                "--level",
-                               "-n",            // don't print out this/these module names/instance names
-                               "--no-include",
+                               "-n",            // don't print out this/these module names
+                               "--ignore-modules",
                                "--lang",        // one of either [verilog ^ vhdl]
                                "--debug",       // more verbose output, print out internal variables
-                               "--iterative",    // print out hierarchy iteratively rather than recursively (uses less memory for large hierarchies)
-                               "--recursive"    // print out hierarchy recursively (default)
+                               "--iterative",   // print out hierarchy iteratively rather than recursively (uses less memory for large hierarchies)
+                               "--recursive",   // print out hierarchy recursively (default)
+                               "--no-inst-name" // do not print out the instance names 
                               };
 
     // call user input parser function here

@@ -34,7 +34,7 @@ int getNextArgs(int argc, char **argv, int i, std::string argName, std::string e
     return i;
 }
 
-struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,14> argList){
+struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,15> argList){
 
     int isEqual;
     bool includedVerilog = false;
@@ -112,18 +112,19 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,14>
         }
         else if(argv[i] == (std::string)"-L" || argv[i] == (std::string)"--level"){
             // check the next string of argv to get the level, increment i accordingly
-            i = getNextArgs(argc, argv, i, argv[i], (std::string)"a numeric value", argumentVecPtr);
+            i = getNextArgs(argc, argv, i, argv[i], (std::string)"a positive numeric value", argumentVecPtr);
+            // check only one value is given
             if(argumentVecPtr->size() != 1){
-                errorAndExit((std::string)"Argument -L must have only one proceeding value");
+                errorAndExit((std::string)"Argument -L/--level must have only one proceeding value");
             }
             // assert(argumentVecPtr->at(0))
             args.level = argumentVecPtr->at(0);
         } 
-        else if(argv[i] == (std::string)"-n" || argv[i] == (std::string)"--no-include"){
+        else if(argv[i] == (std::string)"-n" || argv[i] == (std::string)"--ignore-modules"){
             // check the next N strings of argv to get the don't include filepaths, increment i accordingly
-            i = getNextArgs(argc, argv, i, argv[i], (std::string)"path(s) to RTL files", argumentVecPtr);
+            i = getNextArgs(argc, argv, i, argv[i], (std::string)"names of modules to ignore", argumentVecPtr);
             // now give the args structure the relevant filenames
-            args.noIncFiles = *argumentVecPtr;
+            args.noIncModules = *argumentVecPtr;
         } 
         else if(argv[i] == (std::string)"--lang"){
             // check the next string of argv to get the language, increment i accordingly
@@ -151,7 +152,10 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,14>
         } 
         else if(argv[i] == (std::string)"--recursive"){
             args.algorithm = "recursive";   // default
-        } 
+        }
+        else if(argv[i] == (std::string)"--no-inst-name"){
+            args.printInstName = false;
+        }
         else {   // this should never be reached...
             std::cout << "Bug found! Need to add " << argv[i] << " to argument parser!" << std::endl;
             std::cout << "Please report this on GitHub! https://github.com/LiamSkirrow/verilogtree" << std::endl;
