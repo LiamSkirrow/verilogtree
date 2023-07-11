@@ -128,7 +128,7 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
 // TODO: need a systematic way to find false modules (they appear as child nodes but not parent nodes!) and print this out in an error message...
 //       v0.1.0 should be pretty full proof and should not print out any false modules
 
-void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, std::map<std::string, Node> *pNodeMapPtr, bool debug){
+void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, std::map<std::string, Node> *pNodeMapPtr, bool debug, bool superDebug){
 
     std::fstream rtlFileObj;
     std::string line;
@@ -168,7 +168,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 tokeniseString(matchObjParent.str(), tokenisedStringPtr, false);
                 moduleName = tokenisedStringPtr->at(1);
 
-                if(debug){
+                if(superDebug){
                     std::cout << "Module definition found in file " << rtlFiles.at(i) << ": \"" << matchObjParent.str() << "\" with module name: \"";
                     std::cout << moduleName << "\" " << std::endl;
                 }
@@ -191,7 +191,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 caughtFalseModule = (tokenisedStringPtr->at(0) == "unique") && (tokenisedStringPtr->at(1) == "case" || tokenisedStringPtr->at(1) == "casez");
 
                 if(!caughtFalseModule){
-                    if(debug){
+                    if(superDebug){
                         std::cout << "  Instantiated module \"" << tokenisedStringPtr->at(0) << "\" found in file " << rtlFiles.at(i) << ": \"" << matchObjChild.str() << "\" with instance name: \"";
                         std::cout << instName << "\" " << std::endl;
                     }
@@ -222,12 +222,12 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
         *pNodeMapPtr = tmpNodeMap;
     }
     if(debug){
-        std::cout << parentNodeVecPtr->size() << " modules found, " << numlines << " lines parsed..." << std::endl;
+        std::cout << parentNodeVecPtr->size() << " modules found, " << numlines << " lines parsed..." << std::endl << std::endl;
     }
 }
 
 // recursively go down the hierarchy of Nodes and assign child nodes
-void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, std::vector<std::string> noIncModules, int level){
+void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, bool superDebug, std::vector<std::string> noIncModules, int level){
 
     Node cNode;
     Node *cNodePtr;
@@ -266,24 +266,24 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, std::v
         *cNodePtr = tmpNode;
         // in overwriting the child node with a parent node, we lose the instance name so update it here
         cNodePtr->setInstName(tmpInstName);
-        if(debug){
+        if(superDebug){
             std::cout << "  At level: " << pNodePtr->getModuleName() << " w/ # children: " << pNodePtr->getChildNodesSize() << std::endl;
             std::cout << "  Child   : " << cNodePtr->getModuleName() << " w/ # children: " << cNodePtr->getChildNodesSize() << std::endl;
         }
         if(cNodePtr->getChildNodesSize() > 0){
-            if(debug){
+            if(superDebug){
                 std::cout << "Recursing..." << std::endl;
             }
-            constructTreeRecursively(cNodePtr, hTreePtr, debug, noIncModules, ++level);
+            constructTreeRecursively(cNodePtr, hTreePtr, debug, superDebug, noIncModules, ++level);
         }
     }
-    if(debug){
+    if(superDebug){
         std::cout << "Going up..." << std::endl;
     }
 }
 
 // main algorithm for elaborating the tree of parent nodes
-void elaborateHierarchyTree(Tree *hTreePtr, bool debug, std::vector<std::string> noIncModules){
+void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::vector<std::string> noIncModules){
     // algorithm:
     // - the hash table allows for a lookup of a module, given the module name. Returns the ParentNode object
     // - iterate over the hTree parent nodes and assign child nodes as instantiated using the isInstantiated bool
@@ -345,7 +345,7 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, std::vector<std::string>
     for(int i = 0; i < treeRootSize; i++){
         pNodePtr = hTreePtr->getTreeRootNodeAtIndex(i);
         pNodeNumChilds = pNodePtr->getChildNodesSize();
-        if(debug){
+        if(superDebug){
             std::cout << "Tree Root: " << pNodePtr->getModuleName() << " w/ # children: " << pNodeNumChilds << std::endl;
         }
         // if not stub tree node with no children
@@ -358,13 +358,13 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, std::vector<std::string>
             // - after returning upwards, the next child node at that level will be entered into ... etc until the tree
             //   is constructed DFS style
 
-            constructTreeRecursively(pNodePtr, hTreePtr, debug, noIncModules, 0);
+            constructTreeRecursively(pNodePtr, hTreePtr, debug, superDebug, noIncModules, 0);
         }
     }
 }
 
 // top level function, dispatch the rtl parsing and tree construction functions, return the Tree to main
-Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug, std::vector<std::string> noIncModules){
+Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug, bool superDebug, std::vector<std::string> noIncModules){
 
     Tree hTree;
     // Tree *hTreePtr;
@@ -380,7 +380,7 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
 
 
     // parse the RTL according to the regex strings. Create distinct parent-child node groups
-    parseRtl(rtlFiles, parentNodeVecPtr, parentNodeRegexStr, childNodeRegexStr, pNodeMapPtr, debug);
+    parseRtl(rtlFiles, parentNodeVecPtr, parentNodeRegexStr, childNodeRegexStr, pNodeMapPtr, debug, superDebug);
 
     // int pNodeMapSize = pNodeMap[parentNodeVecPtr->at(0).getModuleName()].getChildNodesSize();
     std::string debugModuleName;
@@ -389,7 +389,7 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
     // FIXME: when the below for loop is not executed (debug == false) the pNodeMap lookup never happens, this is what is causing the 
     //        discrepency between running on the ibex rtl codebase with --debug either defined or not defined
 
-    if(debug){
+    if(superDebug){
         for(int i = 0; i < parentNodeVecPtr->size(); i++){
             std::cout << "Parent Node Name: " << parentNodeVecPtr->at(i).getModuleName() << std::endl;
             for(int j = 0; j < parentNodeVecPtr->at(i).getChildNodesSize(); j++){
@@ -407,7 +407,7 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
     hTreePtr->setMap(*pNodeMapPtr);
 
     // now (recursively?) replace all child nodes with parent nodes to construct the tree
-    elaborateHierarchyTree(hTreePtr, debug, noIncModules);
+    elaborateHierarchyTree(hTreePtr, debug, superDebug, noIncModules);
 
     return *hTreePtr;
 
