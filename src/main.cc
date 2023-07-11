@@ -11,29 +11,29 @@
 
 // move into own file to declutter main.cc, since I will add debug output for the next stages etc
 void dumpArgsStruct(struct Arguments args){
-    std::cout << "Supplied Verilog files for vector size: " << args.rtlFiles.size() << std::endl;
+    std::cout << "Supplied Verilog files: " << args.rtlFiles.size() << std::endl;
     for(int i = 0; i < args.rtlFiles.size(); i++){
         std::cout << "    " << args.rtlFiles.at(i) << std::endl;
     }
     std::cout << std::endl;
 
-    std::cout << "Supplied no-include files for vector size: " << args.noIncModules.size() << std::endl;
+    std::cout << "Ignored modules: " << args.noIncModules.size() << std::endl;
     for(int i = 0; i < args.noIncModules.size(); i++){
         std::cout << "    " << args.noIncModules.at(i) << std::endl;
     }
     std::cout << std::endl;
 
-    std::cout << "Supplied level arg: " << std::endl;
+    std::cout << "level arg: " << std::endl;
     std::cout << "    " << args.level;
     std::cout << std::endl;
 
-    std::cout << "Supplied lang arg: " << std::endl;
+    std::cout << "lang arg: " << std::endl;
     std::cout << "    " << args.lang;
-    std::cout << std::endl;
+    std::cout << std::endl << std::endl;
 
-    std::cout << "Supplied debug arg: " << std::endl;
-    std::cout << "    " << args.debug;
-    std::cout << std::endl;
+    // std::cout << "Supplied debug arg: " << std::endl;
+    // std::cout << "    " << args.debug;
+    // std::cout << std::endl;
 }
 
 // sanity check that input argument files exist
@@ -169,21 +169,22 @@ int main(int argc, char **argv){
     hierarchyTreePtr = &hierarchyTree;
 
     // accepted list of arguments, must remember to update number in parentheses!!!
-    std::array<std::string,15> argListFlags = 
-                              {"-h",            // display usage and flags information
+    std::array<std::string,16> argListFlags = 
+                              {"-h",             // display usage and flags information
                                "--help",
-                               "-f",            // file paths
-                               "--filelist",    // txt filelist, one file path per line
-                               "-v",            // version string
+                               "-f",             // file paths
+                               "--filelist",     // txt filelist, one file path per line
+                               "-v",             // version string
                                "--version",
-                               "-L",            // print up to this many levels of hierarchy
+                               "-L",             // print up to this many levels of hierarchy
                                "--level",
-                               "-n",            // don't print out this/these module names
+                               "-n",             // don't print out this/these module names
                                "--ignore-modules",
-                               "--lang",        // one of either [verilog ^ vhdl]
-                               "--debug",       // more verbose output, print out internal variables
-                               "--iterative",   // print out hierarchy iteratively rather than recursively (uses less memory for large hierarchies)
-                               "--recursive",   // print out hierarchy recursively (default)
+                               "--lang",         // one of either [verilog ^ vhdl]
+                               "--debug",        // more verbose output, print out internal variables
+                               "--super-debug",  // print out even more debug output
+                               "--iterative",    // print out hierarchy iteratively rather than recursively (uses less memory for large hierarchies)
+                               "--recursive",    // print out hierarchy recursively (default)
                                "--no-inst-name" // do not print out the instance names 
                               };
 
@@ -213,7 +214,7 @@ int main(int argc, char **argv){
 
     // now parse the Verilog/VHDL, searching for the key phrases and generate the logical hierarchy
     // this is the main algorithm to configure the tree
-    hierarchyTree = deriveHierarchyTree(hierarchyTreePtr, args.rtlFiles, parentNodeRegexStr, childNodeRegexStr, args.debug, args.noIncModules);
+    hierarchyTree = deriveHierarchyTree(hierarchyTreePtr, args.rtlFiles, parentNodeRegexStr, childNodeRegexStr, args.debug, args.superDebug, args.noIncModules);
 
     // display the tree structure of the RTL
     printTree(hierarchyTree, args);

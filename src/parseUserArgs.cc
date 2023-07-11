@@ -34,7 +34,7 @@ int getNextArgs(int argc, char **argv, int i, std::string argName, std::string e
     return i;
 }
 
-struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,15> argList){
+struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,16> argList){
 
     int isEqual;
     bool includedVerilog = false;
@@ -152,6 +152,10 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,15>
 
         } else if(argv[i] == (std::string)"--debug"){
             args.debug = true;
+        } else if(argv[i] == (std::string)"--super-debug"){
+            // set both levels of debug output to true -> therefore --super-debug implies --debug 
+            args.superDebug = true;
+            args.debug      = true;
         } else if(argv[i] == (std::string)"--iterative"){
             args.algorithm = "iterative";
         } 
