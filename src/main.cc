@@ -150,7 +150,7 @@ void printTree(Tree hierarchyTree, struct Arguments args){
 
     // print a summary of the ignored modules as a sanity reminder
     if(args.noIncModules.size() > 0){
-        std::cout << "Ignoring following module(s) from output: ";
+        std::cout << "Ignoring childs of following module(s): ";
         for(int j = 0; j < args.noIncModules.size(); j++){
             std::cout << args.noIncModules.at(j) << " ";
         }

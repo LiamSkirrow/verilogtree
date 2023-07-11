@@ -227,7 +227,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
 }
 
 // recursively go down the hierarchy of Nodes and assign child nodes
-void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, std::vector<std::string> noIncModules){
+void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, std::vector<std::string> noIncModules, int level){
 
     Node cNode;
     Node *cNodePtr;
@@ -236,6 +236,14 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, std::v
     std::string tmpInstName;
     cNodePtr = &cNode;
     bool skip = false;
+
+    // check if we've reached the arbitrary maximum depth of 100, to avoid circular hierarchy segfault
+    if(level >= 100){
+        std::cout << std::endl << "*** Error!" << std::endl;
+        std::cout << "Maximum hierarchy depth reached, possible ciruclar hierarchy? Run again with '--debug' flag for more information" << std::endl << std::endl;
+        std::cout << "Exiting..." << std::endl;
+        exit(-1);
+    }
 
     for(int i = 0; i < pNodePtr->getChildNodesSize(); i++){
         cNodePtr = pNodePtr->getChildNodeAtIndex(i);
@@ -250,7 +258,7 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, std::v
         // if we get the signal, skip this iteration of the loop and don't add to tree
         if(skip){
             skip = false;
-            std::cout << "Skipping..." << std::endl;
+            // std::cout << "Skipping..." << std::endl;
             continue;
         }
         tmpInstName = cNodePtr->getInstName();
@@ -266,7 +274,7 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, std::v
             if(debug){
                 std::cout << "Recursing..." << std::endl;
             }
-            constructTreeRecursively(cNodePtr, hTreePtr, debug, noIncModules);
+            constructTreeRecursively(cNodePtr, hTreePtr, debug, noIncModules, ++level);
         }
     }
     if(debug){
@@ -350,7 +358,7 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, std::vector<std::string>
             // - after returning upwards, the next child node at that level will be entered into ... etc until the tree
             //   is constructed DFS style
 
-            constructTreeRecursively(pNodePtr, hTreePtr, debug, noIncModules);
+            constructTreeRecursively(pNodePtr, hTreePtr, debug, noIncModules, 0);
         }
     }
 }
