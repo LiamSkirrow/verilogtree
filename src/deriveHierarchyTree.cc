@@ -234,9 +234,7 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, std::v
     Node tmpNode;
     // will need to manually update instance name when swapping child for parent node
     std::string tmpInstName;
-
     cNodePtr = &cNode;
-
     bool skip = false;
 
     for(int i = 0; i < pNodePtr->getChildNodesSize(); i++){
@@ -249,7 +247,6 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, std::v
                 break;
             }
         }
-        // TODO: put this if() in the above for loop
         // if we get the signal, skip this iteration of the loop and don't add to tree
         if(skip){
             skip = false;
@@ -316,6 +313,7 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, std::vector<std::string>
             iter = hTreePtr->findNodeInMap(*cNodePtr);
             if(iter == hTreePtr->getMapEnd()){
                 std::cout << "*** Internal Error: Tried performing a lookup for a module that doesn't exist! " << std::endl;
+                std::cout << "Make sure all RTL files are supplied to verilogtree" << std::endl;
                 std::cout << std::endl << "Please report on GitHub: https://github.com/LiamSkirrow/verilogtree/" << std::endl;
                 exit(-1);
             }
