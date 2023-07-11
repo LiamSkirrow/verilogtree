@@ -222,23 +222,37 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
         *pNodeMapPtr = tmpNodeMap;
     }
     if(debug){
-        std::cout << numlines << " lines parsed..." << std::endl;
+        std::cout << parentNodeVecPtr->size() << " modules found, " << numlines << " lines parsed..." << std::endl;
     }
 }
 
 // recursively go down the hierarchy of Nodes and assign child nodes
-void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug){
+void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, std::vector<std::string> noIncModules){
 
     Node cNode;
     Node *cNodePtr;
     Node tmpNode;
     // will need to manually update instance name when swapping child for parent node
     std::string tmpInstName;
-
     cNodePtr = &cNode;
+    bool skip = false;
 
     for(int i = 0; i < pNodePtr->getChildNodesSize(); i++){
         cNodePtr = pNodePtr->getChildNodeAtIndex(i);
+        // TODO: this would be more efficient as a lookup table rather than a linear search
+        // check if the current module is a module to ignore
+        for(int k = 0; k < noIncModules.size(); k++){
+            if(cNodePtr->getModuleName() == noIncModules.at(k)){
+                skip = true;
+                break;
+            }
+        }
+        // if we get the signal, skip this iteration of the loop and don't add to tree
+        if(skip){
+            skip = false;
+            std::cout << "Skipping..." << std::endl;
+            continue;
+        }
         tmpInstName = cNodePtr->getInstName();
         tmpNode = *hTreePtr->getMapElem(cNodePtr->getModuleName());
         *cNodePtr = tmpNode;
@@ -250,18 +264,18 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug){
         }
         if(cNodePtr->getChildNodesSize() > 0){
             if(debug){
-                std::cout << "recursing..." << std::endl;
+                std::cout << "Recursing..." << std::endl;
             }
-            constructTreeRecursively(cNodePtr, hTreePtr, debug);
+            constructTreeRecursively(cNodePtr, hTreePtr, debug, noIncModules);
         }
     }
     if(debug){
-        std::cout << "going up..." << std::endl;
+        std::cout << "Going up..." << std::endl;
     }
 }
 
 // main algorithm for elaborating the tree of parent nodes
-void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
+void elaborateHierarchyTree(Tree *hTreePtr, bool debug, std::vector<std::string> noIncModules){
     // algorithm:
     // - the hash table allows for a lookup of a module, given the module name. Returns the ParentNode object
     // - iterate over the hTree parent nodes and assign child nodes as instantiated using the isInstantiated bool
@@ -286,6 +300,9 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
     pNodePtr = &pNode;
     cNodePtr = &cNode;
     tmpNodePtr = &tmpNode;
+
+    // TODO: could alternatively just loop until we find a module that should not be included, and simply 'delete' it 
+    //       from the parent node vector
     
     for(int i = 0; i < parentNodeSize; i++){
         pNodePtr = hTreePtr->getParentNodeAtIndex(i);
@@ -296,6 +313,7 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
             iter = hTreePtr->findNodeInMap(*cNodePtr);
             if(iter == hTreePtr->getMapEnd()){
                 std::cout << "*** Internal Error: Tried performing a lookup for a module that doesn't exist! " << std::endl;
+                std::cout << "Make sure all RTL files are supplied to verilogtree" << std::endl;
                 std::cout << std::endl << "Please report on GitHub: https://github.com/LiamSkirrow/verilogtree/" << std::endl;
                 exit(-1);
             }
@@ -332,13 +350,13 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug){
             // - after returning upwards, the next child node at that level will be entered into ... etc until the tree
             //   is constructed DFS style
 
-            constructTreeRecursively(pNodePtr, hTreePtr, debug);            
+            constructTreeRecursively(pNodePtr, hTreePtr, debug, noIncModules);
         }
     }
 }
 
 // top level function, dispatch the rtl parsing and tree construction functions, return the Tree to main
-Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug){
+Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug, std::vector<std::string> noIncModules){
 
     Tree hTree;
     // Tree *hTreePtr;
@@ -381,7 +399,7 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
     hTreePtr->setMap(*pNodeMapPtr);
 
     // now (recursively?) replace all child nodes with parent nodes to construct the tree
-    elaborateHierarchyTree(hTreePtr, debug);
+    elaborateHierarchyTree(hTreePtr, debug, noIncModules);
 
     return *hTreePtr;
 

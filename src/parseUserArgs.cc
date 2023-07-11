@@ -100,10 +100,15 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,15>
             }
             // read the contents of filelist into argumentVecPtr
             std::string filelistName = argumentVecPtr->at(0);
+            std::fstream fileHandler;
             argumentVecPtr->clear();
 
             for(std::string filelistEntry; getline(filelistObj, filelistEntry); ){
-                // getline(filelistObj, filelistEntry);
+                fileHandler.open(filelistEntry);
+                if(!fileHandler){
+                    errorAndExit((std::string)"Supplied file in filelist: \"" + filelistEntry + "\" does not exist");
+                }
+                fileHandler.close();
                 argumentVecPtr->push_back(filelistEntry);
             }
 
