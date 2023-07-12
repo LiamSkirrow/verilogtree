@@ -220,7 +220,7 @@ int main(int argc, char **argv){
     printTree(hierarchyTree, args);
 
     if(args.debug){
-        std::cout << "Successfully reached end of program!" << std::endl << std::endl;
+        std::cout << "Successfully reached end of program!" << std::endl;
     }
 
     return 0;
