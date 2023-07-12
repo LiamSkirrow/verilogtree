@@ -222,6 +222,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
         *pNodeMapPtr = tmpNodeMap;
     }
     if(debug){
+        if(superDebug){ std::cout << std::endl; }
         std::cout << parentNodeVecPtr->size() << " modules found, " << numlines << " lines parsed..." << std::endl << std::endl;
     }
 }
