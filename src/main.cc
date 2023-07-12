@@ -168,6 +168,7 @@ int main(int argc, char **argv){
 
     hierarchyTreePtr = &hierarchyTree;
 
+    // TODO: figure out what to do with --iterative and --recursive? Probably not going to implement these afterall
     // accepted list of arguments, must remember to update number in parentheses!!!
     std::array<std::string,16> argListFlags = 
                               {"-h",             // display usage and flags information
@@ -220,7 +221,7 @@ int main(int argc, char **argv){
     printTree(hierarchyTree, args);
 
     if(args.debug){
-        std::cout << "Successfully reached end of program!" << std::endl << std::endl;
+        std::cout << "Successfully reached end of program!" << std::endl;
     }
 
     return 0;

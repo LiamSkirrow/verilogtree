@@ -258,7 +258,6 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, bool s
         // if we get the signal, skip this iteration of the loop and don't add to tree
         if(skip){
             skip = false;
-            // std::cout << "Skipping..." << std::endl;
             continue;
         }
         tmpInstName = cNodePtr->getInstName();
@@ -271,14 +270,8 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, bool s
             std::cout << "  Child   : " << cNodePtr->getModuleName() << " w/ # children: " << cNodePtr->getChildNodesSize() << std::endl;
         }
         if(cNodePtr->getChildNodesSize() > 0){
-            if(superDebug){
-                std::cout << "Recursing..." << std::endl;
-            }
             constructTreeRecursively(cNodePtr, hTreePtr, debug, superDebug, noIncModules, ++level);
         }
-    }
-    if(superDebug){
-        std::cout << "Going up..." << std::endl;
     }
 }
 
@@ -320,9 +313,8 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::ve
             // check if the module exists in the map, if not generate an error and exit
             iter = hTreePtr->findNodeInMap(*cNodePtr);
             if(iter == hTreePtr->getMapEnd()){
-                std::cout << "*** Internal Error: Tried performing a lookup for a module that doesn't exist! " << std::endl;
+                std::cout << "*** Error: Tried performing a lookup for a module that doesn't exist! " << std::endl;
                 std::cout << "Make sure all RTL files are supplied to verilogtree" << std::endl;
-                std::cout << std::endl << "Please report on GitHub: https://github.com/LiamSkirrow/verilogtree/" << std::endl;
                 exit(-1);
             }
             // mark the parent node as instantiated
