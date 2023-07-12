@@ -298,6 +298,7 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::ve
     int treeRootSize;
     int cNodeIndex = 0;
     bool testInstantiated;
+    bool skip = false;
 
     pNodePtr = &pNode;
     cNodePtr = &cNode;
@@ -351,7 +352,21 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::ve
             // - after returning upwards, the next child node at that level will be entered into ... etc until the tree
             //   is constructed DFS style
 
-            constructTreeRecursively(pNodePtr, hTreePtr, debug, superDebug, noIncModules, 0);
+            // check if the current module is a module to ignore
+            for(int k = 0; k < noIncModules.size(); k++){
+                if(pNodePtr->getModuleName() == noIncModules.at(k)){
+                    skip = true;
+                    break;
+                }
+            }
+            // if we get the signal, skip this iteration of the loop and don't add to tree
+            if(skip){
+                skip = false;
+                // skip the below call to consstruct the tree for the ignored tree root
+            }
+            else{
+                constructTreeRecursively(pNodePtr, hTreePtr, debug, superDebug, noIncModules, 0);
+            }
         }
     }
 }
