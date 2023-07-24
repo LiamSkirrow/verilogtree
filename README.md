@@ -1,6 +1,6 @@
 # verilogtree
 
-Print out the hierarchy of your Verilog source files in an easy to read, visual format. Like the Unix utility 'tree' but for Verilog!
+Print out the hierarchy of your Verilog source files in an easy to read, visual format. Like the Unix utility 'tree' but for Verilog.
 
 For example, running the following command:
 ```verilogtree -f ./rtl/*.v --no-inst-name```
