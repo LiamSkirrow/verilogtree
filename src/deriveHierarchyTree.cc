@@ -315,7 +315,7 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::ve
             // check if the module exists in the map, if not generate an error and exit
             iter = hTreePtr->findNodeInMap(*cNodePtr);
             if(iter == hTreePtr->getMapEnd()){
-                std::cout << "*** Error: Tried performing a lookup for a module that doesn't exist! " << std::endl;
+                std::cout << "*** Error: Unrecognised module: " << cNodePtr->getModuleName() << " " << cNodePtr->getInstName() << std::endl;
                 std::cout << "Make sure all RTL files are supplied to verilogtree" << std::endl;
                 exit(-1);
             }
