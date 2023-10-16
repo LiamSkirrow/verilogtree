@@ -24,6 +24,8 @@ top
 
 **NOTE: this is very much a work in progress and is not yet completely functional, check back for the v0.1.0 release for a basic working prototype.**
 
+### Need to add either virtual environment or container to be able to reliably recompile from any machine... Look into this
+
 ### Usage
 To run verilogtree, type `verilogtree -f file.v` or `verilogtree --filelist list-of-files.txt` to display the tree output. The supported arguments are...
 | Argument | Description |
