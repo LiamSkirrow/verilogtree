@@ -316,7 +316,7 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::ve
             iter = hTreePtr->findNodeInMap(*cNodePtr);
             if(iter == hTreePtr->getMapEnd()){
                 std::cout << "*** Error: Unrecognised module: " << cNodePtr->getModuleName() << " " << cNodePtr->getInstName() << std::endl;
-                std::cout << "Make sure all RTL files are supplied to verilogtree" << std::endl;
+                std::cout << "Make sure all RTL files are supplied to verilogtree, and check 'Unsupported Syntax' section of README.md" << std::endl;
                 exit(-1);
             }
             // mark the parent node as instantiated
