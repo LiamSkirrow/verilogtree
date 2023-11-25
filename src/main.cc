@@ -206,7 +206,7 @@ int main(int argc, char **argv){
     // childNodeRegexStr  = (args.lang == "verilog") ? "^\ *\w*\s*\w*\s*\("     : "          ";
     //                                               \_______Verilog______/     \__VHDL__/
 
-    parentNodeRegexStr = "^\\ *module\\s+\\w+\\s*#*\\ *\\(";
+    parentNodeRegexStr = "^\\ *module\\s+\\w+\\s*#?\\ *\\(";
     childNodeRegexStr  = "^\\ *\\w+\\s+\\w+\\s*\\(";
 
     // NOTE: should I also be storing the hpaths to each module? This may be more efficient to do *while*
