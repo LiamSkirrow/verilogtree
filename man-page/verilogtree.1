@@ -3,20 +3,15 @@
 .SH NAME
 verilogtree \- print Verilog module hierarchy in a tree-like format.
 .SH SYNOPSIS
-\fBverilogtree\fP [\fB-hfvLn\fP] [\fB--level\fP \fIlevel\fP] [\fB--help\fP] [\fB--filelist\fP \fIfilelist\fP] [\fB--version\fP \fIversion\fP] [\fB--ignore-modules\fP \fImodule names\fP] [\fB--lang\fP \fIverilog | vhdl\fP] [\fB--debug\fP] [\fB--super-debug\fP] [\fB--no-inst-name\fP]
+\fBverilogtree\fP [\fB-hfvLn\fP] [\fB--level\fP \fIlevel\fP] [\fB--help\fP] 
+[\fB--filelist\fP \fIfilelist\fP] [\fB--version\fP \fIversion\fP] 
+[\fB--ignore-modules\fP \fImodule names\fP] [\fB--lang\fP \fIverilog | vhdl\fP] 
+[\fB--debug\fP] [\fB--super-debug\fP] [\fB--no-inst-name\fP]
 
 .br
 .SH DESCRIPTION
 \fIverilogtree\fP is a tool to assist with visualising the hierarchy of a given set of 
 Verilog files. 
-.\"\fITree\fP is a recursive directory listing program that produces a depth
-.\"indented listing of files, which is colorized ala \fIdircolors\fP if the
-.\"\fBLS_COLORS\fP environment variable is set and output is to tty.  With no
-.\"arguments, \fItree\fP lists the files in the current directory.  When directory
-.\"arguments are given, \fItree\fP lists all the files and/or directories found in
-.\"the given directories each in turn.  Upon completion of listing all
-.\"files/directories found, \fItree\fP returns the total number of files and/or
-.\"directories listed.
 
 .SH OPTIONS
 \fIverilogtree\fP understands the following command line switches:
@@ -67,10 +62,47 @@ Do not print out the module's instance names. This gives cleaner output.
 .PP
 
 .SH EXAMPLES
-TODO:
-- filelist example 
-- give sample output for simple hierarchy
-- use --level 
+Take for example the following command: \fIverilogtree -f top.v mod0.v mod1.v mod2.v mod3.v mod4.v\fP
+that prints out the tree of the Verilog hierarchy consisting of the modules...
+top, mod0, mod1, mod2, mod3 and mod4
+
+    top u_top_inst
+    └── mod0 u_mod0_isnt
+        ├── mod3 u_mod3_isnt
+        │   └── mod4 u_mod4_isnt
+        └── mod1 u_mod1_isnt
+            └── mod2 u_mod2_isnt
+
+To print out the hierarchy without the instance names, to declutter the output
+a little, the following command can be run: 
+\fIverilogtree --no-inst-name -f top.v mod0.v mod1.v mod2.v mod3.v mod4.v\fP
+
+    top 
+    └── mod0 
+        ├── mod3 
+        │   └── mod4 
+        └── mod1 
+            └── mod2
+
+Now, assume the relevant Verilog files are located in a directory called 'rtl',
+verilogtree can be called with a filelist argument to save you having to type
+out the filenames. Consider a filelist named \fBsimple_filelist\fP with the following contents:
+.br
+.br
+    rtl/mod0.v
+.br
+    rtl/mod1.v
+.br
+    rtl/mod2.v
+.br
+    rtl/mod3.v
+.br
+    rtl/mod4.v
+.br
+    rtl/top.v
+
+The following command could then be used to generate the above verilogtree output:
+\fIverilogtree --no-inst-name --filelist simple_filelist\fP
 
 .SH AUTHOR
 Written by Liam Skirrow (skirrowliam@gmail.com)
@@ -81,6 +113,12 @@ Contributions welcomed on GitHub repo found at: https://github.com/LiamSkirrow/v
 
 .SH BUGS AND NOTES
 
-TODO
+Not all Verilog/SystemVerilog constructs are supported, for example instantiating
+a module in a generate statement will be treated as though only one module is 
+instantiated, even though in reality many modules may be generated.
 
-Please report bugs and feature requests on GitHub repo, by creating an issue and/or Pull Request.
+Also, referencing a module in a package is not supported by verilogtree at this
+time.
+
+Please report bugs and feature requests on GitHub, by creating an issue and/or Pull Request.
+See the above CONTRIBUTING section for GitHub repo link.
