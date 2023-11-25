@@ -75,7 +75,7 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,16>
         }
 
         if(argv[i] == (std::string)"-h" || argv[i] == (std::string)"--help"){
-            // printHelp();
+            printHelp();
             exit(0);
         } 
         else if(argv[i] == (std::string)"-f"){
@@ -178,4 +178,32 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,16>
     }
 
     return args;
+}
+
+void printHelp(){
+    std::string helpString = "verilogtree arguments:                     \n\
+                                                                         \n\
+    Usage: verilogtree [--filelist <files.txt> | -f file1.v file2.v ...] \n\
+                                                                         \n\
+    -v / --version          Print current version string.                       \n\
+    -h / --help             Print this message.                                 \n\
+    -f                      Pass in RTL files directly one after the other      \n\
+    --filelist              Pass in a filelist containing the paths to the      \n\
+                            files to be parsed. File paths must each be on a    \n\
+                            new line. See below filelist example for details.   \n\
+    -L / --level            Specify the maximum hierarchy depth to be printed   \n\
+                            out.                                                \n\
+    -n / --ignore-modules   List modules whose child modules shall be ignored   \n\
+                            when generating console output. Multiple modules    \n\
+                            can be listed one after the other.                  \n\
+    --lang                  Specify either of 'verilog' or 'vhdl' as the target \n\
+                            language. Currently, only 'verilog' is supported.   \n\
+    --debug                 Produce debugging output. Useful for bug tracing    \n\
+    --super-debug           Produce more extensive debugging output. Passing    \n\
+                            this flag implies --debug.                          \n\
+    --no-inst-name          Do not print out the module's instance names. This  \n\
+                            gives cleaner output.                               \n\
+    ";
+
+    std::cout << helpString << std::endl;
 }

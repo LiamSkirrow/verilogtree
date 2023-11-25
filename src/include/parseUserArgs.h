@@ -23,3 +23,4 @@ struct Arguments{
 struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,16> argList);
 void errorAndExit(std::string errorMsg);
 int getNextArgs(int argc, char **argv, int i, std::string argName, std::string errMsg, std::vector<std::string> *argumentVecPtr);
+void printHelp();
