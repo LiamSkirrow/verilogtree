@@ -27,6 +27,10 @@ void dumpArgsStruct(struct Arguments args){
     std::cout << "    " << args.level;
     std::cout << std::endl;
 
+    std::cout << "max hierarchy arg: " << std::endl;
+    std::cout << "    " << args.maxHierarchyLevel;
+    std::cout << std::endl;
+
     std::cout << "lang arg: " << std::endl;
     std::cout << "    " << args.lang;
     std::cout << std::endl << std::endl;
@@ -170,7 +174,7 @@ int main(int argc, char **argv){
 
     // TODO: figure out what to do with --iterative and --recursive? Probably not going to implement these afterall
     // accepted list of arguments, must remember to update number in parentheses!!!
-    std::array<std::string,16> argListFlags = 
+    std::array<std::string,18> argListFlags = 
                               {"-h",             // display usage and flags information
                                "--help",
                                "-f",             // file paths
@@ -179,6 +183,8 @@ int main(int argc, char **argv){
                                "--version",
                                "-L",             // print up to this many levels of hierarchy
                                "--level",
+                               "-m",             // define the maximum recursion depth when constructing hierarchy tree
+                               "--max-hierarchy",
                                "-n",             // don't print out this/these module names
                                "--ignore-modules",
                                "--lang",         // one of either [verilog ^ vhdl]
@@ -216,7 +222,7 @@ int main(int argc, char **argv){
 
     // now parse the Verilog/VHDL, searching for the key phrases and generate the logical hierarchy
     // this is the main algorithm to configure the tree
-    hierarchyTree = deriveHierarchyTree(hierarchyTreePtr, args.rtlFiles, parentNodeRegexStr, childNodeRegexStr, args.debug, args.superDebug, args.noIncModules);
+    hierarchyTree = deriveHierarchyTree(hierarchyTreePtr, args.rtlFiles, parentNodeRegexStr, childNodeRegexStr, args.debug, args.superDebug, args.noIncModules, args.maxHierarchyLevel);
 
     // display the tree structure of the RTL
     printTree(hierarchyTree, args);

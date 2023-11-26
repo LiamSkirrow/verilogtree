@@ -237,7 +237,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
 }
 
 // recursively go down the hierarchy of Nodes and assign child nodes
-void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, bool superDebug, std::vector<std::string> noIncModules, int level){
+void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, bool superDebug, std::vector<std::string> noIncModules, int level, int maxHierarchyLevel){
 
     Node cNode;
     Node *cNodePtr;
@@ -247,12 +247,11 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, bool s
     cNodePtr = &cNode;
     bool skip = false;
 
-    // TODO: could add another arg to set this maximum number of levels of hierachy
-    // check if we've reached the arbitrary maximum depth of 100, to avoid circular hierarchy segfault
-    if(level >= 100){
+    // check if we've reached the maximum depth of maxHierarchyLevel (default of 100), to avoid circular hierarchy segfault
+    if(level >= maxHierarchyLevel){
         std::cout << std::endl << "*** Error!" << std::endl;
-        std::cout << "Maximum hierarchy depth reached, possible circular hierarchy? Run again with '--debug' flag for more information" << std::endl << std::endl;
-        std::cout << "Exiting..." << std::endl;
+        std::cout << "Maximum hierarchy depth reached, possible circular hierarchy? Run again with '--super-debug' flag for more information" << std::endl << std::endl;
+        std::cout << "Exiting to avoid segmentation fault..." << std::endl;
         exit(-1);
     }
 
@@ -284,13 +283,13 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, bool s
             std::cout << "  Child   : " << cNodePtr->getModuleName() << " w/ # children: " << cNodePtr->getChildNodesSize() << std::endl;
         }
         if(cNodePtr->getChildNodesSize() > 0){
-            constructTreeRecursively(cNodePtr, hTreePtr, debug, superDebug, noIncModules, ++level);
+            constructTreeRecursively(cNodePtr, hTreePtr, debug, superDebug, noIncModules, ++level, maxHierarchyLevel);
         }
     }
 }
 
 // main algorithm for elaborating the tree of parent nodes
-void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::vector<std::string> noIncModules){
+void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::vector<std::string> noIncModules, int maxHierarchyLevel){
     // algorithm:
     // - the hash table allows for a lookup of a module, given the module name. Returns the ParentNode object
     // - iterate over the hTree parent nodes and assign child nodes as instantiated using the isInstantiated bool
@@ -378,19 +377,17 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::ve
             // if we get the signal, skip this iteration of the loop and don't add to tree
             if(skip){
                 skip = false;
-                std::cout << "SKIPPING..." << std::endl;
                 // skip the below call to construct the tree for the ignored tree root
             }
             else{
-                std::cout << "Constructing tree recursively..." << std::endl;
-                constructTreeRecursively(pNodePtr, hTreePtr, debug, superDebug, noIncModules, 0);
+                constructTreeRecursively(pNodePtr, hTreePtr, debug, superDebug, noIncModules, 0, maxHierarchyLevel);
             }
         }
     }
 }
 
 // top level function, dispatch the rtl parsing and tree construction functions, return the Tree to main
-Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug, bool superDebug, std::vector<std::string> noIncModules){
+Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug, bool superDebug, std::vector<std::string> noIncModules, int maxHierarchyLevel){
 
     Tree hTree;
     // Tree *hTreePtr;
@@ -433,7 +430,7 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
     hTreePtr->setMap(*pNodeMapPtr);
 
     // now (recursively?) replace all child nodes with parent nodes to construct the tree
-    elaborateHierarchyTree(hTreePtr, debug, superDebug, noIncModules);
+    elaborateHierarchyTree(hTreePtr, debug, superDebug, noIncModules, maxHierarchyLevel);
 
     return *hTreePtr;
 

@@ -34,7 +34,7 @@ int getNextArgs(int argc, char **argv, int i, std::string argName, std::string e
     return i;
 }
 
-struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,16> argList){
+struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,18> argList){
 
     int isEqual;
     bool includedVerilog = false;
@@ -125,6 +125,16 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,16>
             // assert(argumentVecPtr->at(0))
             args.level = argumentVecPtr->at(0);
         } 
+        else if(argv[i] == (std::string)"-m" || argv[i] == (std::string)"--max-hierarchy"){
+            // check the next string of argv to get the max number of levels to recurse down, increment i accordingly
+            i = getNextArgs(argc, argv, i, argv[i], (std::string)"a positive numeric value", argumentVecPtr);
+            // check only one value is given
+            if(argumentVecPtr->size() != 1){
+                errorAndExit((std::string)"Argument -m/--max-hierarchy must have only one proceeding value");
+            }
+            // assert(argumentVecPtr->at(0))
+            args.maxHierarchyLevel = atoi(argumentVecPtr->at(0).c_str());
+        } 
         else if(argv[i] == (std::string)"-n" || argv[i] == (std::string)"--ignore-modules"){
             // check the next N strings of argv to get the don't include filepaths, increment i accordingly
             i = getNextArgs(argc, argv, i, argv[i], (std::string)"names of modules to ignore", argumentVecPtr);
@@ -179,6 +189,8 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,16>
 
     return args;
 }
+
+// TODO: add max hierarchy level to help/man pages
 
 void printHelp(){
     std::string helpString = "verilogtree arguments:                     \n\
