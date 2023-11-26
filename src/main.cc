@@ -207,6 +207,7 @@ int main(int argc, char **argv){
     //                                               \_______Verilog______/     \__VHDL__/
 
     parentNodeRegexStr = "^\\ *module\\s+\\w+\\s*#?\\ *\\(";
+    // TODO: pretty sure the module instantiations could have a # in them, need to add that to regex...
     childNodeRegexStr  = "^\\ *\\w+\\s+\\w+\\s*\\(";
 
     // NOTE: should I also be storing the hpaths to each module? This may be more efficient to do *while*

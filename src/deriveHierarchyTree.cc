@@ -156,7 +156,12 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
         rtlFileObj.open(rtlFiles.at(i));
         // read line-by-line and apply the regex search pattern
         for(std::string line; getline(rtlFileObj, line); numlines++){
-            // caughtFalseModule = false;
+            // TODO: to detect newlines...
+            // - if we match the beginning of a pattern (the word 'module' for example), but the line ends before we see anything else...
+            // - enter into a conditional with another for loop reading line by line, and keep going until we're able to reach
+            //   a matching pattern, a non-matching pattern, or the end of the file.
+            // - May need to store sub-pattern regexes to match the components one at a time...
+            // - can then advance the line forward by as many lines as necessary
             
             // check for a parent-node match
             std::regex_search(line, matchObjParent, parentNodeRegexStr);
@@ -238,10 +243,11 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, bool s
     cNodePtr = &cNode;
     bool skip = false;
 
+    // TODO: could add another arg to set this maximum number of levels of hierachy
     // check if we've reached the arbitrary maximum depth of 100, to avoid circular hierarchy segfault
     if(level >= 100){
         std::cout << std::endl << "*** Error!" << std::endl;
-        std::cout << "Maximum hierarchy depth reached, possible ciruclar hierarchy? Run again with '--debug' flag for more information" << std::endl << std::endl;
+        std::cout << "Maximum hierarchy depth reached, possible circular hierarchy? Run again with '--debug' flag for more information" << std::endl << std::endl;
         std::cout << "Exiting..." << std::endl;
         exit(-1);
     }
