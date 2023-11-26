@@ -190,32 +190,33 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,18>
     return args;
 }
 
-// TODO: add max hierarchy level to help/man pages
-
 void printHelp(){
     std::string helpString = "verilogtree arguments:                     \n\
                                                                          \n\
     Usage: verilogtree [--filelist <files.txt> | -f file1.v file2.v ...] \n\
                                                                          \n\
-    -v / --version          Print current version string.                       \n\
-    -h / --help             Print this message.                                 \n\
-    -f                      Pass in RTL files directly one after the other.     \n\
-    --filelist              Pass in a filelist containing the paths to the      \n\
-                            files to be parsed. File paths must each be on a    \n\
-                            new line.                                           \n\
-    -L / --level            Specify the maximum hierarchy depth to be printed   \n\
-                            out.                                                \n\
-    -n / --ignore-modules   List modules whose child modules shall be ignored   \n\
-                            when generating console output. Multiple modules    \n\
-                            can be listed one after the other.                  \n\
-    --lang                  Specify either of 'verilog' or 'vhdl' as the target \n\
-                            language. Currently, in verilogtree v0.1.x, only    \n\
-                            'verilog' is supported.                             \n\
-    --debug                 Produce debugging output. Useful for bug tracing    \n\
-    --super-debug           Produce more extensive debugging output. Passing    \n\
-                            this flag implies --debug.                          \n\
-    --no-inst-name          Do not print out the module's instance names. This  \n\
-                            gives cleaner output.                               \n\
+    -v / --version             Print current version string.                       \n\
+    -h / --help                Print this message.                                 \n\
+    -f                         Pass in RTL files directly one after the other.     \n\
+    --filelist                 Pass in a filelist containing the paths to the      \n\
+                               files to be parsed. File paths must each be on a    \n\
+                               new line.                                           \n\
+    -L / --level               Specify the maximum hierarchy depth to be printed   \n\
+                               out.                                                \n\
+    -m / --max-hierarchy       Specify the maximum hierarchy depth to be recursed  \n\
+                               down. This is in place to avoid seg faults in the   \n\
+                               case of a circular hierarchy bug.                   \n\
+    -n / --ignore-modules      List modules whose child modules shall be ignored   \n\
+                               when generating console output. Multiple modules    \n\
+                               can be listed one after the other.                  \n\
+    --lang                     Specify either of 'verilog' or 'vhdl' as the target \n\
+                               language. Currently, in verilogtree v0.1.x, only    \n\
+                               'verilog' is supported.                             \n\
+    --debug                    Produce debugging output. Useful for bug tracing    \n\
+    --super-debug              Produce more extensive debugging output. Passing    \n\
+                               this flag implies --debug.                          \n\
+    --no-inst-name             Do not print out the module's instance names. This  \n\
+                               gives cleaner output.                               \n\
     ";
 
     std::cout << helpString << std::endl;

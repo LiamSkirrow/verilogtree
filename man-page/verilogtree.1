@@ -41,6 +41,11 @@ for details.
 Specify the maximum hierarchy depth to be printed out.
 .PP
 .TP
+.B -m/--max-hierarchy
+Specify the maximum hierarchy depth to be recursed down. This is in place to 
+avoid seg faults in the case of a circular hierarchy bug.
+.PP
+.TP
 .B -n/--ignore-modules
 List modules whose child modules shall be ignored when generating console 
 output. Multiple modules can be listed one after the other.
