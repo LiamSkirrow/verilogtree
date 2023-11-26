@@ -47,6 +47,10 @@ int Tree::getParentNodesSize(){
     return this->parentNodes.size();
 }
 
+void Node::clearChildNodes(){
+    this->childNodes.clear();
+}
+
 bool Node::getIsInstantiated(){
     return this->isInstantiated;
 }
@@ -258,6 +262,9 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, bool s
         // check if the current module is a module to ignore
         for(int k = 0; k < noIncModules.size(); k++){
             if(cNodePtr->getModuleName() == noIncModules.at(k)){
+                if(debug){
+                    std::cout << "Ignoring module: " << cNodePtr->getModuleName() << std::endl;
+                }
                 skip = true;
                 break;
             }
@@ -345,6 +352,7 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::ve
     for(int i = 0; i < treeRootSize; i++){
         pNodePtr = hTreePtr->getTreeRootNodeAtIndex(i);
         pNodeNumChilds = pNodePtr->getChildNodesSize();
+        
         if(superDebug){
             std::cout << "Tree Root: " << pNodePtr->getModuleName() << " w/ # children: " << pNodeNumChilds << std::endl;
         }
@@ -358,19 +366,23 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::ve
             // - after returning upwards, the next child node at that level will be entered into ... etc until the tree
             //   is constructed DFS style
 
-            // check if the current module is a module to ignore
+            // Issue #39: https://github.com/LiamSkirrow/verilogtree/issues/39
+            // ignore the children of top-level modules, have to hardcode this edgecase... need to remove children manually...
             for(int k = 0; k < noIncModules.size(); k++){
                 if(pNodePtr->getModuleName() == noIncModules.at(k)){
                     skip = true;
+                    pNodePtr->clearChildNodes();
                     break;
                 }
             }
             // if we get the signal, skip this iteration of the loop and don't add to tree
             if(skip){
                 skip = false;
-                // skip the below call to consstruct the tree for the ignored tree root
+                std::cout << "SKIPPING..." << std::endl;
+                // skip the below call to construct the tree for the ignored tree root
             }
             else{
+                std::cout << "Constructing tree recursively..." << std::endl;
                 constructTreeRecursively(pNodePtr, hTreePtr, debug, superDebug, noIncModules, 0);
             }
         }

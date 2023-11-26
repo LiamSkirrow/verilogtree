@@ -36,6 +36,7 @@ class Node{
         int getChildNodesSize();
         void setIsInstantiated();
         bool getIsInstantiated();
+        void clearChildNodes();
 };
 
 // main tree abstract data type
