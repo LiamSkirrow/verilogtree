@@ -6,3 +6,7 @@ CFLAGS=-I $(IDIR)
 
 build: src/*.cc
 	$(CC) -o verilogtree src/*.cc $(CFLAGS)
+
+clean: 
+	rm verilogtree
+
