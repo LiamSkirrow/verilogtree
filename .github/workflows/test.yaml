@@ -1,0 +1,17 @@
+name: main branch autotests
+
+on:
+  push:
+      branches: [ main ]
+  pull_request:
+      branches: [ main ]
+
+jobs:
+  build-and-test:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v2
+      - name: compile latest verilogtree source
+      run: make
+      - name: invoke Python test
+      run: python3 verilogtree-tests.py
