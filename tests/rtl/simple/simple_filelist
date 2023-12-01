@@ -1,7 +1,7 @@
-./rtl/simple/mod0.v
-./rtl/simple/mod1.v
-./rtl/simple/mod2.v
-./rtl/simple/mod3.v
-./rtl/simple/mod4.v
-./rtl/simple/top.v
-./rtl/simple/altTop.v
+./tests/rtl/simple/mod0.v
+./tests/rtl/simple/mod1.v
+./tests/rtl/simple/mod2.v
+./tests/rtl/simple/mod3.v
+./tests/rtl/simple/mod4.v
+./tests/rtl/simple/top.v
+./tests/rtl/simple/altTop.v

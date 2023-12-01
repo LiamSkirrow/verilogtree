@@ -10,6 +10,6 @@ mod3 mod3_inst1();
 endmodule
 
 /* 
-module comment1 (
+// module comment1 (
 
 */
