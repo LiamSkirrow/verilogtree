@@ -12,7 +12,7 @@ from subprocess import check_call
 
 # run verilogtree as a subprocess
 print("Running version...")
-check_call(["./verilogtree", "--version"], cwd = "../")
+check_call(["./tests/verilogtree", "--version"])
 
 test_vec = []
 all_tests_fail = False
@@ -48,7 +48,7 @@ altTop
 # received_test_str0 = check_output(["./verilogtree", "--filelist", "tests/rtl/simple/simple_filelist"], cwd = "../")
 
 # TEST 0 | Check basic filelist operation with simple example hierarchy
-process = subprocess.Popen(['./verilogtree', '--filelist', 'tests/rtl/simple/simple_filelist'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd = '../')
+process = subprocess.Popen(['./verilogtree', '--filelist', 'tests/rtl/simple/simple_filelist'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 out, err = process.communicate()
 out_string = out.decode('utf-8')
 if out_string != test_str0:
