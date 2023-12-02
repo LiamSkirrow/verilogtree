@@ -34,7 +34,7 @@ int getNextArgs(int argc, char **argv, int i, std::string argName, std::string e
     return i;
 }
 
-struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,18> argList){
+struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,20> argList){
 
     int isEqual;
     bool includedVerilog = false;
@@ -141,6 +141,12 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,18>
             // now give the args structure the relevant filenames
             args.noIncModules = *argumentVecPtr;
         } 
+        else if(argv[i] == (std::string)"-T" || argv[i] == (std::string)"--top"){
+            // check the next N strings of argv to get the top level module(s), increment i accordingly
+            i = getNextArgs(argc, argv, i, argv[i], (std::string)"names of top-level modules to include", argumentVecPtr);
+            // now give the args structure the relevant filenames
+            args.topModules = *argumentVecPtr;
+        } 
         else if(argv[i] == (std::string)"--lang"){
             // check the next string of argv to get the language, increment i accordingly
             i = getNextArgs(argc, argv, i, argv[i], (std::string)"one of [verilog | vhdl]", argumentVecPtr);
@@ -209,6 +215,8 @@ void printHelp(){
     -n / --ignore-modules      List modules whose child modules shall be ignored   \n\
                                when generating console output. Multiple modules    \n\
                                can be listed one after the other.                  \n\
+    -T / --top                 List modules that shall be treated as top level     \n\
+                               modules.                                            \n\
     --lang                     Specify either of 'verilog' or 'vhdl' as the target \n\
                                language. Currently, in verilogtree v0.1.x, only    \n\
                                'verilog' is supported.                             \n\
