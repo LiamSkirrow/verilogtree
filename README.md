@@ -55,8 +55,8 @@ When building from source, clone this repo and run the following steps:
 ### Version Changelog
 | Version | Changes | Status |
 | ------- | ------- | ------ |
-| 0.2.0   |  | Planned (see GitHub issues) |
-| 0.1.0   | Initial version | *In Progress* |
+| [0.2.0](https://github.com/LiamSkirrow/verilogtree/milestone/2)   |  | Planned (see GitHub issues) |
+| [0.1.0](https://github.com/LiamSkirrow/verilogtree/milestone/1)   | Initial version | *In Progress* |
 
 ### License
 *TODO*
