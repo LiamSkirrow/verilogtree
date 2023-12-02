@@ -5,10 +5,6 @@ from subprocess import check_call
 
 # TODO:
 # - check against the version number?
-# - print out specifically which tests failed so it's easier to read from the output
-# - refactor this file to make it more scalable
-#   - put the test strings into another Python file and import it here
-#   - split up below generic code into functions
 
 # run verilogtree as a subprocess
 print("Running version...")
@@ -47,25 +43,25 @@ altTop
 # ./verilogtree --filelist tests/rtl/simple/simple_filelist --no-inst-name
 test_str1 = """
 top
-├── mod0
-│   ├── mod3
-│   │   └── mod4
-│   └── mod1
-│       └── mod3
-│           └── mod
-├── mod1
-│   └── mod3
-│       └── mod4
-└── mod2
-    └── mod1
-        └── mod3
-            └── mod4
+├── mod0  
+│   ├── mod3  
+│   │   └── mod4  
+│   └── mod1  
+│       └── mod3  
+│           └── mod4  
+├── mod1  
+│   └── mod3  
+│       └── mod4  
+└── mod2  
+    └── mod1  
+        └── mod3  
+            └── mod4  
 
 altTop
-└── mod2
-    └── mod1
-        └── mod3
-            └── mod4
+└── mod2  
+    └── mod1  
+        └── mod3  
+            └── mod4  
 
 """
 
@@ -105,8 +101,13 @@ Ignoring childs of following module(s): mod3
 ### >>>>> Call commands and check against test_strX <<<<< ###
 
 # generic template for tests -> compare strings and threshold pass/fail
-def test_function(exp_str, actual_str, test_vec, test_num):
+def test_function(exp_str, actual_str, test_vec, replace_whitespace, test_num):
     if actual_str != exp_str:
+        if(replace_whitespace):
+            # replace the ' ' space char with something visible for easier debugging
+            actual_str = actual_str.replace(' ', 'X')
+            exp_str    = exp_str.replace(' ', 'X')
+            
         print('Test ' + str(test_num) + ' Failed...')
         print('\n----- Expected Output -----\n')
         print(exp_str)
@@ -123,26 +124,29 @@ def test_function(exp_str, actual_str, test_vec, test_num):
 process = subprocess.Popen(['./verilogtree', '--filelist', 'tests/rtl/simple/simple_filelist'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 out, err = process.communicate()
 out_string = out.decode('utf-8')
-test_vec = test_function(test_str0, out_string, test_vec, 0)
+test_vec = test_function(test_str0, out_string, test_vec, True, 0)
 
 # TEST 1 | Check basic filelist operation with simple example hierarchy without instance names
 process = subprocess.Popen(['./verilogtree', '--filelist', 'tests/rtl/simple/simple_filelist', '--no-inst-name'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 out, err = process.communicate()
 out_string = out.decode('utf-8')
-test_vec = test_function(test_str1, out_string, test_vec, 1)
+test_vec = test_function(test_str1, out_string, test_vec, True, 1)
 
 # TEST 2 | Check the --level argument, set to a level depth of 2
 process = subprocess.Popen(['./verilogtree', '--filelist', 'tests/rtl/simple/simple_filelist', '--level', '2'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 out, err = process.communicate()
 out_string = out.decode('utf-8')
-test_vec = test_function(test_str2, out_string, test_vec, 2)
+test_vec = test_function(test_str2, out_string, test_vec, True, 2)
 
 # TEST 3 | Ignore modules
 process = subprocess.Popen(['./verilogtree', '--filelist', 'tests/rtl/simple/simple_filelist', '--ignore-modules', 'mod3'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 out, err = process.communicate()
 out_string = out.decode('utf-8')
-test_vec = test_function(test_str3, out_string, test_vec, 3)
+test_vec = test_function(test_str3, out_string, test_vec, True, 3)
 
+### New tests go here...
+###
+###
 
 print('\n----- Test Summary -----\n')
 
