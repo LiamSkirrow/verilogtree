@@ -1,0 +1,7 @@
+./tests/rtl/simple/mod0.v
+./tests/rtl/simple/mod1.v
+./tests/rtl/simple/mod2.v
+./tests/rtl/simple/mod3.v
+./tests/rtl/simple/mod4.v
+./tests/rtl/simple/top.v
+./tests/rtl/simple/altTop.v
