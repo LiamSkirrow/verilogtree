@@ -230,7 +230,7 @@ int main(int argc, char **argv){
 
     // now parse the Verilog/VHDL, searching for the key phrases and generate the logical hierarchy
     // this is the main algorithm to configure the tree
-    hierarchyTree = deriveHierarchyTree(hierarchyTreePtr, args.rtlFiles, parentNodeRegexStr, childNodeRegexStr, args.debug, args.superDebug, args.noIncModules, args.maxHierarchyLevel);
+    hierarchyTree = deriveHierarchyTree(hierarchyTreePtr, args.rtlFiles, parentNodeRegexStr, childNodeRegexStr, args.debug, args.superDebug, args.noIncModules, args.maxHierarchyLevel, args.topModules);
 
     // display the tree structure of the RTL
     printTree(hierarchyTree, args);
