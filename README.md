@@ -44,6 +44,9 @@ To run verilogtree, type `verilogtree -f file.v` or `verilogtree --filelist list
 ### Examples
 *TODO*
 
+### Tricks
+- Sometimes it's usfeul to tell verilogtree to print out the hierarchy of 'all the verilog files in this directory and sub-directories', which is where the `find` command comes in handy. Usually, `find` goes and prints out the filenames with a newline separating them, however if you want to pass the output from a `find` command into verilogtree, it'll have to be separated by spaces. This can be achieved by running `find . -name *.v -printf '%p '`... Which shall become ` ./verilogtree -f $(find . -name *.v -printf '%p ')`.
+
 ### Installation Notes
 When building from source, clone this repo and run the following steps:
 - run the `BUILD` script to compile the code. Requires g++ to be installed.
