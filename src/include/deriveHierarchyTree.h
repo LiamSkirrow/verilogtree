@@ -49,6 +49,7 @@ class Tree{
 
     public:
         void setParentNodes(std::vector<Node> pNodes);
+        bool getParentNodeExistence(std::string str);
         Node * getParentNodeAtIndex(int index);
         int getParentNodesSize();
         void setMap(std::map<std::string, Node> pNodeMap);

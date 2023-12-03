@@ -37,6 +37,19 @@ void Tree::setParentNodes(std::vector<Node> pNodes){
     this->parentNodes = pNodes;
 }
 
+// linear search through the parentNodes vector and check for existence of Node with name str
+bool Tree::getParentNodeExistence(std::string str){
+    bool moduleExists = false;
+    for(int i = 0; i < this->parentNodes.size(); i++){
+        // check if module name matches, therefore module exists, break and return True
+        if(this->parentNodes.at(i).getModuleName() == str){
+            moduleExists = true;
+            break;
+        }
+    }
+    return moduleExists;
+}
+
 Node * Tree::getParentNodeAtIndex(int index){
     Node *pNodePtr;
     pNodePtr = &this->parentNodes.at(index);
@@ -343,8 +356,14 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::ve
     if(topModules.size() > 0){
         Node *tmpNode;
         for(int i = 0; i < topModules.size(); i++){
-            tmpNode = hTreePtr->getMapElem(topModules.at(i));
-            hTreePtr->pushTreeRoot(*tmpNode);
+            // check if module exists in the design
+            if(!hTreePtr->getParentNodeExistence(topModules.at(i))){
+                std::cout << "*** Error: Specified top-level module: \"" << topModules.at(i) << "\" does not exist!" << std::endl;
+            }
+            else{
+                tmpNode = hTreePtr->getMapElem(topModules.at(i));
+                hTreePtr->pushTreeRoot(*tmpNode);
+            }
         }
     }
     else{
