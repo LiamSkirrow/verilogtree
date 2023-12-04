@@ -23,6 +23,12 @@ void dumpArgsStruct(struct Arguments args){
     }
     std::cout << std::endl;
 
+    std::cout << "Top level modules: " << args.topModules.size() << std::endl;
+    for(int i = 0; i < args.topModules.size(); i++){
+        std::cout << "    " << args.topModules.at(i) << std::endl;
+    }
+    std::cout << std::endl;
+
     std::cout << "level arg: " << std::endl;
     std::cout << "    " << args.level;
     std::cout << std::endl;
@@ -160,6 +166,15 @@ void printTree(Tree hierarchyTree, struct Arguments args){
         }
         std::cout << std::endl;
     }
+
+    // print a summary of the top level modules as a reminder
+    if(args.topModules.size() > 0){
+        std::cout << "User specified top-level modules: ";
+        for(int j = 0; j < args.topModules.size(); j++){
+            std::cout << args.topModules.at(j) << " ";
+        }
+        std::cout << std::endl;
+    }
 }
 
 int main(int argc, char **argv){
@@ -174,7 +189,7 @@ int main(int argc, char **argv){
 
     // TODO: figure out what to do with --iterative and --recursive? Probably not going to implement these afterall
     // accepted list of arguments, must remember to update number in parentheses!!!
-    std::array<std::string,18> argListFlags = 
+    std::array<std::string,20> argListFlags = 
                               {"-h",             // display usage and flags information
                                "--help",
                                "-f",             // file paths
@@ -187,6 +202,8 @@ int main(int argc, char **argv){
                                "--max-hierarchy",
                                "-n",             // don't print out this/these module names
                                "--ignore-modules",
+                               "-T",             // manually specify top-level module(s)
+                               "--top",
                                "--lang",         // one of either [verilog ^ vhdl]
                                "--debug",        // more verbose output, print out internal variables
                                "--super-debug",  // print out even more debug output
@@ -222,7 +239,7 @@ int main(int argc, char **argv){
 
     // now parse the Verilog/VHDL, searching for the key phrases and generate the logical hierarchy
     // this is the main algorithm to configure the tree
-    hierarchyTree = deriveHierarchyTree(hierarchyTreePtr, args.rtlFiles, parentNodeRegexStr, childNodeRegexStr, args.debug, args.superDebug, args.noIncModules, args.maxHierarchyLevel);
+    hierarchyTree = deriveHierarchyTree(hierarchyTreePtr, args.rtlFiles, parentNodeRegexStr, childNodeRegexStr, args.debug, args.superDebug, args.noIncModules, args.maxHierarchyLevel, args.topModules);
 
     // display the tree structure of the RTL
     printTree(hierarchyTree, args);

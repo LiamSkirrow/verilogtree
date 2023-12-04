@@ -2,7 +2,7 @@ name: main branch autotests
 
 on:
   push:
-    branches: [main, 25-test-infrastructure]
+    branches: [main]
   pull_request:
     branches: [main]
 

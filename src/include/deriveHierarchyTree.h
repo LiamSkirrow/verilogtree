@@ -49,6 +49,7 @@ class Tree{
 
     public:
         void setParentNodes(std::vector<Node> pNodes);
+        bool getParentNodeExistence(std::string str);
         Node * getParentNodeAtIndex(int index);
         int getParentNodesSize();
         void setMap(std::map<std::string, Node> pNodeMap);
@@ -60,8 +61,8 @@ class Tree{
         int getTreeRootSize();
 };
 
-Tree deriveHierarchyTree(Tree *hierarchyTreePtr, std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug, bool superDebug, std::vector<std::string> noIncModules, int maxHierarchyLevel);
+Tree deriveHierarchyTree(Tree *hierarchyTreePtr, std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug, bool superDebug, std::vector<std::string> noIncModules, int maxHierarchyLevel, std::vector<std::string> topModules);
 void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, std::map<std::string, Node> *pNodeMapPtr, bool debug);
-void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::vector<std::string> noIncModules, int maxHierarchyLevel);
+void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::vector<std::string> noIncModules, std::vector<std::string> topModules, int maxHierarchyLevel);
 void tokenizeString(std::string str, std::string *tokenisedStringPtr);
 void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, bool superDebug, std::vector<std::string> noIncModules, int level, int maxHierarchyLevel);

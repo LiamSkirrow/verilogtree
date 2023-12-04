@@ -37,6 +37,19 @@ void Tree::setParentNodes(std::vector<Node> pNodes){
     this->parentNodes = pNodes;
 }
 
+// linear search through the parentNodes vector and check for existence of Node with name str
+bool Tree::getParentNodeExistence(std::string str){
+    bool moduleExists = false;
+    for(int i = 0; i < this->parentNodes.size(); i++){
+        // check if module name matches, therefore module exists, break and return True
+        if(this->parentNodes.at(i).getModuleName() == str){
+            moduleExists = true;
+            break;
+        }
+    }
+    return moduleExists;
+}
+
 Node * Tree::getParentNodeAtIndex(int index){
     Node *pNodePtr;
     pNodePtr = &this->parentNodes.at(index);
@@ -289,7 +302,7 @@ void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, bool s
 }
 
 // main algorithm for elaborating the tree of parent nodes
-void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::vector<std::string> noIncModules, int maxHierarchyLevel){
+void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::vector<std::string> noIncModules, std::vector<std::string> topModules, int maxHierarchyLevel){
     // algorithm:
     // - the hash table allows for a lookup of a module, given the module name. Returns the ParentNode object
     // - iterate over the hTree parent nodes and assign child nodes as instantiated using the isInstantiated bool
@@ -336,13 +349,32 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::ve
         }
     }
 
-    // find the top level modules and push to Tree's tree root vector
-    for(int i = 0; i < parentNodeSize; i++){
-        pNodePtr = hTreePtr->getParentNodeAtIndex(i);
-        testInstantiated = hTreePtr->getMapElem(pNodePtr->getModuleName())->getIsInstantiated();
-        if(!testInstantiated){
-            // now add the top level modules to the Tree's root nodes vector
-            hTreePtr->pushTreeRoot(*pNodePtr);
+    // TODO: issue #45, print out at the bottom "Using <modules> as top level modules"
+
+    // before assigning the top level modules, check if the user has specified the top modules,
+    // otherwise, infer them automatically by figuring out which modules are *not* instantiated
+    if(topModules.size() > 0){
+        Node *tmpNode;
+        for(int i = 0; i < topModules.size(); i++){
+            // check if module exists in the design
+            if(!hTreePtr->getParentNodeExistence(topModules.at(i))){
+                std::cout << "*** Warning: Specified top-level module: \"" << topModules.at(i) << "\" does not exist!" << std::endl;
+            }
+            else{
+                tmpNode = hTreePtr->getMapElem(topModules.at(i));
+                hTreePtr->pushTreeRoot(*tmpNode);
+            }
+        }
+    }
+    else{
+        // find the top level modules and push to Tree's tree root vector
+        for(int i = 0; i < parentNodeSize; i++){
+            pNodePtr = hTreePtr->getParentNodeAtIndex(i);
+            testInstantiated = hTreePtr->getMapElem(pNodePtr->getModuleName())->getIsInstantiated();
+            if(!testInstantiated){
+                // now add the top level modules to the Tree's root nodes vector
+                hTreePtr->pushTreeRoot(*pNodePtr);
+            }
         }
     }
     // assemble the final tree, starting at the tree roots
@@ -387,7 +419,7 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::ve
 }
 
 // top level function, dispatch the rtl parsing and tree construction functions, return the Tree to main
-Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug, bool superDebug, std::vector<std::string> noIncModules, int maxHierarchyLevel){
+Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug, bool superDebug, std::vector<std::string> noIncModules, int maxHierarchyLevel, std::vector<std::string> topModules){
 
     Tree hTree;
     // Tree *hTreePtr;
@@ -430,7 +462,24 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
     hTreePtr->setMap(*pNodeMapPtr);
 
     // now (recursively?) replace all child nodes with parent nodes to construct the tree
-    elaborateHierarchyTree(hTreePtr, debug, superDebug, noIncModules, maxHierarchyLevel);
+    elaborateHierarchyTree(hTreePtr, debug, superDebug, noIncModules, topModules, maxHierarchyLevel);
+
+    // replace the tree with the manually specified top-level modules, if necessary
+    if(topModules.size() > 0){
+        // - loop over the specified top modules
+        // - perform a lookup for each one, and if it exists, override the existing 'treeRoots' std::vector<Node>
+
+        // ALTERNATIVE METHOD:
+        // - perform a lookup for each top-level module passed in by the user
+        // - override each Node's isInstantiated flag to false, this should cause it to be treated as a tree root
+        //   by one of my functions... This is the easiest approach and should hopefully work ok!
+        
+        // - line 335 above is where the setIsInstantiated setter method gets called, just include a conditional
+        //   up there to check if the Node is a module that the user wants to treat as a top module, and if so 
+        //   then don't call the setter method...
+        // - after that, delete *this* conditional and these comments
+    }
+
 
     return *hTreePtr;
 
