@@ -166,6 +166,15 @@ void printTree(Tree hierarchyTree, struct Arguments args){
         }
         std::cout << std::endl;
     }
+
+    // print a summary of the top level modules as a reminder
+    if(args.topModules.size() > 0){
+        std::cout << "User specified top-level modules: ";
+        for(int j = 0; j < args.topModules.size(); j++){
+            std::cout << args.topModules.at(j) << " ";
+        }
+        std::cout << std::endl;
+    }
 }
 
 int main(int argc, char **argv){

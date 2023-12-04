@@ -358,7 +358,7 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::ve
         for(int i = 0; i < topModules.size(); i++){
             // check if module exists in the design
             if(!hTreePtr->getParentNodeExistence(topModules.at(i))){
-                std::cout << "*** Error: Specified top-level module: \"" << topModules.at(i) << "\" does not exist!" << std::endl;
+                std::cout << "*** Warning: Specified top-level module: \"" << topModules.at(i) << "\" does not exist!" << std::endl;
             }
             else{
                 tmpNode = hTreePtr->getMapElem(topModules.at(i));
