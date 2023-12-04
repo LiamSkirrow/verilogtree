@@ -115,6 +115,19 @@ out the filenames. Consider a filelist named \fBsimple_filelist\fP with the foll
 The following command could then be used to generate the above verilogtree output:
 \fIverilogtree --no-inst-name --filelist simple_filelist\fP
 
+Additionally, the top level module can be manually specified rather than relying on the automatic 
+top-level detection in verilogtree by using the --top argument. For example, in the above hierarchy,
+verilogtree can be told to treat mod0 as the top-level module by running the following:
+\fIverilogtree --no-inst-name --filelist simple_filelist --top mod0\fP, which will give the following
+print out:
+
+    mod0 
+    ├── mod3 
+    │   └── mod4 
+    └── mod1 
+        └── mod2
+
+
 .SH AUTHOR
 Written by Liam Skirrow (skirrowliam@gmail.com)
 .br
