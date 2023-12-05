@@ -156,7 +156,9 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
     std::vector<std::string> tokenisedString;
     std::vector<std::string> *tokenisedStringPtr = &tokenisedString;
     std::smatch matchObjParent;
+    std::smatch matchObjParentModuleWord;
     std::smatch matchObjChild;
+    std::smatch tmpMatchObj;
     Node tmpNode;
     Node *tmpNodePtr;
 
@@ -180,9 +182,12 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
             // - May need to store sub-pattern regexes to match the components one at a time...
             // - can then advance the line forward by as many lines as necessary
             
-            // check for a parent-node match
+            // check for a one-liner match
             std::regex_search(line, matchObjParent, regexStrings.parentNodeRegexStr);
             std::regex_search(line, matchObjChild,  regexStrings.childNodeRegexStr);
+            // check for potential mult-liner matches
+            std::regex_search(line, matchObjParentModuleWord, regexStrings.parentNodeRegexStrModuleWord);
+
             // found a parent node
             if(matchObjParent.size() == 1){
                 // tokenise the parent node string, splitting on arbitrary number of space chars
@@ -238,6 +243,37 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                     // pNodeMapPtr->insert(std::pair<std::string, Node>(moduleName, *tmpNodePtr));
                     tmpNodeMap[moduleName] = *tmpNodePtr;
                 }
+            }
+            // we haven't got a one-liner match, try to match over multiple lines ignoring whitespace
+            else if(matchObjParentModuleWord.size() == 1){
+                // we've at least found the word 'module' on its own, check upcoming lines 
+                // for potential module declaration spread over multiple lines...
+
+                // we have the word 'module', now check if the module name is on the same line
+                std::regex_search(line, tmpMatchObj, regexStrings.parentNodeRegexStrModuleWordAndName);
+                if(tmpMatchObj.size() == 1){
+                    // 'module' and module-name are on the same line
+
+                    // TODO: now go and check that there is only whitespace followed by # and/or (
+
+                    // tokenise the parent node string, splitting on arbitrary number of space chars
+                    tokenisedStringPtr->clear();
+                    tokeniseString(matchObjParent.str(), tokenisedStringPtr, false);
+                    moduleName = tokenisedStringPtr->at(1);
+
+                    if(superDebug){
+                        std::cout << "Module definition found in file " << rtlFiles.at(i) << ": \"" << matchObjParent.str() << "\" with module name: \"";
+                        std::cout << moduleName << "\" " << std::endl;
+                    }
+                }
+                else{
+                    // 'module' and module-name are on different lines, go and fine module-name
+                }
+                
+                // above code should form the string ready to be tokenised, just include some code
+                // below to confirm that there is indeed a # or a ( separated only by newlines/whitespace
+                // to complete the module declaration
+                
             }
         }
         rtlFileObj.close();

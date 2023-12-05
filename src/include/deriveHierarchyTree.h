@@ -68,6 +68,7 @@ struct RegexStrings{
     // regex strings to match multi-line module declarations/instantiations
     std::regex parentNodeRegexStrModuleWord;
     std::regex parentNodeRegexStrModuleName;
+    std::regex parentNodeRegexStrModuleWordAndName;
     // TODO: could even potentially split the # and the ( over newlines
     std::regex parentNodeRegexStrModuleParenthesis;
     // TODO:
