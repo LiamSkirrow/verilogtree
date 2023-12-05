@@ -349,8 +349,6 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::ve
         }
     }
 
-    // TODO: issue #45, print out at the bottom "Using <modules> as top level modules"
-
     // before assigning the top level modules, check if the user has specified the top modules,
     // otherwise, infer them automatically by figuring out which modules are *not* instantiated
     if(topModules.size() > 0){
