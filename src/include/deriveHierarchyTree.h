@@ -61,8 +61,22 @@ class Tree{
         int getTreeRootSize();
 };
 
-Tree deriveHierarchyTree(Tree *hierarchyTreePtr, std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug, bool superDebug, std::vector<std::string> noIncModules, int maxHierarchyLevel, std::vector<std::string> topModules);
-void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, std::map<std::string, Node> *pNodeMapPtr, bool debug);
+struct RegexStrings{
+    // regex strings to match one-line module declarations/instantiations
+    std::regex parentNodeRegexStr;
+    std::regex childNodeRegexStr;
+    // regex strings to match multi-line module declarations/instantiations
+    std::regex parentNodeRegexStrModuleWord;
+    std::regex parentNodeRegexStrModuleName;
+    // TODO: could even potentially split the # and the ( over newlines
+    std::regex parentNodeRegexStrModuleParenthesis;
+    // TODO:
+    // std::regex childNodeRegexStr  = "^\\s*\\w+\\s+\\w+\\s*\\(";
+
+};
+
+Tree deriveHierarchyTree(Tree *hierarchyTreePtr, std::vector<std::string> rtlFiles, RegexStrings regexStrings, bool debug, bool superDebug, std::vector<std::string> noIncModules, int maxHierarchyLevel, std::vector<std::string> topModules);
+void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, RegexStrings regexStrings, std::map<std::string, Node> *pNodeMapPtr, bool debug);
 void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::vector<std::string> noIncModules, std::vector<std::string> topModules, int maxHierarchyLevel);
 void tokenizeString(std::string str, std::string *tokenisedStringPtr);
 void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, bool superDebug, std::vector<std::string> noIncModules, int level, int maxHierarchyLevel);

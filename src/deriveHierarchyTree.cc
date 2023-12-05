@@ -145,7 +145,7 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
 // TODO: need a systematic way to find false modules (they appear as child nodes but not parent nodes!) and print this out in an error message...
 //       v0.1.0 should be pretty full proof and should not print out any false modules
 
-void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, std::map<std::string, Node> *pNodeMapPtr, bool debug, bool superDebug){
+void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, RegexStrings regexStrings, std::map<std::string, Node> *pNodeMapPtr, bool debug, bool superDebug){
 
     std::fstream rtlFileObj;
     std::string line;
@@ -181,8 +181,8 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
             // - can then advance the line forward by as many lines as necessary
             
             // check for a parent-node match
-            std::regex_search(line, matchObjParent, parentNodeRegexStr);
-            std::regex_search(line, matchObjChild,  childNodeRegexStr);
+            std::regex_search(line, matchObjParent, regexStrings.parentNodeRegexStr);
+            std::regex_search(line, matchObjChild,  regexStrings.childNodeRegexStr);
             // found a parent node
             if(matchObjParent.size() == 1){
                 // tokenise the parent node string, splitting on arbitrary number of space chars
@@ -417,7 +417,7 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::ve
 }
 
 // top level function, dispatch the rtl parsing and tree construction functions, return the Tree to main
-Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug, bool superDebug, std::vector<std::string> noIncModules, int maxHierarchyLevel, std::vector<std::string> topModules){
+Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, RegexStrings regexStrings, bool debug, bool superDebug, std::vector<std::string> noIncModules, int maxHierarchyLevel, std::vector<std::string> topModules){
 
     Tree hTree;
     // Tree *hTreePtr;
@@ -433,7 +433,7 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
 
 
     // parse the RTL according to the regex strings. Create distinct parent-child node groups
-    parseRtl(rtlFiles, parentNodeVecPtr, parentNodeRegexStr, childNodeRegexStr, pNodeMapPtr, debug, superDebug);
+    parseRtl(rtlFiles, parentNodeVecPtr, regexStrings, pNodeMapPtr, debug, superDebug);
 
     // int pNodeMapSize = pNodeMap[parentNodeVecPtr->at(0).getModuleName()].getChildNodesSize();
     std::string debugModuleName;
