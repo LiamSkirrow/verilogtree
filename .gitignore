@@ -1,3 +1,4 @@
 verilogtree
 tests/verilogtree
 tests/rtl/ibex/
+src/obj/*.o
