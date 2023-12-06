@@ -1,9 +1,5 @@
 # Makefile for verilogtree project, reference: https://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/
 
-# don't forget to .gitignore the object files dir
-
-# test whether the header files are being tracked properly
-
 IDIR=src/include
 SRC=src/*.cc
 CC=g++
@@ -12,16 +8,19 @@ CFLAGS=-I$(IDIR)
 DEPS = src/include/*.h
 #src/include/deriveHierarchyTree.h src/include/parseUserArgs.h
 ODIR=src/obj/
-OBJ = main.o deriveHierarchyTree.o parseUserArgs.o
+OBJ = src/obj/main.o src/obj/deriveHierarchyTree.o src/obj/parseUserArgs.o
+# TODO:
+# would be nice to make the above line use *.o instead of having to manually 
+# list the object files individually
 
 # compile (but don't link) each changed C++ file
-%.o: src/%.cc $(DEPS)
+$(ODIR)%.o: src/%.cc $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 # link all the object files
 verilogtree: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
-	cp verilogtree ./tests
+	@cp verilogtree ./tests
 	
 .PHONY: clean
 
