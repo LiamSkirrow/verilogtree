@@ -12,10 +12,10 @@ CFLAGS=-I$(IDIR)
 DEPS = src/include/*.h
 #src/include/deriveHierarchyTree.h src/include/parseUserArgs.h
 ODIR=src/obj/
-OBJ = $(ODIR)main.o $(ODIR)deriveHierarchyTree.o $(ODIR)parseUserArgs.o
+OBJ = main.o deriveHierarchyTree.o parseUserArgs.o
 
 # compile (but don't link) each changed C++ file
-$(ODIR)/%.o: src/%.cc $(DEPS)
+%.o: src/%.cc $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 # link all the object files
