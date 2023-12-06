@@ -258,11 +258,11 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
 
                     // tokenise the parent node string, splitting on arbitrary number of space chars
                     tokenisedStringPtr->clear();
-                    tokeniseString(matchObjParent.str(), tokenisedStringPtr, false);
+                    tokeniseString(tmpMatchObj.str(), tokenisedStringPtr, false);
                     moduleName = tokenisedStringPtr->at(1);
 
                     if(superDebug){
-                        std::cout << "Module definition found in file " << rtlFiles.at(i) << ": \"" << matchObjParent.str() << "\" with module name: \"";
+                        std::cout << "Module definition found in file " << rtlFiles.at(i) << ": \"" << tmpMatchObj.str() << "\" with module name: \"";
                         std::cout << moduleName << "\" " << std::endl;
                     }
                 }
