@@ -194,6 +194,9 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 tokenisedStringPtr->clear();
                 tokeniseString(matchObjParent.str(), tokenisedStringPtr, false);
                 moduleName = tokenisedStringPtr->at(1);
+                
+                std::cout << "*** Known good matched module name: " << tokenisedStringPtr->at(1) << std::endl; 
+                std::cout << "*** Known good matched string size: " << tokenisedStringPtr->size() << std::endl; 
 
                 if(superDebug){
                     std::cout << "Module definition found in file " << rtlFiles.at(i) << ": \"" << matchObjParent.str() << "\" with module name: \"";
@@ -246,8 +249,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
             }
             // we haven't got a one-liner match, try to match over multiple lines ignoring whitespace
             else if(matchObjParentModuleWord.size() == 1){
-                // we've at least found the word 'module' on its own, check upcoming lines 
-                // for potential module declaration spread over multiple lines...
+                // we've at least found the word 'module' on its own, figure out where the module name is
 
                 // we have the word 'module', now check if the module name is on the same line
                 std::regex_search(line, tmpMatchObj, regexStrings.parentNodeRegexStrModuleWordAndName);
@@ -258,7 +260,14 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
 
                     // tokenise the parent node string, splitting on arbitrary number of space chars
                     tokenisedStringPtr->clear();
-                    tokeniseString(tmpMatchObj.str(), tokenisedStringPtr, false);
+                    
+                    // TODO: the issue is that the tokeniseString() function is explicitly looking for 
+                    // # or ( to terminate the instance name. Need to pass in a different parameter to disable this
+                    // depending on which string format we're looking for -> for example, 'bool: oneLiner'
+                    
+                    tokeniseString(tmpMatchObj.str(), tokenisedStringPtr, true);
+                    std::cout << "*** Matched string size: " << tokenisedStringPtr->size() << std::endl; 
+                    std::cout << "*** Matched string: " << tokenisedStringPtr->at(1) << std::endl; 
                     moduleName = tokenisedStringPtr->at(1);
 
                     if(superDebug){
