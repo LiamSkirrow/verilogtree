@@ -104,6 +104,19 @@ int Node::getChildNodesSize(){
     return this->childNodes.size();
 }
 
+
+/*
+* The tokenising code works as follows:
+* - Starting from the beginning of a line of Verilog, advance forward through any whitespace
+*   and record the position (using indexStart) of the first non-whitespace character
+* - Then advance forward and find the next space char, the substring starting at 'indexStart'
+*   and finishing at for loop index 'i' is the first element, for a module declaration, it
+*   is the word 'module'
+* - Push to the back of the tokenisedStringPtr vector, and repeat this process for the next element
+* - Note that the 'landmarks' in the string vary depending on whether the whole thing is included
+*   on the same line or split between different lines, this is the purpose of the macros MULTI_LINE_X
+*/
+
 // *** NOTE:
 // I do not like the current tokenising code, maybe refactor it from here.
 
@@ -115,16 +128,21 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
     std::string substr;
     std::size_t found;
     for(int i = 0; i < str.size(); i++){
+        // TODO: will this play nicely with tabs?
         if(str[i] != ' ' && !indexStartAssigned){
             indexStart = i;
             indexStartAssigned = true;
         }
-        else if((str[i] == '(' || str[i] == '#' || str[i] == ' ') && indexStartAssigned){
+        else if( ((str[i] == '(' || str[i] == '#' || str[i] == ' ') || ((string_format == MULTI_LINE_1) && i == str.size()-1))
+        && indexStartAssigned){
+
             substr = str.substr(indexStart, i);
 
-            if(superDebug) { std::cout << "substr before trim: " << '<' << substr << '>' << std::endl; }
+            if(superDebug)
+                std::cout << "substr before trim: " << '<' << substr << '>' << std::endl;
+
             for( ; ; ){
-                found = substr.find_first_of(" #(");
+                found = substr.find_first_of("\r #(");
                 // found an unwanted char, delete it
                 if(found != std::string::npos){
                     substr.erase(found);
@@ -133,7 +151,10 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
                     break;
                 }
             }
-            if(superDebug) { std::cout << "substr after trim: " << '<' << substr << '>' << std::endl; }
+
+            if(superDebug)
+                std::cout << "substr after trim: " << '<' << substr << '>' << std::endl; 
+
             tokenisedStringPtr->push_back(substr);
             indexStart = 0;
             indexStartAssigned = false;
@@ -158,7 +179,8 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
     std::smatch matchObjParent;
     std::smatch matchObjParentModuleWord;
     std::smatch matchObjChild;
-    std::smatch tmpMatchObj;
+    std::smatch tmpMatchObj0;
+    std::smatch tmpMatchObj1;
     Node tmpNode;
     Node *tmpNodePtr;
 
@@ -188,15 +210,12 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
             // check for potential mult-liner matches
             std::regex_search(line, matchObjParentModuleWord, regexStrings.parentNodeRegexStrModuleWord);
 
-            // found a parent node
+            // found a parent node all on one line
             if(matchObjParent.size() == 1){
                 // tokenise the parent node string, splitting on arbitrary number of space chars
                 tokenisedStringPtr->clear();
                 tokeniseString(matchObjParent.str(), tokenisedStringPtr, false, MULTI_LINE_0);
                 moduleName = tokenisedStringPtr->at(1);
-                
-                std::cout << "*** Known good matched module name: " << tokenisedStringPtr->at(1) << std::endl; 
-                std::cout << "*** Known good matched string size: " << tokenisedStringPtr->size() << std::endl; 
 
                 if(superDebug){
                     std::cout << "Module definition found in file " << rtlFiles.at(i) << ": \"" << matchObjParent.str() << "\" with module name: \"";
@@ -210,7 +229,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 // pNodeMapPtr->insert(std::pair<std::string, Node>(moduleName, curr0));
                 tmpNodeMap[moduleName] = curr0;
             }
-            // found a child node
+            // found a child node all on one line
             else if(matchObjChild.size() == 1){
                 // tokenise the child node string, splitting on arbitrary number of space chars
                 tokenisedStringPtr->clear();
@@ -247,42 +266,43 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                     tmpNodeMap[moduleName] = *tmpNodePtr;
                 }
             }
-            // we haven't got a one-liner match, try to match over multiple lines ignoring whitespace
+            // multi-line parent node
             else if(matchObjParentModuleWord.size() == 1){
                 // we've at least found the word 'module' on its own, figure out where the module name is
 
                 // we have the word 'module', now check if the module name is on the same line
-                std::regex_search(line, tmpMatchObj, regexStrings.parentNodeRegexStrModuleWordAndName);
-                if(tmpMatchObj.size() == 1){
-                    // 'module' and module-name are on the same line
-
-                    // TODO: now go and check that there is only whitespace followed by # and/or (
+                std::regex_search(line, tmpMatchObj0, regexStrings.parentNodeRegexStrModuleWordAndName);
+                // and check if the line only contains the word 'module'
+                // std::regex_search(line, tmpMatchObj1, regexStrings.parentNodeRegexStrModuleWord);
+                // 'module' and module-name are on the same line
+                if(tmpMatchObj0.size() == 1){
 
                     // tokenise the parent node string, splitting on arbitrary number of space chars
                     tokenisedStringPtr->clear();
-                    
-                    // TODO: the issue is that the tokeniseString() function is explicitly looking for 
-                    // # or ( to terminate the instance name. Need to pass in a different parameter to disable this
-                    // depending on which string format we're looking for -> for example, 'bool: oneLiner'
-                    
-                    tokeniseString(tmpMatchObj.str(), tokenisedStringPtr, true, MULTI_LINE_1);
-                    std::cout << "*** Matched string size: " << tokenisedStringPtr->size() << std::endl; 
-                    std::cout << "*** Matched string: " << tokenisedStringPtr->at(1) << std::endl; 
+                    tokeniseString(tmpMatchObj0.str(), tokenisedStringPtr, false, MULTI_LINE_1);                    
                     moduleName = tokenisedStringPtr->at(1);
-
+                    
                     if(superDebug){
-                        std::cout << "Module definition found in file " << rtlFiles.at(i) << ": \"" << tmpMatchObj.str() << "\" with module name: \"";
+                        // FIXME: printing out tmpMatchObj0.str() gives weird output here for this sub-case...
+                        std::cout << "Module definition found in file " << rtlFiles.at(i) << ": \"" << tmpMatchObj0.str() << "\" with module name: \"";
                         std::cout << moduleName << "\" " << std::endl;
                     }
+
+                    // create the parent Node object
+                    Node curr0;
+                    curr0.setModuleName(moduleName);
+                    parentNodeVecPtr->push_back(curr0);
+                    // add an entry to the hash table of parent nodes
+                    tmpNodeMap[moduleName] = curr0;
                 }
+                // 'module' and module-name are on different lines, go and find module-name
                 else{
-                    // 'module' and module-name are on different lines, go and fine module-name
+                    
                 }
-                
-                // above code should form the string ready to be tokenised, just include some code
-                // below to confirm that there is indeed a # or a ( separated only by newlines/whitespace
-                // to complete the module declaration
-                
+            }
+            // multi-line child node
+            else if(false){
+
             }
         }
         rtlFileObj.close();
