@@ -7,17 +7,9 @@
 #include <regex>
 #include <cstddef>
 
-// child nodes
-// class ChildNode{
-//     std::string moduleName;
-//     std::string instanceName;
-
-//     public:
-//         void setModuleName(std::string str);
-//         void setInstName(std::string str);
-//         std::string getModuleName();
-//         std::string getInstName();
-// };
+#define MULTI_LINE_0 0  // one liner
+#define MULTI_LINE_1 1  // module keyword and module name on same line
+#define MULTI_LINE_2 2  // module keyword, module name and #/( all on different lines
 
 // node representing a Verilog module
 class Node{
@@ -79,5 +71,5 @@ struct RegexStrings{
 Tree deriveHierarchyTree(Tree *hierarchyTreePtr, std::vector<std::string> rtlFiles, RegexStrings regexStrings, bool debug, bool superDebug, std::vector<std::string> noIncModules, int maxHierarchyLevel, std::vector<std::string> topModules);
 void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, RegexStrings regexStrings, std::map<std::string, Node> *pNodeMapPtr, bool debug);
 void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::vector<std::string> noIncModules, std::vector<std::string> topModules, int maxHierarchyLevel);
-void tokenizeString(std::string str, std::string *tokenisedStringPtr);
+void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPtr, bool superDebug, int string_format);
 void constructTreeRecursively(Node *pNodePtr, Tree *hTreePtr, bool debug, bool superDebug, std::vector<std::string> noIncModules, int level, int maxHierarchyLevel);

@@ -108,7 +108,7 @@ int Node::getChildNodesSize(){
 // I do not like the current tokenising code, maybe refactor it from here.
 
 // given the raw regex match from the RTL files, strip whitespace and store the two text words
-void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPtr, bool superDebug){
+void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPtr, bool superDebug, int string_format){
     // loop through str and push the sub-words to tokenisedStringPtr
     int indexStart = 0;
     bool indexStartAssigned = false;
@@ -192,7 +192,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
             if(matchObjParent.size() == 1){
                 // tokenise the parent node string, splitting on arbitrary number of space chars
                 tokenisedStringPtr->clear();
-                tokeniseString(matchObjParent.str(), tokenisedStringPtr, false);
+                tokeniseString(matchObjParent.str(), tokenisedStringPtr, false, MULTI_LINE_0);
                 moduleName = tokenisedStringPtr->at(1);
                 
                 std::cout << "*** Known good matched module name: " << tokenisedStringPtr->at(1) << std::endl; 
@@ -214,7 +214,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
             else if(matchObjChild.size() == 1){
                 // tokenise the child node string, splitting on arbitrary number of space chars
                 tokenisedStringPtr->clear();
-                tokeniseString(matchObjChild.str(), tokenisedStringPtr, false);
+                tokeniseString(matchObjChild.str(), tokenisedStringPtr, false, MULTI_LINE_0);
                 // moduleName = tokenisedStringPtr->at(0);
                 instName = tokenisedStringPtr->at(1);
                 
@@ -265,7 +265,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                     // # or ( to terminate the instance name. Need to pass in a different parameter to disable this
                     // depending on which string format we're looking for -> for example, 'bool: oneLiner'
                     
-                    tokeniseString(tmpMatchObj.str(), tokenisedStringPtr, true);
+                    tokeniseString(tmpMatchObj.str(), tokenisedStringPtr, true, MULTI_LINE_1);
                     std::cout << "*** Matched string size: " << tokenisedStringPtr->size() << std::endl; 
                     std::cout << "*** Matched string: " << tokenisedStringPtr->at(1) << std::endl; 
                     moduleName = tokenisedStringPtr->at(1);
