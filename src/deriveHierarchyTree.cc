@@ -169,7 +169,9 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
 void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, RegexStrings regexStrings, std::map<std::string, Node> *pNodeMapPtr, bool debug, bool superDebug){
 
     std::fstream rtlFileObj;
-    std::string line;
+    std::fstream *tmpRtlFileObj;
+    // std::string line;
+    // std::string tmpLine;
     std::string moduleName;
     std::string instName;
     std::string childModuleName;
@@ -283,8 +285,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                     moduleName = tokenisedStringPtr->at(1);
                     
                     if(superDebug){
-                        // FIXME: printing out tmpMatchObj0.str() gives weird output here for this sub-case...
-                        std::cout << "Module definition found in file " << rtlFiles.at(i) << ": \"" << tmpMatchObj0.str() << "\" with module name: \"";
+                        std::cout << "Module definition found in file " << rtlFiles.at(i) << ": \"" << tmpMatchObj0.str().substr(0, tmpMatchObj0.str().size()-1) << "\" with module name: \"";
                         std::cout << moduleName << "\" " << std::endl;
                     }
 
@@ -297,7 +298,34 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 }
                 // 'module' and module-name are on different lines, go and find module-name
                 else{
-                    
+                    tmpRtlFileObj = &rtlFileObj;
+                    std::cout << "Found a newline module, scanning along...: " << std::endl;
+                    for(std::string tmpLine; getline(*tmpRtlFileObj, tmpLine); ){
+                    // do the above in a for loop and search for the first
+                    // word on a line, ignoring trailing characters
+                    // then create a new module based on this...
+
+                        std::cout << "   Looking...: " << std::endl;
+                        std::regex_search(tmpLine, tmpMatchObj0, regexStrings.parentNodeRegexStrModuleName);
+                        if(tmpMatchObj0.size() == 1){
+                            break;
+                        }
+                        // TODO: might be helpful to add some more super-debug text output here for debugging
+                    }
+
+                    // tokenise the parent node string, splitting on arbitrary number of space chars
+                    tokenisedStringPtr->clear();
+                    tokeniseString(tmpMatchObj0.str(), tokenisedStringPtr, false, MULTI_LINE_1);                    
+                    moduleName = tokenisedStringPtr->at(0);
+                    std::cout << "   Found module name: \"" << moduleName << '\"' << std::endl;
+
+                    // create the parent Node object
+                    Node curr0;
+                    curr0.setModuleName(moduleName);
+                    parentNodeVecPtr->push_back(curr0);
+                    // add an entry to the hash table of parent nodes
+                    tmpNodeMap[moduleName] = curr0;
+
                 }
             }
             // multi-line child node
