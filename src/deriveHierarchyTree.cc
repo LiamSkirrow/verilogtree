@@ -104,27 +104,45 @@ int Node::getChildNodesSize(){
     return this->childNodes.size();
 }
 
+
+/*
+* The tokenising code works as follows:
+* - Starting from the beginning of a line of Verilog, advance forward through any whitespace
+*   and record the position (using indexStart) of the first non-whitespace character
+* - Then advance forward and find the next space char, the substring starting at 'indexStart'
+*   and finishing at for loop index 'i' is the first element, for a module declaration, it
+*   is the word 'module'
+* - Push to the back of the tokenisedStringPtr vector, and repeat this process for the next element
+* - Note that the 'landmarks' in the string vary depending on whether the whole thing is included
+*   on the same line or split between different lines, this is the purpose of the macros MULTI_LINE_X
+*/
+
 // *** NOTE:
 // I do not like the current tokenising code, maybe refactor it from here.
 
 // given the raw regex match from the RTL files, strip whitespace and store the two text words
-void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPtr, bool superDebug){
+void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPtr, bool superDebug, int string_format){
     // loop through str and push the sub-words to tokenisedStringPtr
     int indexStart = 0;
     bool indexStartAssigned = false;
     std::string substr;
     std::size_t found;
     for(int i = 0; i < str.size(); i++){
+        // TODO: will this play nicely with tabs?
         if(str[i] != ' ' && !indexStartAssigned){
             indexStart = i;
             indexStartAssigned = true;
         }
-        else if((str[i] == '(' || str[i] == '#' || str[i] == ' ') && indexStartAssigned){
+        else if( ((str[i] == '(' || str[i] == '#' || str[i] == ' ') || ((string_format == MULTI_LINE_1) && i == str.size()-1))
+        && indexStartAssigned){
+
             substr = str.substr(indexStart, i);
 
-            if(superDebug) { std::cout << "substr before trim: " << '<' << substr << '>' << std::endl; }
+            if(superDebug)
+                std::cout << "substr before trim: " << '<' << substr << '>' << std::endl;
+
             for( ; ; ){
-                found = substr.find_first_of(" #(");
+                found = substr.find_first_of("\r #(");
                 // found an unwanted char, delete it
                 if(found != std::string::npos){
                     substr.erase(found);
@@ -133,7 +151,10 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
                     break;
                 }
             }
-            if(superDebug) { std::cout << "substr after trim: " << '<' << substr << '>' << std::endl; }
+
+            if(superDebug)
+                std::cout << "substr after trim: " << '<' << substr << '>' << std::endl; 
+
             tokenisedStringPtr->push_back(substr);
             indexStart = 0;
             indexStartAssigned = false;
@@ -145,10 +166,12 @@ void tokeniseString(std::string str, std::vector<std::string> *tokenisedStringPt
 // TODO: need a systematic way to find false modules (they appear as child nodes but not parent nodes!) and print this out in an error message...
 //       v0.1.0 should be pretty full proof and should not print out any false modules
 
-void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, std::map<std::string, Node> *pNodeMapPtr, bool debug, bool superDebug){
+void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVecPtr, RegexStrings regexStrings, std::map<std::string, Node> *pNodeMapPtr, bool debug, bool superDebug){
 
     std::fstream rtlFileObj;
-    std::string line;
+    std::fstream *tmpRtlFileObj;
+    // std::string line;
+    // std::string tmpLine;
     std::string moduleName;
     std::string instName;
     std::string childModuleName;
@@ -156,7 +179,10 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
     std::vector<std::string> tokenisedString;
     std::vector<std::string> *tokenisedStringPtr = &tokenisedString;
     std::smatch matchObjParent;
+    std::smatch matchObjParentModuleWord;
     std::smatch matchObjChild;
+    std::smatch tmpMatchObj0;
+    std::smatch tmpMatchObj1;
     Node tmpNode;
     Node *tmpNodePtr;
 
@@ -180,14 +206,17 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
             // - May need to store sub-pattern regexes to match the components one at a time...
             // - can then advance the line forward by as many lines as necessary
             
-            // check for a parent-node match
-            std::regex_search(line, matchObjParent, parentNodeRegexStr);
-            std::regex_search(line, matchObjChild,  childNodeRegexStr);
-            // found a parent node
+            // check for a one-liner match
+            std::regex_search(line, matchObjParent, regexStrings.parentNodeRegexStr);
+            std::regex_search(line, matchObjChild,  regexStrings.childNodeRegexStr);
+            // check for potential mult-liner matches
+            std::regex_search(line, matchObjParentModuleWord, regexStrings.parentNodeRegexStrModuleWord);
+
+            // found a parent node all on one line
             if(matchObjParent.size() == 1){
                 // tokenise the parent node string, splitting on arbitrary number of space chars
                 tokenisedStringPtr->clear();
-                tokeniseString(matchObjParent.str(), tokenisedStringPtr, false);
+                tokeniseString(matchObjParent.str(), tokenisedStringPtr, false, MULTI_LINE_0);
                 moduleName = tokenisedStringPtr->at(1);
 
                 if(superDebug){
@@ -202,11 +231,11 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 // pNodeMapPtr->insert(std::pair<std::string, Node>(moduleName, curr0));
                 tmpNodeMap[moduleName] = curr0;
             }
-            // found a child node
+            // found a child node all on one line
             else if(matchObjChild.size() == 1){
                 // tokenise the child node string, splitting on arbitrary number of space chars
                 tokenisedStringPtr->clear();
-                tokeniseString(matchObjChild.str(), tokenisedStringPtr, false);
+                tokeniseString(matchObjChild.str(), tokenisedStringPtr, false, MULTI_LINE_0);
                 // moduleName = tokenisedStringPtr->at(0);
                 instName = tokenisedStringPtr->at(1);
                 
@@ -238,6 +267,75 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                     // pNodeMapPtr->insert(std::pair<std::string, Node>(moduleName, *tmpNodePtr));
                     tmpNodeMap[moduleName] = *tmpNodePtr;
                 }
+            }
+            // multi-line parent node
+            else if(matchObjParentModuleWord.size() == 1){
+                // we've at least found the word 'module' on its own, figure out where the module name is
+
+                // we have the word 'module', now check if the module name is on the same line
+                std::regex_search(line, tmpMatchObj0, regexStrings.parentNodeRegexStrModuleWordAndName);
+                // and check if the line only contains the word 'module'
+
+                // 'module' and module-name are on the same line
+                if(tmpMatchObj0.size() == 1){
+
+                    // tokenise the parent node string, splitting on arbitrary number of space chars
+                    tokenisedStringPtr->clear();
+                    tokeniseString(tmpMatchObj0.str(), tokenisedStringPtr, false, MULTI_LINE_1);                    
+                    moduleName = tokenisedStringPtr->at(1);
+                    
+                    if(superDebug){
+                        std::cout << "Module definition found in file " << rtlFiles.at(i) << ": \"" << tmpMatchObj0.str().substr(0, tmpMatchObj0.str().size()-1) << "\" with module name: \"";
+                        std::cout << moduleName << "\" " << std::endl;
+                    }
+
+                    // create the parent Node object
+                    Node curr0;
+                    curr0.setModuleName(moduleName);
+                    parentNodeVecPtr->push_back(curr0);
+                    // add an entry to the hash table of parent nodes
+                    tmpNodeMap[moduleName] = curr0;
+                }
+                // 'module' and module-name are on different lines, go and find module-name
+                else{
+                    // create a copy of the file object 
+                    tmpRtlFileObj = &rtlFileObj;
+                    if(superDebug)
+                        std::cout << "Found a newline module, scanning along...: " << std::endl;
+                    for(std::string tmpLine; getline(*tmpRtlFileObj, tmpLine); ){
+                        if(superDebug)
+                            std::cout << "   Reading a new line... " << std::endl;
+                        std::regex_search(tmpLine, tmpMatchObj0, regexStrings.parentNodeRegexStrModuleName);
+                        if(tmpMatchObj0.size() == 1){
+                            break;
+                        }
+                        // TODO: might be helpful to add some more super-debug text output here for debugging
+                    }
+
+                    // tokenise the parent node string, splitting on arbitrary number of space chars
+                    tokenisedStringPtr->clear();
+                    tokeniseString(tmpMatchObj0.str(), tokenisedStringPtr, false, MULTI_LINE_1);                    
+                    moduleName = tokenisedStringPtr->at(0);
+                    if(superDebug)
+                        std::cout << "   Found module name: \"" << moduleName << '\"' << std::endl;
+
+                    // create the parent Node object
+                    Node curr0;
+                    curr0.setModuleName(moduleName);
+                    parentNodeVecPtr->push_back(curr0);
+                    // add an entry to the hash table of parent nodes
+                    tmpNodeMap[moduleName] = curr0;
+
+                }
+            }
+            // multi-line child node
+            else if(false){
+                // GitHub issue #11: https://github.com/LiamSkirrow/verilogtree/issues/11
+                // This conditional is here as a placeholder, and is where the handling for 
+                // multi line module instantiations would go. However, it would be a bit cumbersome
+                // to handle as of now, since we'd also have to account for structures like 'wire a' or
+                // 'reg b' etc. Leaving this unpopulated for now and maybe I'll think of a way around
+                // in the future...
             }
         }
         rtlFileObj.close();
@@ -349,8 +447,6 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::ve
         }
     }
 
-    // TODO: issue #45, print out at the bottom "Using <modules> as top level modules"
-
     // before assigning the top level modules, check if the user has specified the top modules,
     // otherwise, infer them automatically by figuring out which modules are *not* instantiated
     if(topModules.size() > 0){
@@ -419,7 +515,7 @@ void elaborateHierarchyTree(Tree *hTreePtr, bool debug, bool superDebug, std::ve
 }
 
 // top level function, dispatch the rtl parsing and tree construction functions, return the Tree to main
-Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std::regex parentNodeRegexStr, std::regex childNodeRegexStr, bool debug, bool superDebug, std::vector<std::string> noIncModules, int maxHierarchyLevel, std::vector<std::string> topModules){
+Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, RegexStrings regexStrings, bool debug, bool superDebug, std::vector<std::string> noIncModules, int maxHierarchyLevel, std::vector<std::string> topModules){
 
     Tree hTree;
     // Tree *hTreePtr;
@@ -435,7 +531,7 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
 
 
     // parse the RTL according to the regex strings. Create distinct parent-child node groups
-    parseRtl(rtlFiles, parentNodeVecPtr, parentNodeRegexStr, childNodeRegexStr, pNodeMapPtr, debug, superDebug);
+    parseRtl(rtlFiles, parentNodeVecPtr, regexStrings, pNodeMapPtr, debug, superDebug);
 
     // int pNodeMapSize = pNodeMap[parentNodeVecPtr->at(0).getModuleName()].getChildNodesSize();
     std::string debugModuleName;
@@ -463,23 +559,6 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, std:
 
     // now (recursively?) replace all child nodes with parent nodes to construct the tree
     elaborateHierarchyTree(hTreePtr, debug, superDebug, noIncModules, topModules, maxHierarchyLevel);
-
-    // replace the tree with the manually specified top-level modules, if necessary
-    if(topModules.size() > 0){
-        // - loop over the specified top modules
-        // - perform a lookup for each one, and if it exists, override the existing 'treeRoots' std::vector<Node>
-
-        // ALTERNATIVE METHOD:
-        // - perform a lookup for each top-level module passed in by the user
-        // - override each Node's isInstantiated flag to false, this should cause it to be treated as a tree root
-        //   by one of my functions... This is the easiest approach and should hopefully work ok!
-        
-        // - line 335 above is where the setIsInstantiated setter method gets called, just include a conditional
-        //   up there to check if the Node is a module that the user wants to treat as a top module, and if so 
-        //   then don't call the setter method...
-        // - after that, delete *this* conditional and these comments
-    }
-
 
     return *hTreePtr;
 

@@ -6,7 +6,7 @@
 #include <fstream>
 #include <vector>
 #include <array>
-#include <regex>
+// #include <regex>
 #include <string.h>   // need this?
 
 // move into own file to declutter main.cc, since I will add debug output for the next stages etc
@@ -180,10 +180,11 @@ void printTree(Tree hierarchyTree, struct Arguments args){
 int main(int argc, char **argv){
 
     struct Arguments args;
+    struct RegexStrings regexStrings;
     Tree hierarchyTree;
     Tree *hierarchyTreePtr;
-    std::regex parentNodeRegexStr;
-    std::regex childNodeRegexStr;
+    // std::regex parentNodeRegexStr;
+    // std::regex childNodeRegexStr;
 
     hierarchyTreePtr = &hierarchyTree;
 
@@ -229,9 +230,18 @@ int main(int argc, char **argv){
     // childNodeRegexStr  = (args.lang == "verilog") ? "^\ *\w*\s*\w*\s*\("     : "          ";
     //                                               \_______Verilog______/     \__VHDL__/
 
-    parentNodeRegexStr = "^\\ *module\\s+\\w+\\s*#?\\ *\\(";
+    // parentNodeRegexStr = "^\\s*module\\s+\\w+\\s*#?\\s*\\(";
     // TODO: pretty sure the module instantiations could have a # in them, need to add that to regex...
-    childNodeRegexStr  = "^\\ *\\w+\\s+\\w+\\s*\\(";
+    // childNodeRegexStr  = "^\\s*\\w+\\s+\\w+\\s*\\(";
+
+    // regex strings to match one-line module declarations/instantiations
+    regexStrings.parentNodeRegexStr = "^\\s*module\\s+\\w+\\s*#?\\s*\\(";
+    regexStrings.childNodeRegexStr  = "^\\s*\\w+\\s+\\w+\\s*\\(";
+    // regex strings to match multi-line module declarations/instantiations
+    regexStrings.parentNodeRegexStrModuleWord        = "^\\s*module\\s*";
+    regexStrings.parentNodeRegexStrModuleWordAndName = "^\\s*module\\s+\\w+\\s*";
+    regexStrings.parentNodeRegexStrModuleName        = "^\\s*\\w+\\s*";
+    regexStrings.parentNodeRegexStrModuleParenthesis = "^\\s*#?\\s*\\(";
 
     // NOTE: should I also be storing the hpaths to each module? This may be more efficient to do *while*
     //       the tree is being constructed rather than having to traverse the tree DFS-style to figure
@@ -239,7 +249,7 @@ int main(int argc, char **argv){
 
     // now parse the Verilog/VHDL, searching for the key phrases and generate the logical hierarchy
     // this is the main algorithm to configure the tree
-    hierarchyTree = deriveHierarchyTree(hierarchyTreePtr, args.rtlFiles, parentNodeRegexStr, childNodeRegexStr, args.debug, args.superDebug, args.noIncModules, args.maxHierarchyLevel, args.topModules);
+    hierarchyTree = deriveHierarchyTree(hierarchyTreePtr, args.rtlFiles, regexStrings, args.debug, args.superDebug, args.noIncModules, args.maxHierarchyLevel, args.topModules);
 
     // display the tree structure of the RTL
     printTree(hierarchyTree, args);
