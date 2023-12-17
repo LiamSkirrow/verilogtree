@@ -275,7 +275,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 // we have the word 'module', now check if the module name is on the same line
                 std::regex_search(line, tmpMatchObj0, regexStrings.parentNodeRegexStrModuleWordAndName);
                 // and check if the line only contains the word 'module'
-                // std::regex_search(line, tmpMatchObj1, regexStrings.parentNodeRegexStrModuleWord);
+
                 // 'module' and module-name are on the same line
                 if(tmpMatchObj0.size() == 1){
 
@@ -298,14 +298,13 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 }
                 // 'module' and module-name are on different lines, go and find module-name
                 else{
+                    // create a copy of the file object 
                     tmpRtlFileObj = &rtlFileObj;
-                    std::cout << "Found a newline module, scanning along...: " << std::endl;
+                    if(superDebug)
+                        std::cout << "Found a newline module, scanning along...: " << std::endl;
                     for(std::string tmpLine; getline(*tmpRtlFileObj, tmpLine); ){
-                    // do the above in a for loop and search for the first
-                    // word on a line, ignoring trailing characters
-                    // then create a new module based on this...
-
-                        std::cout << "   Looking...: " << std::endl;
+                        if(superDebug)
+                            std::cout << "   Reading a new line... " << std::endl;
                         std::regex_search(tmpLine, tmpMatchObj0, regexStrings.parentNodeRegexStrModuleName);
                         if(tmpMatchObj0.size() == 1){
                             break;
@@ -317,7 +316,8 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                     tokenisedStringPtr->clear();
                     tokeniseString(tmpMatchObj0.str(), tokenisedStringPtr, false, MULTI_LINE_1);                    
                     moduleName = tokenisedStringPtr->at(0);
-                    std::cout << "   Found module name: \"" << moduleName << '\"' << std::endl;
+                    if(superDebug)
+                        std::cout << "   Found module name: \"" << moduleName << '\"' << std::endl;
 
                     // create the parent Node object
                     Node curr0;
@@ -330,7 +330,12 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
             }
             // multi-line child node
             else if(false){
-
+                // GitHub issue #11: https://github.com/LiamSkirrow/verilogtree/issues/11
+                // This conditional is here as a placeholder, and is where the handling for 
+                // multi line module instantiations would go. However, it would be a bit cumbersome
+                // to handle as of now, since we'd also have to account for structures like 'wire a' or
+                // 'reg b' etc. Leaving this unpopulated for now and maybe I'll think of a way around
+                // in the future...
             }
         }
         rtlFileObj.close();
@@ -554,23 +559,6 @@ Tree deriveHierarchyTree(Tree *hTreePtr, std::vector<std::string> rtlFiles, Rege
 
     // now (recursively?) replace all child nodes with parent nodes to construct the tree
     elaborateHierarchyTree(hTreePtr, debug, superDebug, noIncModules, topModules, maxHierarchyLevel);
-
-    // replace the tree with the manually specified top-level modules, if necessary
-    if(topModules.size() > 0){
-        // - loop over the specified top modules
-        // - perform a lookup for each one, and if it exists, override the existing 'treeRoots' std::vector<Node>
-
-        // ALTERNATIVE METHOD:
-        // - perform a lookup for each top-level module passed in by the user
-        // - override each Node's isInstantiated flag to false, this should cause it to be treated as a tree root
-        //   by one of my functions... This is the easiest approach and should hopefully work ok!
-        
-        // - line 335 above is where the setIsInstantiated setter method gets called, just include a conditional
-        //   up there to check if the Node is a module that the user wants to treat as a top module, and if so 
-        //   then don't call the setter method...
-        // - after that, delete *this* conditional and these comments
-    }
-
 
     return *hTreePtr;
 

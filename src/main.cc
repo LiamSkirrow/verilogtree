@@ -238,7 +238,7 @@ int main(int argc, char **argv){
     regexStrings.parentNodeRegexStr = "^\\s*module\\s+\\w+\\s*#?\\s*\\(";
     regexStrings.childNodeRegexStr  = "^\\s*\\w+\\s+\\w+\\s*\\(";
     // regex strings to match multi-line module declarations/instantiations
-    regexStrings.parentNodeRegexStrModuleWord        = "^\\s*module\\s+";
+    regexStrings.parentNodeRegexStrModuleWord        = "^\\s*module\\s*";
     regexStrings.parentNodeRegexStrModuleWordAndName = "^\\s*module\\s+\\w+\\s*";
     regexStrings.parentNodeRegexStrModuleName        = "^\\s*\\w+\\s*";
     regexStrings.parentNodeRegexStrModuleParenthesis = "^\\s*#?\\s*\\(";
