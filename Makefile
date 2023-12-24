@@ -15,6 +15,9 @@ OBJ = src/obj/main.o src/obj/deriveHierarchyTree.o src/obj/parseUserArgs.o
 
 all: create-dir verilogtree
 
+# delete all object files and compile from nothing
+rebuild: clean all
+
 # create the object file directory
 create-dir:
 	@mkdir -p src/obj
