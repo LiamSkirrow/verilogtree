@@ -61,6 +61,7 @@ struct RegexStrings{
     std::regex parentNodeRegexStrModuleWord;
     std::regex parentNodeRegexStrModuleName;
     std::regex parentNodeRegexStrModuleWordAndName;
+    std::regex parentNodeRegexStrModuleNameAndInst;
     // TODO: could even potentially split the # and the ( over newlines
     std::regex parentNodeRegexStrModuleParenthesis;
     // TODO:

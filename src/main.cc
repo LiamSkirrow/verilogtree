@@ -241,6 +241,7 @@ int main(int argc, char **argv){
     regexStrings.parentNodeRegexStrModuleWord        = "^\\s*module\\s*";
     regexStrings.parentNodeRegexStrModuleWordAndName = "^\\s*module\\s+\\w+\\s*";
     regexStrings.parentNodeRegexStrModuleName        = "^\\s*\\w+\\s*";
+    regexStrings.parentNodeRegexStrModuleNameAndInst = "^\\s*\\w+\\s+\\w+\\s*";
     regexStrings.parentNodeRegexStrModuleParenthesis = "^\\s*#?\\s*\\(";
 
     // NOTE: should I also be storing the hpaths to each module? This may be more efficient to do *while*

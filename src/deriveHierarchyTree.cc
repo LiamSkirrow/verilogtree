@@ -180,6 +180,7 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
     std::vector<std::string> *tokenisedStringPtr = &tokenisedString;
     std::smatch matchObjParent;
     std::smatch matchObjParentModuleWord;
+    std::smatch matchObjChildModule;
     std::smatch matchObjChild;
     std::smatch tmpMatchObj0;
     std::smatch tmpMatchObj1;
@@ -191,10 +192,13 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
     int parentNodeSize;
     int numlines = 0;
     bool caughtFalseModule = false;
+    bool parenthesesFound = false;
 
     tmpNodePtr = &tmpNode;
 
     for(int i = 0; i < rtlFiles.size(); i++){
+        caughtFalseModule = false;
+        parenthesesFound = false;
         // open the next file in the list
         rtlFileObj.open(rtlFiles.at(i));
         // read line-by-line and apply the regex search pattern
@@ -209,8 +213,10 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
             // check for a one-liner match
             std::regex_search(line, matchObjParent, regexStrings.parentNodeRegexStr);
             std::regex_search(line, matchObjChild,  regexStrings.childNodeRegexStr);
-            // check for potential mult-liner matches
+            // check for multi-liner module declaration matches
             std::regex_search(line, matchObjParentModuleWord, regexStrings.parentNodeRegexStrModuleWord);
+            // check for multi-liner module instantiation matches
+            std::regex_search(line, matchObjChildModule, regexStrings.parentNodeRegexStrModuleName);
 
             // found a parent node all on one line
             if(matchObjParent.size() == 1){
@@ -251,12 +257,6 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                     Node curr1;
                     curr1.setModuleName(tokenisedStringPtr->at(0));
                     curr1.setInstName(tokenisedStringPtr->at(1));
-                    // curr1.setModuleName(moduleName);
-                    // curr1.setInstName(instName);
-
-                    // all child nodes are instantiated, only parent nodes are not
-                    // I was hoping this would eliminate the need for the first for loop in elaborateHierarchyTree ?
-                    // curr.setIsInstantiated();
                     
                     // the last parent node is the current one, push the associated child nodes
                     tmpNodePtr = &parentNodeVecPtr->back();
@@ -329,13 +329,69 @@ void parseRtl(std::vector<std::string> rtlFiles, std::vector<Node> *parentNodeVe
                 }
             }
             // multi-line child node
-            else if(false){
-                // GitHub issue #11: https://github.com/LiamSkirrow/verilogtree/issues/11
-                // This conditional is here as a placeholder, and is where the handling for 
-                // multi line module instantiations would go. However, it would be a bit cumbersome
-                // to handle as of now, since we'd also have to account for structures like 'wire a' or
-                // 'reg b' etc. Leaving this unpopulated for now and maybe I'll think of a way around
-                // in the future...
+            else if(matchObjChildModule.size() == 1){
+                // found a single word on a line, now need to read further lines and figure out name
+                std::cout << "*** Found a multi line module instantiation: " << line << std::endl;
+
+                // we at least have the module name, now check if the instance name is on the same line
+                std::regex_search(line, tmpMatchObj0, regexStrings.parentNodeRegexStrModuleNameAndInst);
+                // and check if the line only contains the word 'module'
+
+                // module name and instance name are on the same line
+                if(tmpMatchObj0.size() == 1){
+
+                    // check if the next char is a # or (
+                    // create a copy of the file object 
+                    tmpRtlFileObj = &rtlFileObj;
+                    if(superDebug)
+                        std::cout << "Found a newline module, scanning along...: " << std::endl;
+                    for(std::string tmpLine; getline(*tmpRtlFileObj, tmpLine); ){
+                        if(superDebug)
+                            std::cout << "   Reading a new line... " << std::endl;
+                        std::regex_search(tmpLine, tmpMatchObj1, regexStrings.parentNodeRegexStrModuleParenthesis);
+                        // FIXME: currently we just read until the end of the file, need to stop early if 
+                        //        anything other than a newline is found
+                        if(tmpMatchObj1.size() == 1){
+                            parenthesesFound = true;
+                            break;
+                        }
+                        // TODO: might be helpful to add some more super-debug text output here for debugging
+                    }
+                    // the module name was followed by # or ( so store as a child node
+                    if(parenthesesFound){
+                        // tokenise the child node string, splitting on arbitrary number of space chars
+                        tokenisedStringPtr->clear();
+                        tokeniseString(tmpMatchObj0.str(), tokenisedStringPtr, false, MULTI_LINE_1);
+                        std::cout << "YOOOOOOOO: " << tmpMatchObj0.str() << std::endl;
+                        instName = tokenisedStringPtr->at(1);
+                        
+                        caughtFalseModule = (tokenisedStringPtr->at(0) == "unique") && (tokenisedStringPtr->at(1) == "case" || tokenisedStringPtr->at(1) == "casez");
+
+                        if(!caughtFalseModule){
+                            if(superDebug){
+                                std::cout << "  Instantiated module \"" << tokenisedStringPtr->at(0) << "\" found in file " << rtlFiles.at(i) << ": \"" << matchObjChild.str() << "\" with instance name: \"";
+                                std::cout << instName << "\" " << std::endl;
+                            }
+
+                            // create the child Node object
+                            Node curr1;
+                            curr1.setModuleName(tokenisedStringPtr->at(0));
+                            curr1.setInstName(tokenisedStringPtr->at(1));
+                            
+                            // the last parent node is the current one, push the associated child nodes
+                            tmpNodePtr = &parentNodeVecPtr->back();
+                            // pNodeName = tmpNodePtr->getModuleName();
+                            tmpNodePtr->pushChildNode(curr1);
+
+                            // add/update the entry in the hash table of the respective parent node
+                            // pNodeMapPtr->insert(std::pair<std::string, Node>(moduleName, *tmpNodePtr));
+                            tmpNodeMap[moduleName] = *tmpNodePtr;
+                        }
+                    }
+                }
+                else{
+
+                }
             }
         }
         rtlFileObj.close();
