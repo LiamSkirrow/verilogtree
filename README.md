@@ -26,18 +26,18 @@ top
 To run verilogtree, type `verilogtree -f file.v` or `verilogtree --filelist list-of-files.txt` to display the tree output. The supported arguments are...
 | Argument | Description |
 | -------- | ----------- |
-| `-h`/`--help` | print out help information |
-| `-v`/`--version` | print out version information |
-| `-f` | list the Verilog files one by one |
-| `--fileilst` | instead give a list of Verilog files |
-| `-L`/`--level` | only print out x levels of Verilog hierarchy |
+| `-h`/`--help` | Print out help information |
+| `-v`/`--version` | Print out version information |
+| `-f` | List the Verilog files one by one |
+| `--fileilst` | Instead give a list of Verilog files |
+| `-L`/`--level` | Only print out x levels of Verilog hierarchy |
 | `-m`/`--max-hierarchy` | Specify the maximum hierarchy depth to be recursed down |
-| `--no-inst-name` | don't print out the instance names in output |
-| `-n`/`--ignore-modules` | ignore the child modules of the following modules |
+| `--no-inst-name` | Don't print out the instance names in output |
+| `-n`/`--ignore-modules` | Ignore the child modules of the following modules |
 | `-T`/`--top` | List modules that shall be treated as top level modules |
-| `--lang` | select language, either Verilog or VHDL (currently only Verilog is supported in v0.1.0) |
-| `--debug` | verbose mode, print out general information |
-| `--super-debug` | very verbose mode, print out all internal information |
+| `--lang` | Select language, either Verilog or VHDL (currently only Verilog is supported in v0.1.0) |
+| `--debug` | Verbose mode, print out general information |
+| `--super-debug` | Very verbose mode, print out all internal information |
 
 ### Examples
 Check out the `man-page` for some examples of using verilogtree.
