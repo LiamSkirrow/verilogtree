@@ -2,8 +2,11 @@
 
 Print out the hierarchy of your Verilog source files in an easy to read, visual format. Like the Unix utility 'tree' but for Verilog.
 
-For example, running the following command:
-```verilogtree -f ./rtl/*.v --no-inst-name```
+For example, cloning this repo and running the following:
+```
+make
+./verilogtree -f tests/rtl/simple/*.v --no-inst-name
+```
 Will give the following output:
 ```
 top
@@ -21,6 +24,7 @@ top
         └── mod3
             └── mod4
 ```
+Which is based on the very simple Verilog code found at the path `tests/rtl/simple`.
 
 ### Usage
 To run verilogtree, type `verilogtree -f file.v` or `verilogtree --filelist list-of-files.txt` to display the tree output. The supported arguments are...
