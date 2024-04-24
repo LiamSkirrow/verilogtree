@@ -4,11 +4,16 @@ Print out the hierarchy of your Verilog source files in an easy to read, visual 
 
 For example, cloning this repo and running the following:
 ```
-make
-./verilogtree -f tests/rtl/simple/*.v --no-inst-name
+> make
+> ./verilogtree -f tests/rtl/simple/*.v --no-inst-name
 ```
 Will give the following output:
 ```
+altTop
+└── mod2
+    └── mod1
+        └── mod3
+            └── mod4
 top
 ├── mod0
 │   ├── mod3
@@ -27,7 +32,7 @@ top
 Which is based on the very simple Verilog code found at the path `tests/rtl/simple`.
 
 ### Usage
-To run verilogtree, type `verilogtree -f file.v` or `verilogtree --filelist list-of-files.txt` to display the tree output. The supported arguments are...
+To run verilogtree, type `verilogtree -f file.v` or `verilogtree --filelist list-of-files.txt` to display the tree output. The supported arguments (all of which are optional, other than one of `-f` and --`filelist`) are...
 | Argument | Description |
 | -------- | ----------- |
 | `-h`/`--help` | Print out help information |
@@ -39,7 +44,7 @@ To run verilogtree, type `verilogtree -f file.v` or `verilogtree --filelist list
 | `--no-inst-name` | Don't print out the instance names in output |
 | `-n`/`--ignore-modules` | Ignore the child modules of the following modules |
 | `-T`/`--top` | List modules that shall be treated as top level modules |
-| `--lang` | Select language, either Verilog or VHDL (currently only Verilog is supported in v0.1.0) |
+| `--lang` | Select language, either Verilog or VHDL (currently only Verilog is supported in v0.1.x) |
 | `--debug` | Verbose mode, print out general information |
 | `--super-debug` | Very verbose mode, print out all internal information |
 
@@ -47,12 +52,12 @@ To run verilogtree, type `verilogtree -f file.v` or `verilogtree --filelist list
 Check out the `man-page` for some examples of using verilogtree.
 
 ### Tricks
-- Sometimes it's usfeul to tell verilogtree to print out the hierarchy of 'all the verilog files in this directory and sub-directories', which is where the `find` command comes in handy. Usually, `find` goes and prints out the filenames with a newline separating them, however if you want to pass the output from a `find` command into verilogtree, it'll have to be separated by spaces. This can be achieved by running `find . -name *.v -printf '%p '`... Which shall become ` ./verilogtree -f $(find . -name *.v -printf '%p ')`.
+- Sometimes it's usfeul to tell verilogtree to print out the hierarchy of 'all the verilog files in this directory and sub-directories', which is where the `find` command comes in handy. Usually, `find` goes and prints out the filenames with a newline separating them, however if you want to pass the output from a `find` command into verilogtree, it'll have to be separated by spaces. This can be achieved by running `find . -name *.v -printf '%p '`... Which when used in verilogtree, becomes... ` ./verilogtree -f $(find . -name *.v -printf '%p ')`.
 
 ### Installation Notes
 When building from source, clone this repo and run the following steps:
 - run `make` to compile the code. Requires g++ to be installed.
-- run `sudo ./install.sh` to install verilogtree.
+- run `sudo ./install.sh` to install verilogtree. (optional, if this step is skipped just run the executable generated from the previous step)
 - try running `verilogtree --version` to test whether the program was installed successfully.
 
 ### Unsupported Syntax
