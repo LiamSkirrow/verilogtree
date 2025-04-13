@@ -39,6 +39,10 @@ void dumpArgsStruct(struct Arguments args){
 
     std::cout << "lang arg: " << std::endl;
     std::cout << "    " << args.lang;
+    std::cout << std::endl;
+
+    std::cout << "tool arg: " << std::endl;
+    std::cout << "    " << args.tool;
     std::cout << std::endl << std::endl;
 
     // std::cout << "Supplied debug arg: " << std::endl;
@@ -185,6 +189,10 @@ int main(int argc, char **argv){
     Tree *hierarchyTreePtr;
     // std::regex parentNodeRegexStr;
     // std::regex childNodeRegexStr;
+    bool interactiveMode;
+    int toolNameIndex;
+    std::string interactiveCommand;
+    char **argvCopy;
 
     hierarchyTreePtr = &hierarchyTree;
 
@@ -213,27 +221,6 @@ int main(int argc, char **argv){
                                "--no-inst-name" // do not print out the instance names 
                               };
 
-    // call user input parser function here
-    args = parseUserArgs(argc, argv, argListFlags);
-    
-    // this is enabled by supplying the --debug argument
-    if(args.debug){
-        dumpArgsStruct(args);
-    }
-
-    // sanity check, make sure the files exist in the file system
-    checkFilesExist(args);
-
-    // select the correct regex patterns depending on the language selected
-    // https://regex101.com/ is my best friend for this kind of stuff -> https://regex101.com/r/CzzlTF/1
-    // parentNodeRegexStr = (args.lang == "verilog") ? "^\ *module*\s*\w*\s*\(" : "          ";
-    // childNodeRegexStr  = (args.lang == "verilog") ? "^\ *\w*\s*\w*\s*\("     : "          ";
-    //                                               \_______Verilog______/     \__VHDL__/
-
-    // parentNodeRegexStr = "^\\s*module\\s+\\w+\\s*#?\\s*\\(";
-    // TODO: pretty sure the module instantiations could have a # in them, need to add that to regex...
-    // childNodeRegexStr  = "^\\s*\\w+\\s+\\w+\\s*\\(";
-
     // regex strings to match one-line module declarations/instantiations
     regexStrings.parentNodeRegexStr = "^\\s*module\\s+\\w+\\s*#?\\s*\\(";
     regexStrings.childNodeRegexStr  = "^\\s*\\w+\\s+\\w+\\s*\\(";
@@ -243,16 +230,72 @@ int main(int argc, char **argv){
     regexStrings.parentNodeRegexStrModuleName        = "^\\s*\\w+\\s*";
     regexStrings.parentNodeRegexStrModuleParenthesis = "^\\s*#?\\s*\\(";
 
-    // NOTE: should I also be storing the hpaths to each module? This may be more efficient to do *while*
-    //       the tree is being constructed rather than having to traverse the tree DFS-style to figure
-    //       out the hpaths
+    // figure out if we're running interactive mode, invoked by program name on its own
+    interactiveMode = (argc == 1);
 
-    // now parse the Verilog/VHDL, searching for the key phrases and generate the logical hierarchy
-    // this is the main algorithm to configure the tree
-    hierarchyTree = deriveHierarchyTree(hierarchyTreePtr, args.rtlFiles, regexStrings, args.debug, args.superDebug, args.noIncModules, args.maxHierarchyLevel, args.topModules);
+    // the location of the tool name is 0 (interactiveMode) or 1 (!interactiveMode)
+    toolNameIndex = interactiveMode ? 0 : 1;
 
-    // display the tree structure of the RTL
-    printTree(hierarchyTree, args);
+    do
+    {
+        if(interactiveMode){
+            std::cout << "[vt] > ";
+            // block on read of next user input command
+            getline(std::cin, interactiveCommand);
+            std::cout << "You typed: " << interactiveCommand << std::endl;
+            // TODO: split string on space chars, and populate argc and argv
+
+            // TODO: should this still be argc-1 ???
+            argvCopy = splitText(interactiveCommand, argc-1);
+            // TODO: this is hardcoded, needs determining automatically
+            argc     = 5;
+        }
+        else{
+            argvCopy = argv;
+        }
+
+        std::cout << "Just checking again..." << std::endl;
+        std::cout << argvCopy[0] << std::endl;
+        std::cout << argvCopy[1] << std::endl;
+        std::cout << argvCopy[2] << std::endl;
+        std::cout << argvCopy[3] << std::endl;
+        std::cout << argvCopy[4] << std::endl;
+        std::cout << "Done checking again..." << std::endl;
+
+        // call user input parser function here
+        args = parseUserArgs(argc, argvCopy, argListFlags, toolNameIndex);
+        
+        // this is enabled by supplying the --debug argument
+        if(args.debug){
+            dumpArgsStruct(args);
+        }
+
+        // sanity check, make sure the files exist in the file system
+        checkFilesExist(args);
+
+        // select the correct regex patterns depending on the language selected
+        // https://regex101.com/ is my best friend for this kind of stuff -> https://regex101.com/r/CzzlTF/1
+        // parentNodeRegexStr = (args.lang == "verilog") ? "^\ *module*\s*\w*\s*\(" : "          ";
+        // childNodeRegexStr  = (args.lang == "verilog") ? "^\ *\w*\s*\w*\s*\("     : "          ";
+        //                                               \_______Verilog______/     \__VHDL__/
+
+        // parentNodeRegexStr = "^\\s*module\\s+\\w+\\s*#?\\s*\\(";
+        // TODO: pretty sure the module instantiations could have a # in them, need to add that to regex...
+        // childNodeRegexStr  = "^\\s*\\w+\\s+\\w+\\s*\\(";
+
+        // NOTE: should I also be storing the hpaths to each module? This may be more efficient to do *while*
+        //       the tree is being constructed rather than having to traverse the tree DFS-style to figure
+        //       out the hpaths
+
+        // now parse the Verilog/VHDL, searching for the key phrases and generate the logical hierarchy
+        // this is the main algorithm to configure the tree
+        hierarchyTree = deriveHierarchyTree(hierarchyTreePtr, args.rtlFiles, regexStrings, args.debug, args.superDebug, args.noIncModules, args.maxHierarchyLevel, args.topModules);
+
+        // TODO: this will become conditional on which verilogtree-tool is being run
+        // display the tree structure of the RTL
+        printTree(hierarchyTree, args);
+
+        } while (interactiveMode);
 
     if(args.debug){
         std::cout << "Successfully reached end of program!" << std::endl;

@@ -8,6 +8,27 @@ void errorAndExit(std::string errorMsg){
     exit(-1);
 }
 
+// split a string with spaces between the commands
+char **splitText(std::string str, int max){
+    // TODO: temp just hardcode it and check if the rest of the code works
+    // tree --filelist tests/rtl/simple/simple_filelist --no-inst-name --debug
+    char *str0 = "tree";
+    char *str1 = "--filelist";
+    char *str2 = "tests/rtl/simple/simple_filelist";
+    char *str3 = "--no-inst-name";
+    char *str4 = "--debug";
+
+    char **argVector = new char * [6];// = {str0, str1, str2, str3, str4};
+
+    argVector[0] = str0;
+    argVector[1] = str1;
+    argVector[2] = str2;
+    argVector[3] = str3;
+    argVector[4] = str4;
+
+    return argVector;
+}
+
 int getNextArgs(int argc, char **argv, int i, std::string argName, std::string errMsg, std::vector<std::string> *argumentVecPtr){
     // int index = 0;
     for(int fileNum = 0; ; fileNum++){
@@ -34,7 +55,7 @@ int getNextArgs(int argc, char **argv, int i, std::string argName, std::string e
     return i;
 }
 
-struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,20> argList){
+struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,20> argList, int toolNameIndex){
 
     int isEqual;
     bool includedVerilog = false;
@@ -42,14 +63,21 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,20>
     std::vector<std::string> *argumentVecPtr = &argumentVec;
     Arguments args;
 
-    // check args and arg number
-    if(argc <= 1){
-        errorAndExit((std::string)"Usage: verilogtree [--filelist <files.txt> | -f file1.v file2.v ...]");
+    // // check args and arg number
+    // if(argc <= 1){
+    //     errorAndExit((std::string)"Usage: verilogtree [--filelist <files.txt> | -f file1.v file2.v ...]");
+    // }
+
+    if(argv[toolNameIndex] == (std::string)"tree")
+        args.tool = "tree";
+    else if(argv[toolNameIndex] == (std::string)"trace")
+        args.tool = "trace";
+    else{
+        errorAndExit((std::string)"Unsupported tool name <" + (std::string)argv[toolNameIndex] + ">... Exiting");
     }
 
-    // TODO: make this more efficient...
-    // parse args, make sure they match what's expected
-    for(int i = 1; i < argc; i++){
+    // parse args corresponding to the tool being invoked. Start after the toolNameIndex
+    for(int i = toolNameIndex+1; i < argc; i++){
         isEqual = 0;
         // loop through argv list and perform a lookup of argList to determine whether the args are correct
         for(int j = 0; j < argList.size(); j++){
@@ -86,6 +114,7 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,20>
             args.rtlFiles = *argumentVecPtr;
         } 
         else if(argv[i] == (std::string)"--filelist"){
+            // std::cout << "FOUND A FILELIST!!!" << std::endl;
             includedVerilog = true;
             // check the next string of argv for the filelist name, open it and read the contents
             i = getNextArgs(argc, argv, i, argv[i], (std::string)"path to filelist", argumentVecPtr);

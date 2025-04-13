@@ -13,6 +13,7 @@ struct Arguments{
     std::vector<std::string> noIncModules;
     std::string codeVersion  = "v0.1.0-dev";
     std::vector<std::string> topModules;
+    std::string tool         = "NONE";
     std::string lang         = "verilog";
     std::string level        = "-1";
     std::string algorithm    = "recursive";
@@ -22,7 +23,8 @@ struct Arguments{
     int maxHierarchyLevel    = 100;
 };
 
-struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,20> argList);
+struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,20> argList, int toolNameIndex);
 void errorAndExit(std::string errorMsg);
 int getNextArgs(int argc, char **argv, int i, std::string argName, std::string errMsg, std::vector<std::string> *argumentVecPtr);
 void printHelp();
+char **splitText(std::string str, int max);
