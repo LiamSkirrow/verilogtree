@@ -241,29 +241,23 @@ int main(int argc, char **argv){
         if(interactiveMode){
             std::cout << "[vt] > ";
             // block on read of next user input command
-            getline(std::cin, interactiveCommand);
-            std::cout << "You typed: " << interactiveCommand << std::endl;
-            // TODO: split string on space chars, and populate argc and argv
-
-            // TODO: should this still be argc-1 ???
-            argvCopy = splitText(interactiveCommand, argc-1);
-            // TODO: this is hardcoded, needs determining automatically
-            argc     = 5;
+            std::getline(std::cin, interactiveCommand);
+            // get a version of the command, split on spaces and cast to -> char **
+            argvCopy = splitText(interactiveCommand, &argc);
+            std::cout << "Num args given... " << argc << std::endl;
+            for(int i = 0; i < argc; i++){
+                std::cout << "User entered arg: <" << argvCopy[i] << '>' << std::endl;
+            }
         }
         else{
             argvCopy = argv;
         }
 
-        std::cout << "Just checking again..." << std::endl;
-        std::cout << argvCopy[0] << std::endl;
-        std::cout << argvCopy[1] << std::endl;
-        std::cout << argvCopy[2] << std::endl;
-        std::cout << argvCopy[3] << std::endl;
-        std::cout << argvCopy[4] << std::endl;
-        std::cout << "Done checking again..." << std::endl;
-
         // call user input parser function here
         args = parseUserArgs(argc, argvCopy, argListFlags, toolNameIndex);
+
+        // TODO: check with valgrind to make sure there are no mem leaks
+        delete(argvCopy);
         
         // this is enabled by supplying the --debug argument
         if(args.debug){

@@ -9,22 +9,38 @@ void errorAndExit(std::string errorMsg){
 }
 
 // split a string with spaces between the commands
-char **splitText(std::string str, int max){
-    // TODO: temp just hardcode it and check if the rest of the code works
-    // tree --filelist tests/rtl/simple/simple_filelist --no-inst-name --debug
-    char *str0 = "tree";
-    char *str1 = "--filelist";
-    char *str2 = "tests/rtl/simple/simple_filelist";
-    char *str3 = "--no-inst-name";
-    char *str4 = "--debug";
+char **splitText(std::string str, int *argc){
 
-    char **argVector = new char * [6];// = {str0, str1, str2, str3, str4};
+    // TODO: not a fan of making the argument vector arbitrarily big
+    char **argVector = new char * [50];
+    int i = 0, j = 0, iter = 0;
 
-    argVector[0] = str0;
-    argVector[1] = str1;
-    argVector[2] = str2;
-    argVector[3] = str3;
-    argVector[4] = str4;
+    // for loop should also depend on the 'max' arg
+    // iterate over the user-entered command and split based on single space chars
+    for(i = 0; i < str.length(); i++){
+        if(str.at(i) == ' '){
+            std::cout << "Found a substr: <" << (char *)str.substr(j, i-j).c_str() << '>' << std::endl;
+            j = i+1;
+            // increase the count representing the number of args
+            // iter++;
+            argVector[iter++] = (char *)str.substr(j, i-j).c_str();
+        }
+        // this forces the final arg to be printed out, otherwise the for loop exits right before we find the final arg
+        else if(i == str.length()-1){
+            std::cout << "Found final substr: <" << (char *)str.substr(j, i-j+1).c_str() << '>' << std::endl;
+            // increase the count representing the number of args
+            // iter++;
+            argVector[iter++] = (char *)str.substr(j, i-j+1).c_str();
+        }
+    }
+
+    std::cout << str << std::endl;
+    // let argc represent the number of args found
+    *argc = iter;
+
+    for(int i = 0; i < *argc; i++){
+        std::cout << "User entered arg (in function): <" << argVector[i] << '>' << std::endl;
+    }
 
     return argVector;
 }

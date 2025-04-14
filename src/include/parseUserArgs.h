@@ -27,4 +27,4 @@ struct Arguments parseUserArgs(int argc, char **argv, std::array<std::string,20>
 void errorAndExit(std::string errorMsg);
 int getNextArgs(int argc, char **argv, int i, std::string argName, std::string errMsg, std::vector<std::string> *argumentVecPtr);
 void printHelp();
-char **splitText(std::string str, int max);
+char **splitText(std::string str, int *argc);
